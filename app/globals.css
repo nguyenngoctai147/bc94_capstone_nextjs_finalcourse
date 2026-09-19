@@ -1,0 +1,46 @@
+/*
+ * Tailwind is utilities-only in this Bootstrap/Hotux application.
+ * `preflight` is disabled in tailwind.config.js and base/components are
+ * deliberately not imported, so Tailwind never applies a global reset.
+ */
+@tailwind utilities;
+
+:root { --stay-accent: #c93650; --stay-ink: #213331; --stay-bg: #fff; }
+/* Match the static Hotux theme's body defaults from default.css. */
+body { background: #fff; color: #444; font-family: 'Lato', sans-serif; }
+a { text-underline-offset: 3px; }
+.btn-primary { --bs-btn-bg: #c93650; --bs-btn-border-color: #c93650; --bs-btn-hover-bg: #aa2940; --bs-btn-hover-border-color: #aa2940; --bs-btn-active-bg: #aa2940; --bs-btn-active-border-color: #aa2940; --bs-btn-disabled-bg: #c93650; --bs-btn-disabled-border-color: #c93650; }
+.form-control:focus, .form-select:focus { border-color: #c93650; box-shadow: 0 0 0 .2rem rgb(201 54 80 / 15%); }
+.brand { color: var(--stay-accent); font-size: 1.65rem; font-weight: 800; text-decoration: none; letter-spacing: -.08rem; }
+.site-header { background: white; border-bottom: 1px solid #e5e9e4; }
+.site-main { min-height: 70vh; }
+.nav-link { color: #425651; border-radius: .5rem; }
+.nav-link.active { background: #e7eeea; color: #183e30; font-weight: 600; }
+.eyebrow { letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; font-weight: 700; color: #62786e; }
+.hero { background: #e7eeea; border-radius: 1.5rem; padding: clamp(1.75rem, 5vw, 4rem); }
+.card { border-color: #e1e7e1; border-radius: 1rem; }
+.admin-sidebar { background: #183e30; border-radius: 1rem; }
+.admin-sidebar .nav-link { color: #d7e5dd; }
+.admin-sidebar .nav-link.active { background: #305442; color: white; }
+.auth-shell { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; background: #e7eeea; }
+.auth-panel { width: 100%; max-width: 520px; }
+.skip-link { position: absolute; top: -100px; left: 1rem; z-index: 1100; }
+.skip-link:focus { top: .5rem; }
+.main_header_area .navbar-brand img { max-height: 48px; width: auto; }
+.main_header_area .navbar-collapse.show { display: block; }
+.main_header_area .dropdown-menu.show { display: block; }
+@media (max-width: 991px) {
+  .main_header_area .navbar-collapse { display: none; clear: both; }
+  .main_header_area .navbar-collapse.show { display: block; }
+  .main_header_area .navbar-nav { float: none; }
+  .main_header_area .navbar-nav > li { float: none; }
+  .main_header_area .nav-btn { margin: 1rem 0; }
+}
+.hotux-footer .footer-logo img { max-height: 52px; width: auto; }
+
+/* flight.css has generic `.detail-title` rules for its flight detail page.
+ * Scope the Hotux room page so that those rules cannot add the boxed title
+ * and horizontal rule that are absent from the supplied room-detail theme. */
+.details .detail-title { position: static; overflow: visible; }
+.details .detail-title::after { display: none; }
+.details .detail-title h3 { border: 0; padding: 0; background: transparent; }
