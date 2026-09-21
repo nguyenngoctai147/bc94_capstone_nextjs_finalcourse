@@ -12,5 +12,10 @@ export const authService = {
     }
     return session;
   },
-  register: (data: RegisterInput, options?: RequestOptions) => api.post<User>(authEndpoints.register, { ...data, role: "USER" }, options),
+  register: (data: RegisterInput, options?: RequestOptions) =>
+    api.post<User>(
+      authEndpoints.register,
+      { id: 0, ...data, role: "USER" },
+      options,
+    ),
 };
