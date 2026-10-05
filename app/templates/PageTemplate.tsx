@@ -17,7 +17,7 @@ export function PageTemplate({
   content = "contained",
 }: PageTemplateProps) {
   return (
-    <>
+    <div className="ds-site">
       <HotuxHeader />
       <section className="breadcrumb-outer">
         <div className="container">
@@ -37,7 +37,7 @@ export function PageTemplate({
         </div>
       </section>
       {content === "contained" ? (
-        <section className="content">
+        <section className="content ds-content">
           <div className="container">{children}</div>
         </section>
       ) : children}
@@ -45,6 +45,6 @@ export function PageTemplate({
       <div id="back-to-top">
         <a href="#"></a>
       </div>
-    </>
+    </div>
   );
 }

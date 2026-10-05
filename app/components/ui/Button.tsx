@@ -30,7 +30,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading}
-      className={`btn btn-${variant} ${size ? `btn-${size}` : ""} ${className}`}
+      className={`btn ds-button btn-${variant} ${size ? `btn-${size}` : ""} ${className}`}
     >
       {loading && (
         <span className="me-2">

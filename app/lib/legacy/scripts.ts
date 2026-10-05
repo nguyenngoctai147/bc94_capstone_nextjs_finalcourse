@@ -1,3 +1,5 @@
+import { enqueueVendorScripts, loadVendorScript } from "./vendor-scripts";
+
 export const legacyScriptBundles = {
   hotuxContact: [
     "/assets/legacy/js/jquery-3.3.1.min.js",
@@ -37,38 +39,6 @@ export const legacyScriptBundles = {
 } as const;
 
 type LegacyScriptSource = (typeof legacyScriptBundles)[keyof typeof legacyScriptBundles][number];
-const loadingScripts = new Map<LegacyScriptSource, Promise<void>>();
-const legacyScriptStateAttribute = "data-hotux-load-state";
-
-function waitForLegacyScript(
-  script: HTMLScriptElement,
-  source: LegacyScriptSource,
-) {
-  const state = script.getAttribute(legacyScriptStateAttribute);
-  if (state === "loaded") return Promise.resolve();
-  if (state === "failed") return Promise.reject(new Error(`Không thể tải ${source}`));
-
-  // Scripts injected by an earlier Fast Refresh did not have our state marker.
-  // Once the document is complete, such a script has already finished loading.
-  if (document.readyState === "complete") {
-    script.setAttribute(legacyScriptStateAttribute, "loaded");
-    return Promise.resolve();
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    const handleLoad = () => {
-      script.setAttribute(legacyScriptStateAttribute, "loaded");
-      resolve();
-    };
-    const handleError = () => {
-      script.setAttribute(legacyScriptStateAttribute, "failed");
-      reject(new Error(`Không thể tải ${source}`));
-    };
-
-    script.addEventListener("load", handleLoad, { once: true });
-    script.addEventListener("error", handleError, { once: true });
-  });
-}
 
 type HotuxJQueryCollection = {
   length: number;
@@ -76,10 +46,39 @@ type HotuxJQueryCollection = {
   slick(options: Record<string, unknown> | string): void;
   niceSelect(): void;
   dateRangePicker(options: Record<string, unknown>): void;
+  on(eventName: string, handler: (event: { date1?: Date }) => void): void;
+  off(eventName: string): void;
   data(key: string): unknown;
 };
 
-type HotuxJQuery = (target: string | Element) => HotuxJQueryCollection;
+type HotuxJQuery = {
+  (target: string | Element): HotuxJQueryCollection;
+  fn?: { slick?: unknown; dateRangePicker?: unknown; niceSelect?: unknown; modal?: unknown };
+};
+
+type HotuxWindow = Window & {
+  jQuery?: HotuxJQuery;
+  $?: HotuxJQuery;
+  hotuxJQuery?: HotuxJQuery;
+};
+
+function hasHotuxPlugins(jQuery: HotuxJQuery | undefined) {
+  return typeof jQuery?.fn?.slick === "function"
+    && typeof jQuery.fn.dateRangePicker === "function"
+    && typeof jQuery.fn.niceSelect === "function";
+}
+
+function getHotuxJQuery() {
+  const hotuxWindow = window as HotuxWindow;
+  if (hasHotuxPlugins(hotuxWindow.hotuxJQuery)) {
+    return hotuxWindow.hotuxJQuery;
+  }
+  if (hasHotuxPlugins(hotuxWindow.jQuery)) {
+    hotuxWindow.hotuxJQuery = hotuxWindow.jQuery;
+    return hotuxWindow.jQuery;
+  }
+  return undefined;
+}
 
 type HotuxSwiperInstance = {
   destroy(deleteInstance?: boolean, cleanStyles?: boolean): void;
@@ -90,45 +89,38 @@ type HotuxSwiperConstructor = new (
   options: Record<string, unknown>,
 ) => HotuxSwiperInstance;
 
-function loadLegacyScript(source: LegacyScriptSource) {
-  const pending = loadingScripts.get(source);
-  if (pending) return pending;
-
-  const promise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${source}"]`,
-    );
-    if (existing) {
-      void waitForLegacyScript(existing, source).then(resolve, reject);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = source;
-    script.async = false;
-    script.setAttribute(legacyScriptStateAttribute, "loading");
-    script.onload = () => {
-      script.setAttribute(legacyScriptStateAttribute, "loaded");
-      resolve();
-    };
-    script.onerror = () => {
-      script.setAttribute(legacyScriptStateAttribute, "failed");
-      reject(new Error(`Không thể tải ${source}`));
-    };
-    document.body.appendChild(script);
-  });
-
-  loadingScripts.set(source, promise);
-  return promise;
-}
-
 export function loadLegacyScripts(
   bundle: readonly LegacyScriptSource[],
 ) {
-  return bundle.reduce(
-    (chain, source) => chain.then(() => loadLegacyScript(source)),
-    Promise.resolve(),
-  );
+  return enqueueVendorScripts(async () => {
+    const hotuxWindow = window as HotuxWindow;
+    let jQuery = hotuxWindow.hotuxJQuery ?? getHotuxJQuery();
+    for (const source of bundle) {
+      if (source === "/assets/legacy/js/jquery-3.3.1.min.js") {
+        if (!jQuery?.fn) {
+          // Older sessions can retain loaded tags but lose the plugin-owning
+          // jQuery after the dashboard bundle replaces the globals.
+          const existing = document.querySelector(`script[src="${source}"]`);
+          const stale = !!existing && existing.getAttribute("data-hotux-load-state") !== "loading";
+          await loadVendorScript(source, stale);
+          jQuery = hotuxWindow.jQuery;
+          if (!jQuery?.fn) throw new Error("Không thể khởi tạo jQuery của Hotux");
+          hotuxWindow.hotuxJQuery = jQuery;
+        }
+        hotuxWindow.jQuery = hotuxWindow.$ = jQuery;
+        continue;
+      }
+
+      await loadVendorScript(source);
+      const needsReload = source === "/assets/legacy/js/plugin.js"
+        ? !hasHotuxPlugins(jQuery)
+        : source === "/assets/legacy/js/bootstrap.min.js" && typeof jQuery?.fn?.modal !== "function";
+      if (needsReload) await loadVendorScript(source, true);
+      if (source === "/assets/legacy/js/plugin.js" && !hasHotuxPlugins(jQuery)) {
+        throw new Error("Không thể khởi tạo bộ plugin Hotux sau khi tải lại");
+      }
+    }
+  });
 }
 
 const homeSwiperOptions = {
@@ -152,9 +144,42 @@ const homeDatePickerOptions = {
   singleMonth: true,
   showTopbar: false,
   extraClass: "reserved-form",
+  format: "YYYY-MM-DD",
+  startDate: new Date(),
+  hoveringTooltip: false,
   customArrowPrevSymbol: '<span class="fa fa-angle-left"></span>',
   customArrowNextSymbol: '<span class="fa fa-angle-right"></span>',
 };
+
+const teamSliderOptions = {
+  infinite: true,
+  slidesToShow: 4,
+  slidesToScroll: 1,
+  arrows: true,
+  dots: true,
+  autoplay: true,
+  responsive: [
+    { breakpoint: 1200, settings: { slidesToShow: 3 } },
+    { breakpoint: 1000, settings: { slidesToShow: 2 } },
+    { breakpoint: 760, settings: { slidesToShow: 1 } },
+  ],
+};
+
+/** Initialize the static Hotux destination carousel after React renders its slides. */
+export function initializeHotuxTeamSlider(root: ParentNode = document) {
+  const $ = getHotuxJQuery();
+  const teamSlider = root.querySelector<HTMLElement>(".team-slider");
+  if (!$ || !teamSlider || teamSlider.classList.contains("slick-initialized")) {
+    return () => undefined;
+  }
+
+  $(teamSlider).slick(teamSliderOptions);
+  return () => {
+    if (teamSlider.classList.contains("slick-initialized")) {
+      $(teamSlider).slick("unslick");
+    }
+  };
+}
 
 /**
  * Initialize the homepage-only widgets against the current React DOM.
@@ -162,7 +187,7 @@ const homeDatePickerOptions = {
  * every client-side visit to the home route.
  */
 export function initializeHotuxHome(root: ParentNode = document) {
-  const $ = (window as typeof window & { jQuery?: HotuxJQuery }).jQuery;
+  const $ = getHotuxJQuery();
   const Swiper = (window as typeof window & { Swiper?: HotuxSwiperConstructor }).Swiper;
   if (!$ || !Swiper) return () => undefined;
 
@@ -185,26 +210,36 @@ export function initializeHotuxHome(root: ParentNode = document) {
     });
   }
 
-  for (const id of ["date-range2", "date-range3"] as const) {
-    const input = root.querySelector<HTMLElement>(`#${id}`);
-    if (input && !$(input).data("dateRangePicker")) {
-      $(input).dateRangePicker(homeDatePickerOptions);
-    }
-  }
+  const checkIn = root.querySelector<HTMLInputElement>("#date-range2");
+  const checkOut = root.querySelector<HTMLInputElement>("#date-range3");
+  const initializeDatePicker = (input: HTMLInputElement, startDate: Date) => {
+    const element = $(input);
+    getDateRangePicker(element)?.destroy();
+    element.dateRangePicker({ ...homeDatePickerOptions, startDate });
+  };
 
-  root.querySelectorAll<HTMLSelectElement>("select.wide").forEach((select) => {
-    if (!select.nextElementSibling?.classList.contains("nice-select")) $(select).niceSelect();
-  });
+  if (checkIn && checkOut) {
+    initializeDatePicker(checkIn, new Date());
+    initializeDatePicker(checkOut, new Date());
+    $(checkIn).on("datepicker-change.home-search", (event) => {
+      if (!event.date1) return;
+      const nextDay = new Date(event.date1);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOut.value = "";
+      initializeDatePicker(checkOut, nextDay);
+    });
+  }
 
   return () => {
     swiper?.destroy(true, true);
     if (galleryElement?.classList.contains("slick-initialized")) {
       $(galleryElement).slick("unslick");
     }
-    for (const id of ["date-range2", "date-range3"] as const) {
-      const input = root.querySelector<HTMLElement>(`#${id}`);
-      if (input) getDateRangePicker($(input))?.destroy();
+    if (checkIn) {
+      $(checkIn).off("datepicker-change.home-search");
+      getDateRangePicker($(checkIn))?.destroy();
     }
+    if (checkOut) getDateRangePicker($(checkOut))?.destroy();
   };
 }
 
@@ -216,13 +251,41 @@ function getDateRangePicker(element: HotuxJQueryCollection) {
   return element.data("dateRangePicker") as HotuxDateRangePicker | undefined;
 }
 
+function destroySliders(jQuery: HotuxJQuery, sliders: HTMLElement[]) {
+  for (const slider of sliders) {
+    if (slider.classList.contains("slick-initialized")) jQuery(slider).slick("unslick");
+  }
+}
+
+/** Static About widgets must also be recreated on a client-side return visit. */
+export function initializeHotuxAbout(root: ParentNode = document) {
+  const $ = getHotuxJQuery();
+  if (!$) return () => undefined;
+  const sliders: HTMLElement[] = [];
+  const definitions = [
+    [".team-slider", { ...teamSliderOptions, arrows: false, dots: false }],
+    [".review-slider", {
+      infinite: true, slidesToShow: 2, slidesToScroll: 1,
+      arrows: false, dots: true, autoplay: true,
+      responsive: [{ breakpoint: 1000, settings: { slidesToShow: 1 } }],
+    }],
+  ] as const;
+  for (const [selector, options] of definitions) {
+    root.querySelectorAll<HTMLElement>(selector).forEach((slider) => {
+      if (!slider.classList.contains("slick-initialized")) $(slider).slick(options);
+      sliders.push(slider);
+    });
+  }
+  return () => destroySliders($, sliders);
+}
+
 /**
  * The date-range-picker plugin retains a window resize listener. Its instance
  * must be created and destroyed with the React route instead of executing the
  * legacy script just once for the whole document.
  */
 export function initializeHotuxReservation() {
-  const $ = (window as typeof window & { jQuery?: HotuxJQuery }).jQuery;
+  const $ = getHotuxJQuery();
   if (!$) return;
 
   const calendar = $("#date-range12");
@@ -247,7 +310,7 @@ export function initializeHotuxReservation() {
 }
 
 export function destroyHotuxReservation() {
-  const $ = (window as typeof window & { jQuery?: HotuxJQuery }).jQuery;
+  const $ = getHotuxJQuery();
   if (!$) return;
 
   const calendar = $("#date-range12");
@@ -258,13 +321,16 @@ export function destroyHotuxReservation() {
  * `main.js` executes only the first time it is inserted into the document.
  * These are its detail-page initializers, repeated for client-side navigation.
  */
-export function initializeHotuxRoomDetail() {
-  const $ = (window as typeof window & { jQuery?: HotuxJQuery }).jQuery;
-  if (!$) return;
+export function initializeHotuxRoomDetail(root: ParentNode = document) {
+  const $ = getHotuxJQuery();
+  if (!$) return () => undefined;
+  const sliders: HTMLElement[] = [];
 
   const initializeSlick = (selector: string, options: Record<string, unknown>) => {
-    const element = $(selector);
-    if (element.length && !element.hasClass("slick-initialized")) element.slick(options);
+    root.querySelectorAll<HTMLElement>(selector).forEach((slider) => {
+      if (!slider.classList.contains("slick-initialized")) $(slider).slick(options);
+      sliders.push(slider);
+    });
   };
 
   initializeSlick(".slider-for", {
@@ -288,8 +354,8 @@ export function initializeHotuxRoomDetail() {
     infinite: true,
     slidesToShow: 3,
     slidesToScroll: 1,
-    arrows: false,
-    dots: false,
+    arrows: true,
+    dots: true,
     autoplay: true,
     responsive: [
       { breakpoint: 1000, settings: { slidesToShow: 2 } },
@@ -297,7 +363,8 @@ export function initializeHotuxRoomDetail() {
     ],
   });
 
-  document.querySelectorAll<HTMLSelectElement>(".check-in select.wide").forEach((select) => {
+  root.querySelectorAll<HTMLSelectElement>(".check-in select.wide").forEach((select) => {
     if (!select.nextElementSibling?.classList.contains("nice-select")) $(select).niceSelect();
   });
+  return () => destroySliders($, sliders);
 }

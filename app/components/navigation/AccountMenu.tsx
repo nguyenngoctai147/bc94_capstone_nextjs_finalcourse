@@ -4,8 +4,10 @@ import { routes } from "@/config/routes";
 import { logout } from "@/features/auth/auth.slice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Button } from "@/components/ui";
+import { useClientReady } from "@/hooks/useClientReady";
 export function AccountMenu() {
-  const user = useAppSelector((state) => state.auth.user);
+  const { user: storedUser, hydrated } = useAppSelector((state) => state.auth);
+  const user = useClientReady() && hydrated ? storedUser : null;
   const dispatch = useAppDispatch();
   return (
     <div className="d-flex align-items-center gap-2">

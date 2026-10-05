@@ -7,9 +7,11 @@ import { usersService } from "../app/features/users/users.service";
 import { roomsService } from "../app/features/rooms/rooms.service";
 import { makeStore } from "../app/store";
 import { roomsThunks } from "../app/features/rooms/rooms.thunks";
+import { locationsThunks } from "../app/features/locations/locations.thunks";
 import { login } from "../app/features/auth/auth.thunks";
 import { logout } from "../app/features/auth/auth.slice";
 import type { Room } from "../app/features/rooms/rooms.types";
+import type { Location } from "../app/features/locations/locations.types";
 
 const original = http.defaults.adapter;
 afterEach(() => { http.defaults.adapter = original; });
@@ -57,9 +59,6 @@ test("stores are isolated; stale results and aborted requests cannot overwrite n
   first.dispatch(roomsThunks.detail.pending("abort", 1));
   first.dispatch(roomsThunks.detail.rejected({ name: "AbortError", message: "Aborted" }, "abort", 1));
   assert.equal(first.getState().rooms.requests.detail.status, "idle");
-  first.dispatch(logout());
-  first.dispatch(roomsThunks.list.fulfilled(toPage([room]), "new", undefined));
-  assert.equal(first.getState().rooms.items.length, 0);
 });
 test("real thunk dispatch transitions through pending, fulfillment and normalized failure", async () => {
   const store = makeStore();
@@ -70,12 +69,23 @@ test("real thunk dispatch transitions through pending, fulfillment and normalize
   await store.dispatch(roomsThunks.list());
   assert.equal(store.getState().rooms.requests.list.error?.message, "Missing token");
 });
-test("login removes unexpected password from profile, logout resets every feature", async () => {
+test("login removes unexpected password; logout clears private state and keeps the public catalogue", async () => {
   http.defaults.adapter = async (config) => response(config, { user: { id: 1, name: "Guest", role: "USER", password: "must-not-store" }, token: "session-token" });
   const store = makeStore(); await store.dispatch(login({ email: "guest@example.com", password: "test-only" }));
   assert.equal(store.getState().auth.token, "session-token");
   assert.ok(!("password" in store.getState().auth.user!));
+  const room = { id: 2, tenPhong: "Public room" } as Room;
+  const location = { id: 3, tenViTri: "Public location" } as Location;
+  store.dispatch(roomsThunks.list.pending("catalogue", undefined));
+  store.dispatch(roomsThunks.list.fulfilled(toPage([room]), "catalogue", undefined));
+  store.dispatch(locationsThunks.list.pending("locations", undefined));
+  store.dispatch(locationsThunks.list.fulfilled(toPage([location]), "locations", undefined));
   store.dispatch(logout());
   assert.equal(store.getState().auth.token, null);
+  assert.equal(store.getState().auth.hydrated, true);
+  assert.equal(store.getState().rooms.items[0].id, room.id);
+  assert.equal(store.getState().locations.items[0].id, location.id);
+  assert.equal(store.getState().bookings.items.length, 0);
+  assert.equal(store.getState().users.items.length, 0);
 });
 

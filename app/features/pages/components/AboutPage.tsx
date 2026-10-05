@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- static Hotux about markup. */
 import { useEffect } from "react";
-import { legacyScriptBundles, loadLegacyScripts } from "@/lib/legacy/scripts";
+import { initializeHotuxAbout, legacyScriptBundles, loadLegacyScripts } from "@/lib/legacy/scripts";
 
 const faqs = [
   ["How can I improve my oral hygiene?", "Everyone’s needs are different, so have a chat to your dentist about how often you need to have your teeth checked by them based on the condition of your mouth, teeth and gums."],
@@ -38,7 +38,19 @@ function SocialLinks() {
 
 export function AboutPage() {
   useEffect(() => {
-    void loadLegacyScripts(legacyScriptBundles.hotuxAbout);
+    let active = true;
+    let cleanup: () => void = () => undefined;
+    void loadLegacyScripts(legacyScriptBundles.hotuxAbout)
+      .then(() => {
+        if (active) cleanup = initializeHotuxAbout();
+      })
+      .catch((error: unknown) => {
+        if (active) console.error("Hotux about scripts failed to load", error);
+      });
+    return () => {
+      active = false;
+      cleanup();
+    };
   }, []);
 
   return (

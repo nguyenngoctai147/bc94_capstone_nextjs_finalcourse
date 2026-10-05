@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   authRoutes,
   clientRoutes,
@@ -10,15 +10,67 @@ import {
   isRouteActive,
   type NavItem,
 } from "@/config/routes";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { logout } from "@/features/auth/auth.slice";
+import { useClientReady } from "@/hooks/useClientReady";
+import type { User } from "@/features/users/users.types";
 
 const Icon = ({ name }: { name: string }) => (
   <i className={`fa ${name}`} aria-hidden="true" />
 );
 
+function AuthenticatedAccountMenu({ user }: { user: User }) {
+  const dispatch = useAppDispatch();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideInteraction = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", closeOnOutsideInteraction);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideInteraction);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  return (
+    <li className="account-context" ref={menuRef}>
+      <button
+        type="button"
+        className="account-context-trigger"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <Icon name="fa-user" /> {user.name} <Icon name="fa-angle-down" />
+      </button>
+      {open && (
+        <ul className="account-context-menu" role="menu" aria-label="Tài khoản">
+          <li role="none"><Link href={clientRoutes.account} role="menuitem" onClick={() => setOpen(false)}><Icon name="fa-user" /> Tài khoản</Link></li>
+          <li role="none"><Link href={clientRoutes.bookings} role="menuitem" onClick={() => setOpen(false)}><Icon name="fa-calendar" /> Đặt phòng của tôi</Link></li>
+          <li className="account-context-separator" role="separator" />
+          <li role="none">
+            <button type="button" role="menuitem" onClick={() => dispatch(logout())}>
+              <Icon name="fa-sign-out" /> Đăng xuất
+            </button>
+          </li>
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export function HotuxHeader() {
   const pathname = usePathname();
-  const user = useAppSelector((state) => state.auth.user);
+  const { user: storedUser, hydrated } = useAppSelector((state) => state.auth);
+  const clientReady = useClientReady();
+  const user = clientReady && hydrated ? storedUser : null;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const toggleMenu = (label: string) =>
@@ -54,11 +106,11 @@ export function HotuxHeader() {
           </div>
           <div className="links links-right pull-right">
             <ul>
-              <li>
-                <Link href={user ? clientRoutes.account : authRoutes.login}>
-                  <Icon name="fa-user" /> {user ? user.name : "Login"}
-                </Link>
-              </li>
+              {user ? (
+                <AuthenticatedAccountMenu user={user} />
+              ) : (
+                <li><Link href={authRoutes.login}><Icon name="fa-user" /> Login</Link></li>
+              )}
               {!user && (
                 <li>
                   <Link href={authRoutes.register}>

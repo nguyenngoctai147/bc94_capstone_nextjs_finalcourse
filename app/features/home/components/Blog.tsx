@@ -4,7 +4,7 @@ import { routes } from "@/config/routes";
 
 export default function Blog() {
   return (
-    <section className="news pad-bottom-70">
+    <section className="news ds-section">
       <div className="container">
         <div className="section-title">
           <h2>

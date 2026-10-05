@@ -5,44 +5,45 @@
 * Created:        01/08/2020
 -------------------------------------------------------------------*/
 
-
+(function (jQuery, $) {
 (function ($) {
+  "use strict";
 
+  /*======== Doucument Ready Function =========*/
+  jQuery(document).ready(function () {
+    //CACHE JQUERY OBJECTS
+    $("#status").fadeOut();
+    $("#preloader").delay(200).fadeOut("slow");
+    $("body").delay(200).css({ overflow: "visible" });
 
-   "use strict";
-
-   /*======== Doucument Ready Function =========*/
-    jQuery(document).ready(function () {
-     //CACHE JQUERY OBJECTS
-      $("#status").fadeOut();
-      $("#preloader").delay(200).fadeOut("slow");
-      $("body").delay(200).css({ "overflow": "visible" });
-
-      
-      /* Init Wow Js */
-      new WOW().init();
-
-    });
-
+    /* Init Wow Js */
+    new WOW().init();
+  });
 
   // Mouse-enter dropdown
-  $('#navbar li').on('mouseenter', function () {
-    $(this).find('ul').first().stop(true, true)
+  $("#navbar li").on("mouseenter", function () {
+    $(this)
+      .find("ul")
+      .first()
+      .stop(true, true)
       .delay(350)
-      .slideDown(500, 'easeInOutQuad');
+      .slideDown(500, "easeInOutQuad");
   });
   // Mouse-leave dropdown
-  $('#navbar li').on('mouseleave', function () {
-    $(this).find('ul').first().stop(true, true)
+  $("#navbar li").on("mouseleave", function () {
+    $(this)
+      .find("ul")
+      .first()
+      .stop(true, true)
       .delay(100)
-      .slideUp(150, 'easeInOutQuad');
+      .slideUp(150, "easeInOutQuad");
   });
 
   $(window).scroll(() => {
     if ($(window).scrollTop() > 10) {
-      $('.navigation').addClass('navbar-sticky');
+      $(".navigation").addClass("navbar-sticky");
     } else {
-      $('.navigation').removeClass('navbar-sticky');
+      $(".navigation").removeClass("navbar-sticky");
     }
   });
 
@@ -50,24 +51,23 @@
   /* BACK TO TOP
 /* ------------------------------------------------------------------------ */
 
-  $(document).on('click', '#back-to-top, .back-to-top', () => {
-    $('html, body').animate({ scrollTop: 0 }, '500');
+  $(document).on("click", "#back-to-top, .back-to-top", () => {
+    $("html, body").animate({ scrollTop: 0 }, "500");
     return false;
   });
-  $(window).on('scroll', () => {
+  $(window).on("scroll", () => {
     if ($(window).scrollTop() > 500) {
-      $('#back-to-top').fadeIn(200);
+      $("#back-to-top").fadeIn(200);
     } else {
-      $('#back-to-top').fadeOut(200);
+      $("#back-to-top").fadeOut(200);
     }
   });
 
   jQuery(document).ready(() => {
-    jQuery('.js-video-button').modalVideo({ channel: 'vimeo' });
+    jQuery(".js-video-button").modalVideo({ channel: "vimeo" });
   });
 
-
-  $('.review-slider').slick({
+  $(".review-slider").not(".slick-initialized, [data-hotux-managed]").slick({
     infinite: true,
     slidesToShow: 2,
     slidesToScroll: 1,
@@ -78,13 +78,13 @@
       {
         breakpoint: 1000,
         settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
+          slidesToShow: 1,
+        },
+      },
+    ],
   });
 
-  $('.review-slider1').slick({
+  $(".review-slider1").not(".slick-initialized, [data-hotux-managed]").slick({
     infinite: true,
     slidesToShow: 1,
     slidesToScroll: 1,
@@ -93,8 +93,30 @@
     autoplay: true,
   });
 
+  $(".award-slider").not(".slick-initialized, [data-hotux-managed]").slick({
+    infinite: true,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    arrows: true,
+    dots: true,
+    autoplay: true,
+    responsive: [
+      {
+        breakpoint: 1000,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 500,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
+  });
 
-  $('.award-slider').slick({
+  $(".team-slider").not(".slick-initialized, [data-hotux-managed]").slick({
     infinite: true,
     slidesToShow: 4,
     slidesToScroll: 1,
@@ -105,42 +127,19 @@
       {
         breakpoint: 1000,
         settings: {
-          slidesToShow: 2
-        }
-      },
-      {
-        breakpoint: 500,
-        settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
-  });
-
-  $('.team-slider').slick({
-    infinite: true,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    arrows: false,
-    dots: false,
-    autoplay: true,
-    responsive: [
-      {
-        breakpoint: 1000,
-        settings: {
-          slidesToShow: 2
-        }
+          slidesToShow: 2,
+        },
       },
       {
         breakpoint: 760,
         settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
+          slidesToShow: 1,
+        },
+      },
+    ],
   });
 
-  $('.gallery-slider').slick({
+  $(".gallery-slider").not(".slick-initialized, [data-hotux-managed]").slick({
     infinite: true,
     slidesToShow: 6,
     slidesToScroll: 1,
@@ -151,111 +150,114 @@
       {
         breakpoint: 1000,
         settings: {
-          slidesToShow: 4
-        }
+          slidesToShow: 4,
+        },
       },
       {
         breakpoint: 500,
         settings: {
-          slidesToShow: 2
-        }
-      }
-    ]
+          slidesToShow: 2,
+        },
+      },
+    ],
   });
 
-  $('.slider-store').slick({
+  $(".slider-store").not(".slick-initialized, [data-hotux-managed]").slick({
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
     fade: true,
-    asNavFor: '.slider-thumbs',
+    asNavFor: ".slider-thumbs",
   });
 
-  $('.slider-thumbs').slick({
+  $(".slider-thumbs").not(".slick-initialized, [data-hotux-managed]").slick({
     slidesToShow: 3,
     slidesToScroll: 1,
-    asNavFor: '.slider-store',
+    asNavFor: ".slider-store",
     dots: false,
     centerMode: true,
     arrows: true,
     focusOnSelect: true,
   });
 
-  $('.slider-for').slick({
+  $(".slider-for").not(".slick-initialized, [data-hotux-managed]").slick({
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: true,
     fade: true,
-    autoplay:true,
-    asNavFor: '.slider-nav',
+    autoplay: true,
+    asNavFor: ".slider-nav",
   });
-  $('.slider-nav').slick({
+  $(".slider-nav").not(".slick-initialized, [data-hotux-managed]").slick({
     slidesToShow: 5,
     slidesToScroll: 1,
-    asNavFor: '.slider-for',
+    asNavFor: ".slider-for",
     dots: false,
     centerMode: true,
-    autoplay:true,
+    autoplay: true,
     focusOnSelect: true,
   });
 
-
-
   // Date Picker
-  $('#datepicker, #check-datepicker').datepicker();
+  $("#datepicker, #check-datepicker").datepicker();
 
   // selectPicker
-  $('.selectpicker').selectpicker();
+  $(".selectpicker").selectpicker();
 
   // Nice Select JS
-  $(document).ready(function() {
-    $('select').niceSelect();
+  $(document).ready(function () {
+    $("select").niceSelect();
   });
 
   // accordian
 
-  if ($('.accrodion-grp').length) {
-    const accrodionGrp = $('.accrodion-grp');
+  if ($(".accrodion-grp").length) {
+    const accrodionGrp = $(".accrodion-grp");
     accrodionGrp.each(function () {
-      const accrodionName = $(this).data('grp-name');
+      const accrodionName = $(this).data("grp-name");
       const Self = $(this);
-      const accordion = Self.find('.accrodion');
+      const accordion = Self.find(".accrodion");
       Self.addClass(accrodionName);
-      Self.find('.accrodion .accrodion-content').hide();
-      Self.find('.accrodion.active').find('.accrodion-content').show();
+      Self.find(".accrodion .accrodion-content").hide();
+      Self.find(".accrodion.active").find(".accrodion-content").show();
       accordion.each(function () {
-        $(this).find('.accrodion-title').on('click', function () {
-          if ($(this).parent().hasClass('active') === false) {
-            $(`.accrodion-grp.${accrodionName}`).find('.accrodion').removeClass('active');
-            $(`.accrodion-grp.${accrodionName}`).find('.accrodion').find('.accrodion-content').slideUp();
-            $(this).parent().addClass('active');
-            $(this).parent().find('.accrodion-content').slideDown();
-          }
-        });
+        $(this)
+          .find(".accrodion-title")
+          .on("click", function () {
+            if ($(this).parent().hasClass("active") === false) {
+              $(`.accrodion-grp.${accrodionName}`)
+                .find(".accrodion")
+                .removeClass("active");
+              $(`.accrodion-grp.${accrodionName}`)
+                .find(".accrodion")
+                .find(".accrodion-content")
+                .slideUp();
+              $(this).parent().addClass("active");
+              $(this).parent().find(".accrodion-content").slideDown();
+            }
+          });
       });
     });
   }
 
-  $("#contactform").validate({      
-    submitHandler: function() {
-      
+  $("#contactform").validate({
+    submitHandler: function () {
       $.ajax({
-        url : 'mail/contact.php',
-        type : 'POST',
-        data : {
-          fname : $('input[name="first_name"]').val(),
-          lname : $('input[name="last_name"]').val(),
-          email : $('input[name="email"]').val(),
-          phone : $('input[name="phone"]').val(),
-          comments : $('textarea[name="comments"]').val(),
+        url: "mail/contact.php",
+        type: "POST",
+        data: {
+          fname: $('input[name="first_name"]').val(),
+          lname: $('input[name="last_name"]').val(),
+          email: $('input[name="email"]').val(),
+          phone: $('input[name="phone"]').val(),
+          comments: $('textarea[name="comments"]').val(),
         },
-        success : function( result ){
-          $('#contactform-error-msg').html( result );
+        success: function (result) {
+          $("#contactform-error-msg").html(result);
           $("#contactform")[0].reset();
-        }     
+        },
       });
-
-    }
+    },
   });
 
   /*= ======= Isotope Filter Script ========= */
@@ -265,16 +267,16 @@
 
   mt_personal.Isotope = function () {
     // 4 column layout
-    const isotopeContainer = $('.isotopeContainer');
+    const isotopeContainer = $(".isotopeContainer");
     if (!isotopeContainer.length || !jQuery().isotope) return;
-    $win.on('load', () => {
+    $win.on("load", () => {
       isotopeContainer.isotope({
-        itemSelector: '.isotopeSelector',
+        itemSelector: ".isotopeSelector",
       });
-      $('.mt_filter').on('click', 'a', function (e) {
-        $('.mt_filter ul li').find('.active').removeClass('active');
-        $(this).addClass('active');
-        const filterValue = $(this).attr('data-filter');
+      $(".mt_filter").on("click", "a", function (e) {
+        $(".mt_filter ul li").find(".active").removeClass("active");
+        $(this).addClass("active");
+        const filterValue = $(this).attr("data-filter");
         isotopeContainer.isotope({ filter: filterValue });
         e.preventDefault();
       });
@@ -283,14 +285,13 @@
 
   mt_personal.Isotope();
 
-
   // Range sliders activation
-  $('.range-slider-ui').each(function () {
-    const minRangeValue = $(this).attr('data-min');
-    const maxRangeValue = $(this).attr('data-max');
-    const minName = $(this).attr('data-min-name');
-    const maxName = $(this).attr('data-max-name');
-    const unit = $(this).attr('data-unit');
+  $(".range-slider-ui").each(function () {
+    const minRangeValue = $(this).attr("data-min");
+    const maxRangeValue = $(this).attr("data-max");
+    const minName = $(this).attr("data-min-name");
+    const maxName = $(this).attr("data-max-name");
+    const unit = $(this).attr("data-unit");
 
     $(this).slider({
       range: true,
@@ -301,34 +302,34 @@
         event = event;
         const currentMin = parseInt(ui.values[0], 10);
         const currentMax = parseInt(ui.values[1], 10);
-        $(this).children('.min-value').text(`${currentMin} ${unit}`);
-        $(this).children('.max-value').text(`${currentMax} ${unit}`);
-        $(this).children('.current-min').val(currentMin);
-        $(this).children('.current-max').val(currentMax);
+        $(this).children(".min-value").text(`${currentMin} ${unit}`);
+        $(this).children(".max-value").text(`${currentMax} ${unit}`);
+        $(this).children(".current-min").val(currentMin);
+        $(this).children(".current-max").val(currentMax);
       },
     });
   });
 
-  $('#counter-block').ready(() => {
-    $('.room').animationCounter({
+  $("#counter-block").ready(() => {
+    $(".room").animationCounter({
       start: 0,
       end: 264,
       step: 2,
       delay: 10,
     });
-    $('.staff').animationCounter({
+    $(".staff").animationCounter({
       start: 12,
       end: 575,
       step: 2,
       delay: 15,
     });
-    $('.restaurant').animationCounter({
+    $(".restaurant").animationCounter({
       start: 25,
       end: 487,
       step: 2,
       delay: 12,
     });
-    $('.award').animationCounter({
+    $(".award").animationCounter({
       start: 25,
       end: 320,
       step: 1,
@@ -337,9 +338,8 @@
   });
 
   $(document).ready(() => {
-    loopcounter('coming-counter');
+    loopcounter("coming-counter");
   });
-
 
   window.FPConfig = {
     delay: 0,
@@ -348,45 +348,44 @@
     hoverDelay: 50,
   };
 
-
   niceSelect_destroy();
-
-}(jQuery));
-
-/**
-* Make height equal to screen
-*/
-
-jQuery(window).on('resize load', () => {
-  resize_eb_slider();
-}).resize();
+})(jQuery);
 
 /**
-* Resize slider
-*/
+ * Make height equal to screen
+ */
+
+jQuery(window)
+  .on("resize load", () => {
+    resize_eb_slider();
+  })
+  .resize();
+
+/**
+ * Resize slider
+ */
 
 function resize_eb_slider() {
   let bodyheight = jQuery(this).height();
 
   if (jQuery(window).width() > 1400) {
-    bodyheight *= 0.90;
-    jQuery('.slider').css('height', `${bodyheight}px`);
+    bodyheight *= 0.9;
+    jQuery(".slider").css("height", `${bodyheight}px`);
   }
 }
-
 
 function niceSelect_destroy() {
   if (jQuery(window).width() < 768) {
-    $('.niceSelect').niceSelect('destroy');
+    $(".niceSelect").niceSelect("destroy");
   } else {
-    $('.niceSelect').niceSelect('udpate');
+    $(".niceSelect").niceSelect("udpate");
   }
 }
 
-
-jQuery(document).on('click','.dark-mode a',function(){
-  jQuery('body').addClass('night-mode');
+jQuery(document).on("click", ".dark-mode a", function () {
+  jQuery("body").addClass("night-mode");
 });
-jQuery(document).on('click','.light-mode a',function(){
-  jQuery('body').removeClass('night-mode');
+jQuery(document).on("click", ".light-mode a", function () {
+  jQuery("body").removeClass("night-mode");
 });
+})(window.hotuxJQuery || window.jQuery, window.hotuxJQuery || window.jQuery);

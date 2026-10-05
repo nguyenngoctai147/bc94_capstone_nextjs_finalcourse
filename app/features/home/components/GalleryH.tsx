@@ -15,7 +15,7 @@ export default function GalleryH() {
           </p>
         </div>
       </div>
-      <div className="gallery-main gallery-slider">
+      <div className="gallery-main gallery-slider" data-hotux-managed>
         <div className="gallery-image">
           <Image
             width={100}

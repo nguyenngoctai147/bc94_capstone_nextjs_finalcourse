@@ -3,10 +3,12 @@ import { useState } from "react";
 import { Alert, Button, Card, EmptyState, Input, LoadingSpinner, Pagination, Select, Textarea } from "@/components/ui";
 import { useForm } from "@/hooks/useForm";
 import { required, email, minLength } from "@/lib/validation/rules";
+import { DesignSystemGuide } from "./DesignSystemGuide";
+import { Typography } from "@/components/ui";
 export function ComponentShowcase() {
   const [saved, setSaved] = useState(false); const [page, setPage] = useState(1);
   const form = useForm({ name: "", email: "", type: "room", note: "" }, { name: [required()], email: [required(), email], note: [minLength(10)] });
-  return <><h1 className="mb-4">Bộ component Bootstrap</h1><div className="row g-4">
+  return <><DesignSystemGuide /><section id="components" className="ds-foundation ds-component-showcase"><Typography as="h2" variant="h2" className="mb-4">05. Component & trạng thái</Typography><div className="row g-4">
     <div className="col-lg-6"><Card title="Form & validation">
       {saved && <Alert variant="success">Dữ liệu hợp lệ. Đây là form minh họa, chưa gửi lên backend.</Alert>}
       <form noValidate onSubmit={form.handleSubmit(() => setSaved(true))}>
@@ -23,5 +25,5 @@ export function ComponentShowcase() {
       <EmptyState title="Chưa có phòng" description="Danh sách sẽ xuất hiện tại đây." />
       <div className="mt-4"><Pagination page={page} pageSize={10} total={35} onChange={setPage} /></div>
     </Card></div>
-  </div></>;
+  </div></section></>;
 }

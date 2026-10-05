@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendor/legacy template files are preserved verbatim under public and are not application source.
     "public/assets/legacy/**",
+    "public/assets/dashboard/vendors/**",
   ]),
 ]);
 

@@ -105,6 +105,8 @@ d.slice(e-c+1,e+c+2).addClass("slick-active").attr("aria-hidden","false")),0===a
  *
 */
 
+(function (jQuery) {
+// Keep animation callbacks bound to the jQuery that owns these easing functions.
 // t: current time, b: begInnIng value, c: change In value, d: duration
 jQuery.easing['jswing'] = jQuery.easing['swing'];
 
@@ -240,6 +242,7 @@ jQuery.extend( jQuery.easing,
 		return jQuery.easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
 	}
 });
+})(jQuery);
 
 /*
  *

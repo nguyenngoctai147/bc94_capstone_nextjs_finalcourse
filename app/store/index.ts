@@ -8,7 +8,18 @@ import reviews from "@/features/reviews/reviews.slice";
 const combinedReducer = combineReducers({ auth, rooms, bookings, locations, users, reviews });
 export type RootState = ReturnType<typeof combinedReducer>;
 function rootReducer(state: RootState | undefined, action: UnknownAction) {
-  return combinedReducer(logout.match(action) ? undefined : state, action);
+  if (!state || !logout.match(action)) return combinedReducer(state, action);
+
+  // Rooms and locations are public catalogue data. Keeping them during logout
+  // avoids both needless refetching and replacing React children while legacy
+  // Slick/NiceSelect widgets still own their transformed DOM. Private/auth
+  // state is rebuilt from the reducers' initial state below.
+  const resetState = combinedReducer(undefined, action);
+  return {
+    ...resetState,
+    rooms: state.rooms,
+    locations: state.locations,
+  };
 }
 export const makeStore = () => configureStore({
   reducer: rootReducer,

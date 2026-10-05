@@ -93,10 +93,20 @@ export function RoomDetail({ id }: { id: number }) {
 
   useEffect(() => {
     const task = dispatch(roomsThunks.detail(id));
-    void loadLegacyScripts(legacyScriptBundles.hotuxRoomDetail).then(
-      initializeHotuxRoomDetail,
-    );
-    return () => task.abort();
+    let active = true;
+    let cleanup: () => void = () => undefined;
+    void loadLegacyScripts(legacyScriptBundles.hotuxRoomDetail)
+      .then(() => {
+        if (active) cleanup = initializeHotuxRoomDetail();
+      })
+      .catch((error: unknown) => {
+        if (active) console.error("Hotux room scripts failed to load", error);
+      });
+    return () => {
+      active = false;
+      cleanup();
+      task.abort();
+    };
   }, [dispatch, id]);
 
   return (
@@ -104,14 +114,14 @@ export function RoomDetail({ id }: { id: number }) {
       <section className="details">
         <div className="container">
           <div className="detail-slider">
-            <div className="slider-1 slider-for">
+            <div className="slider-1 slider-for" data-hotux-managed>
               {DETAIL_IMAGES.map((image) => (
                 <div className="detail-slider-item" key={`main-${image}`}>
                   <img src={image} alt="image" />
                 </div>
               ))}
             </div>
-            <div className="slider-1 slider-nav">
+            <div className="slider-1 slider-nav" data-hotux-managed>
               {DETAIL_IMAGES.map((image) => (
                 <div className="detail-slider-item" key={`nav-${image}`}>
                   <img src={image} alt="image" />
@@ -224,7 +234,7 @@ export function RoomDetail({ id }: { id: number }) {
       <section className="related-rooms">
         <div className="container">
           <div className="section-title"><h2>Explore <span>Rooms</span></h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis</p></div>
-          <div className="room-outer"><div className="row team-slider">
+          <div className="room-outer"><div className="row team-slider" data-hotux-managed>
             {RELATED_ROOMS.map(([image, name, relatedPrice, serviceClass], index) => (
               <div className="col-md-4" key={name}>
                 <div className="room-item"><div className="room-image"><img src={`/assets/images/${image}`} alt="image" /></div><div className="room-content">

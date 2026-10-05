@@ -5,7 +5,7 @@ import { routes } from "@/config/routes";
 
 export function VeChungToi() {
   return (
-    <section className="about-style-3">
+    <section className="about-style-3 ds-section">
       <div className="container">
         <div className="about-inner">
           <div className="row">

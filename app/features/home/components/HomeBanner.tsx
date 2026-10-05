@@ -3,14 +3,28 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import Form from "next/form";
 import { routes } from "@/config/routes";
+import { locationsThunks } from "@/features/locations/locations.thunks";
 import {
   initializeHotuxHome,
   legacyScriptBundles,
   loadLegacyScripts,
 } from "@/lib/legacy/scripts";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export function HomeBanner() {
+  const dispatch = useAppDispatch();
+  const { items: locations, requests } = useAppSelector(
+    (state) => state.locations,
+  );
+  const locationRequest = requests.list;
+
+  useEffect(() => {
+    const task = dispatch(locationsThunks.list());
+    return () => task.abort();
+  }, [dispatch]);
+
   useEffect(() => {
     let cancelled = false;
     let cleanup: () => void = () => undefined;
@@ -20,7 +34,8 @@ export function HomeBanner() {
         if (!cancelled) cleanup = initializeHotuxHome(document);
       })
       .catch((error: unknown) => {
-        if (!cancelled) console.error("Hotux legacy scripts failed to load", error);
+        if (!cancelled)
+          console.error("Hotux legacy scripts failed to load", error);
       });
     return () => {
       cancelled = true;
@@ -132,17 +147,52 @@ export function HomeBanner() {
 
         <div className="banner-form">
           <div className="container">
-            <div className="form-content">
+            <Form
+              action={routes.reservation.availability}
+              className="form-content"
+            >
               <div className="table-item">
-                <div className="form-group">
+                <div className="form-group form-icon">
+                  <select
+                    id="home-location"
+                    name="maViTri"
+                    className="wide"
+                    defaultValue=""
+                    required
+                    aria-label="Địa điểm"
+                    disabled={locationRequest.status !== "succeeded"}
+                  >
+                    <option value="" disabled>
+                      {locationRequest.status === "loading" ||
+                      locationRequest.status === "idle"
+                        ? "Đang tải địa điểm..."
+                        : locationRequest.status === "failed"
+                          ? "Không thể tải địa điểm"
+                          : "Chọn địa điểm"}
+                    </option>
+                    {locations.map((location) => (
+                      <option value={location.id} key={location.id}>
+                        {location.tenViTri}, {location.tinhThanh},{" "}
+                        {location.quocGia}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="table-item">
+                <div className="form-group form-icon">
                   <div className="date-range-inner-wrapper">
                     <input
                       id="date-range2"
+                      name="checkIn"
+                      type="text"
                       className="form-control"
-                      defaultValue="Check In"
+                      placeholder="Nhận phòng"
+                      aria-label="Ngày nhận phòng"
+                      required
                     />
-                    <span className="input-group-addon">
-                      <i className="fa fa-calendar" aria-hidden="true" />
+                    <span className="input-group-addon" aria-hidden="true">
+                      <i className="fa fa-calendar" />
                     </span>
                   </div>
                 </div>
@@ -152,47 +202,46 @@ export function HomeBanner() {
                   <div className="date-range-inner-wrapper">
                     <input
                       id="date-range3"
+                      name="checkOut"
+                      type="text"
                       className="form-control"
-                      defaultValue="Check Out"
+                      placeholder="Trả phòng"
+                      aria-label="Ngày trả phòng"
+                      required
                     />
-                    <span className="input-group-addon">
-                      <i className="fa fa-calendar" aria-hidden="true" />
+                    <span className="input-group-addon" aria-hidden="true">
+                      <i className="fa fa-calendar" />
                     </span>
                   </div>
                 </div>
               </div>
               <div className="table-item">
                 <div className="form-group form-icon">
-                  <select className="wide" defaultValue="0">
-                    <option value="0">Guest</option>
-                    <option value="1">0</option>
-                    <option value="2">1</option>
-                    <option value="3">2</option>
-                    <option value="4">3</option>
-                    <option value="5">4</option>
-                  </select>
-                </div>
-              </div>
-              <div className="table-item">
-                <div className="form-group form-icon">
-                  <select className="wide" defaultValue="0">
-                    <option value="0">Nights</option>
-                    <option value="1">0</option>
-                    <option value="2">1</option>
-                    <option value="3">2</option>
-                    <option value="4">3</option>
-                    <option value="5">4</option>
+                  <select
+                    id="home-guests"
+                    name="guests"
+                    className="wide"
+                    defaultValue="1"
+                    aria-label="Khách"
+                  >
+                    {Array.from({ length: 10 }, (_, index) => index + 1).map(
+                      (guestCount) => (
+                        <option value={guestCount} key={guestCount}>
+                          {guestCount} khách
+                        </option>
+                      ),
+                    )}
                   </select>
                 </div>
               </div>
               <div className="table-item">
                 <div className="form-btn">
-                  <Link href={routes.reservation.availability} className="btn btn-orange">
-                    Check Availability
-                  </Link>
+                  <button type="submit" className="btn btn-orange">
+                    Kiểm tra đặt phòng
+                  </button>
                 </div>
               </div>
-            </div>
+            </Form>
           </div>
         </div>
       </section>

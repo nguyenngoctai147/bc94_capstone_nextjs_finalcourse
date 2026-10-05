@@ -1453,6 +1453,7 @@ section.banner.banner-style-1 .swiper-content {
   border-bottom: 1px solid #ccc;
   border-radius: 0;
 }
+.table-item select.wide {width: 100%;}
 .table-item .nice-select span {
   color: #fff;
 }
@@ -2076,7 +2077,7 @@ section.rooms-style3 .room-item{border: 10px solid #ffffff52;}
     padding: 16px 25px 25px;
     background: transparent;
     position: absolute;
-    bottom: -145px;
+    bottom: -130px;
     transition: all 0.5s;
 }
 

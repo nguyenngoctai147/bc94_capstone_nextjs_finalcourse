@@ -10,8 +10,8 @@ export function Card({
   footer?: ReactNode;
 }) {
   return (
-    <div {...props} className={`card h-100 ${className}`}>
-      <div className="card-body p-4">
+    <div {...props} className={`card ds-card h-100 ${className}`}>
+      <div className="card-body">
         {title && <h2 className="h5 card-title mb-3">{title}</h2>}
         {children}
       </div>

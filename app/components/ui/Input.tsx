@@ -24,7 +24,7 @@ export function Input({
       .filter(Boolean)
       .join(" ") || undefined;
   return (
-    <div className="mb-3">
+    <div className="ds-field mb-3">
       <label htmlFor={fieldId} className="form-label">
         {label}
         {props.required && <span aria-hidden="true"> *</span>}

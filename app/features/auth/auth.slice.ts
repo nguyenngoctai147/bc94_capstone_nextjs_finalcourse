@@ -2,22 +2,33 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { User } from "@/features/users/users.types";
 import type { RequestState } from "@/store/crud";
 import { login, register } from "./auth.thunks";
+import { toSafeUser } from "./auth.session";
 type AuthState = {
   user: User | null;
   token: string | null;
   login: RequestState;
   register: RequestState;
+  hydrated: boolean;
 };
 const initialState: AuthState = {
   user: null,
   token: null,
   login: { status: "idle", error: null },
   register: { status: "idle", error: null },
+  hydrated: false,
 };
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: { logout: () => initialState },
+  reducers: {
+    hydrateSession: (state, action: { payload: { user: User; token: string } | null }) => {
+      const user = toSafeUser(action.payload?.user);
+      state.user = user;
+      state.token = user && typeof action.payload?.token === "string" && action.payload.token ? action.payload.token : null;
+      state.hydrated = true;
+    },
+    logout: () => ({ ...initialState, hydrated: true }),
+  },
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state, action) => {
       state.login = {
@@ -34,6 +45,7 @@ const authSlice = createSlice({
       state.user = { id, name, email, phone, birthday, gender, role, avatar };
       state.token = action.payload.token;
       state.login = { status: "succeeded", error: null };
+      state.hydrated = true;
     });
     builder.addCase(login.rejected, (state, action) => {
       if (state.login.requestId !== action.meta.requestId) return;
@@ -66,5 +78,5 @@ const authSlice = createSlice({
     });
   },
 });
-export const { logout } = authSlice.actions;
+export const { hydrateSession, logout } = authSlice.actions;
 export default authSlice.reducer;
