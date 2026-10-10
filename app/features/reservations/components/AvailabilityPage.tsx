@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { flowKeys, today, validSearch } from "../flow";
 import { routes } from "@/config/routes";
-import {
-  destroyHotuxReservation,
-  initializeHotuxReservation,
-  legacyScriptBundles,
-  loadLegacyScripts,
-} from "@/lib/legacy/scripts";
 
 const checkInDays = ["05/Jan", "06/Jan", "07/Jan", "08/Jan", "09/Jan"];
 const guests = ["01", "02", "03", "04", "05"];
@@ -80,44 +76,27 @@ export function StaticSelect({
 }
 
 export function AvailabilityPage() {
-  useEffect(() => {
-    let active = true;
-
-    void loadLegacyScripts(legacyScriptBundles.hotuxReservation).then(() => {
-      if (active) initializeHotuxReservation();
-    });
-
-    return () => {
-      active = false;
-      destroyHotuxReservation();
-    };
-  }, []);
+  const router = useRouter();
+  const [checkIn,setCheckIn]=useState(""); const [checkOut,setCheckOut]=useState(""); const [guests,setGuests]=useState(1); const [error,setError]=useState("");
 
   return (
     <section className="content reservation-main">
       <div className="container">
         <ReservationProgress active={1} />
 
-        <div className="banner-form form-style-1">
+        <form className="banner-form form-style-1" onSubmit={event=>{event.preventDefault();const search={checkIn,checkOut,guests};if(!validSearch(search)){setError("Chọn ngày nhận phòng từ hôm nay, ngày trả sau ngày nhận và ít nhất 1 khách.");return;}sessionStorage.setItem(flowKeys.search,JSON.stringify(search));sessionStorage.removeItem(flowKeys.draft);router.push(routes.reservation.selectRoom);}}>
           <div className="form-content">
-            <StaticSelect label="Check In" values={checkInDays} />
-            <StaticSelect label="Check Out" values={checkInDays} />
-            <StaticSelect label="Guests" values={guests} />
-            <StaticSelect label="Nights" values={nights} />
+            <div className="table-item"><label>Nhận phòng</label><input type="date" min={today()} value={checkIn} onChange={e=>setCheckIn(e.target.value)} required /></div>
+            <div className="table-item"><label>Trả phòng</label><input type="date" min={checkIn||today()} value={checkOut} onChange={e=>setCheckOut(e.target.value)} required /></div>
+            <div className="table-item"><label>Số khách</label><input type="number" min="1" value={guests} onChange={e=>setGuests(Number(e.target.value))} required /></div>
             <div className="table-item">
               <div className="form-btn mar-top-35">
-                <Link href={routes.reservation.selectRoom} className="btn btn-orange">Check Availability</Link>
+                <button type="submit" className="btn btn-orange">Kiểm tra phòng trống</button>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="calendar-range">
-          <div className="date-range-inner-wrapper">
-            <input id="date-range12" className="form-control d-none" aria-hidden="true" />
-            <div id="date-range12-container" />
-          </div>
-        </div>
+          {error&&<p role="alert" className="text-danger">{error}</p>}
+        </form>
       </div>
     </section>
   );

@@ -26,9 +26,9 @@ export function LoginForm() {
           const result = await dispatch(login(values));
           if (login.fulfilled.match(result))
             router.push(
-              result.payload.user.role === "ADMIN"
+              result.payload.user.role.trim().toUpperCase() === "ADMIN"
                 ? routes.admin.dashboard
-                : routes.account,
+                : routes.reservation.availability,
             );
         })}
       >

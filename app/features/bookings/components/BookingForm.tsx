@@ -8,9 +8,12 @@ import { routes } from "@/config/routes";
 import type { Room } from "@/features/rooms/rooms.types";
 import { bookingsThunks } from "../bookings.thunks";
 import { bookingSchema } from "../booking.validation";
+import { bookingsService } from "../bookings.service";
+import { available } from "@/features/reservations/flow";
 export function BookingForm({ room }: { room: Room }) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const token = useAppSelector((state) => state.auth.token);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(
     null,
   );
@@ -22,8 +25,18 @@ export function BookingForm({ room }: { room: Room }) {
     <form
       noValidate
       onSubmit={form.handleSubmit(async (values) => {
-        if (!user) return;
+        if (!user || !token) return;
         setResult(null);
+        try {
+          const latest = await bookingsService.list({ token });
+          if (!available(room, { checkIn: values.ngayDen, checkOut: values.ngayDi, guests: Number(values.soLuongKhach) }, latest.data)) {
+            setResult({ ok: false, message: "Phòng không còn trống trong khoảng ngày này hoặc vượt quá số khách cho phép." });
+            return;
+          }
+        } catch {
+          setResult({ ok: false, message: "Không thể kiểm tra phòng trống. Vui lòng thử lại." });
+          return;
+        }
         const action = await dispatch(
           bookingsThunks.create({
             maPhong: room.id,

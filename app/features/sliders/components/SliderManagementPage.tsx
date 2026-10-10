@@ -76,7 +76,7 @@ export function SliderManagementPage() {
         <li className="breadcrumb-item"><Link href={routes.admin.dashboard}>Dashboard</Link></li>
         <li className="breadcrumb-item active" aria-current="page">Slider</li>
       </ol>
-      <button className="btn btn-primary btn-icon-text" type="button" data-bs-toggle="modal" data-bs-target="#addslider" onClick={openAdd}>
+      <button className="btn btn-primary btn-icon-text" type="button" onClick={openAdd}>
         <Icon className="btn-icon-prepend" name="plus" /> Add Slider
       </button>
     </nav>
@@ -104,8 +104,8 @@ export function SliderManagementPage() {
               <td>{slider.id}</td><td>{slider.startDate}</td><td className="w-25"><Image src={`/assets/images/${slider.image}`} alt="image" width={900} height={480} /></td><td>{slider.title}</td><td>{slider.subtitle}</td>
               <td className="text-center"><span className="form-check form-switch"><input type="checkbox" className="form-check-input" id={`formSwitch${index + 1}`} /></span></td>
               <td className="text-center"><ul className="d-flex list-unstyled mb-0 justify-content-center">
-                <li className="me-2"><a href="#viewslider" data-bs-toggle="modal" data-bs-target="#viewslider" aria-label={`View ${slider.title}`} onClick={(event) => { preventNavigation(event); openView(slider); }}><Icon className="link-icon" name="eye" /></a></li>
-                <li className="me-2"><a href="#addslider" data-bs-toggle="modal" data-bs-target="#addslider" aria-label={`Edit ${slider.title}`} onClick={(event) => { preventNavigation(event); openAdd(); }}><Icon className="link-icon" name="edit" /></a></li>
+                <li className="me-2"><a href="#viewslider" aria-label={`View ${slider.title}`} onClick={(event) => { preventNavigation(event); openView(slider); }}><Icon className="link-icon" name="eye" /></a></li>
+                <li className="me-2"><a href="#addslider" aria-label={`Edit ${slider.title}`} onClick={(event) => { preventNavigation(event); openAdd(); }}><Icon className="link-icon" name="edit" /></a></li>
                 <li><a href="#delete-slider" aria-label={`Delete ${slider.title}`} onClick={preventNavigation}><Icon className="link-icon" name="trash" /></a></li>
               </ul></td>
             </tr>)}</tbody>

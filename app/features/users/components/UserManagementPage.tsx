@@ -92,7 +92,7 @@ export function UserManagementPage() {
                     <td className="text-center"><span className="form-check form-switch"><input type="checkbox" className="form-check-input" id={`formSwitch${index + 1}`} /></span></td>
                     <td className="text-center">
                       <ul className="d-flex list-unstyled mb-0">
-                        <li className="me-2"><a href="#addslider" data-bs-toggle="modal" data-bs-target="#addslider" aria-label={`Edit ${user.fullname}`} onClick={stopNavigation}><Icon className="link-icon" name="edit" /></a></li>
+                        <li className="me-2"><Link href={routes.admin.userDetail} aria-label={`Edit ${user.fullname}`}><Icon className="link-icon" name="edit" /></Link></li>
                         <li><a href="#delete-user" aria-label={`Delete ${user.fullname}`} onClick={stopNavigation}><Icon className="link-icon" name="trash" /></a></li>
                       </ul>
                     </td>

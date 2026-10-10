@@ -1,10 +1,10 @@
 import { RequireAuth } from "@/components/auth/RequireAuth";
-import { TestimonialManagementPage } from "@/features/reviews/components/TestimonialManagementPage";
+import { AddBookingRoomPage } from "@/features/bookings/components/AddBookingRoomPage";
 
 export default function Page() {
   return (
     <RequireAuth role="ADMIN">
-      <TestimonialManagementPage />
+      <AddBookingRoomPage />
     </RequireAuth>
   );
 }

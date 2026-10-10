@@ -37,6 +37,7 @@ export function AdminSidebar({
             width={156}
             height={49}
             priority
+            style={{ height: "auto" }}
           />
         </Link>
         <button
@@ -50,7 +51,11 @@ export function AdminSidebar({
           <span />
         </button>
       </div>
-      <div className="sidebar-body">
+      <div
+        className="sidebar-body sidebar-menu-scroll"
+        tabIndex={0}
+        aria-label="Danh sách menu quản trị"
+      >
         <ul className="nav">
           {menuItems.map((item) => {
             const active =

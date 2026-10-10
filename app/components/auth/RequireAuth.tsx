@@ -1,9 +1,9 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
-import { EmptyState } from "@/components/ui";
 import { useClientReady } from "@/hooks/useClientReady";
 export function RequireAuth({
   children,
@@ -14,25 +14,21 @@ export function RequireAuth({
 }) {
   const { user, token, hydrated } = useAppSelector((state) => state.auth);
   const clientReady = useClientReady();
-  if (!clientReady || !hydrated) return <div className="auth-pending" role="status">Đang khôi phục phiên đăng nhập…</div>;
-  if (!user || !token)
-    return (
-      <EmptyState
-        title="Vui lòng đăng nhập"
-        description="Đăng nhập để tiếp tục vào khu vực này."
-        action={
-          <Link className="btn btn-primary" href={routes.auth.login}>
-            Đăng nhập
-          </Link>
-        }
-      />
-    );
-  if (role && user.role !== role)
-    return (
-      <EmptyState
-        title="Bạn không có quyền truy cập"
-        description="Khu vực này dành cho quản trị viên."
-      />
-    );
+  const router = useRouter();
+  const isReady = clientReady && hydrated;
+  const hasSession = Boolean(user && token);
+  const hasRequiredRole = !role || user?.role.trim().toUpperCase() === role;
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (!hasSession) {
+      router.replace(routes.auth.login);
+      return;
+    }
+    if (!hasRequiredRole) router.replace(routes.reservation.availability);
+  }, [hasRequiredRole, hasSession, isReady, router]);
+
+  if (!isReady || !hasSession || !hasRequiredRole)
+    return <div className="auth-pending" role="status">Đang chuyển đến trang phù hợp…</div>;
   return children;
 }

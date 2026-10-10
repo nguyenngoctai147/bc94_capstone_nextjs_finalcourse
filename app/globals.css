@@ -17,8 +17,8 @@ a { text-underline-offset: 3px; }
 .brand { color: var(--stay-accent); font-size: 1.65rem; font-weight: 800; text-decoration: none; letter-spacing: -.08rem; }
 .site-header { background: white; border-bottom: 1px solid #e5e9e4; }
 .site-main { min-height: 70vh; }
-.nav-link { color: #425651; border-radius: .5rem; }
-.nav-link.active { background: #e7eeea; color: #183e30; font-weight: 600; }
+.ds-site .nav-link { color: #425651; border-radius: .5rem; }
+.ds-site .nav-link.active { background: #e7eeea; color: #183e30; font-weight: 600; }
 .eyebrow { letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; font-weight: 700; color: #62786e; }
 .hero { background: #e7eeea; border-radius: 1.5rem; padding: clamp(1.75rem, 5vw, 4rem); }
 :is(.ds-site, .auth-shell) .card { border-color: #e1e7e1; border-radius: 1rem; }
@@ -198,3 +198,24 @@ a { text-underline-offset: 3px; }
 .header-content .account-context-menu :is(a, button):hover, .header-content .account-context-menu :is(a, button):focus-visible { background: var(--ds-primary-soft); color: var(--ds-primary); outline: none; }
 .header-content .account-context-separator { height: 1px; margin: var(--ds-space-2) 0; background: var(--ds-border); }
 .auth-pending { min-height: 8rem; display: grid; place-items: center; color: var(--ds-muted); }
+
+/* The supplied dashboard CSS sizes the menu area but expects its optional
+ * PerfectScrollbar plugin to provide scrolling. Use native scrolling instead
+ * so long menus work on every route and input device. */
+.main-wrapper > .sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+.main-wrapper > .sidebar > .sidebar-header { flex: 0 0 auto; }
+.main-wrapper > .sidebar > .sidebar-menu-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}

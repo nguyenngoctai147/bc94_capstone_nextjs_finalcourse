@@ -1,0 +1,10 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { available, nights, overlaps } from "../app/features/reservations/flow";
+import type { Booking } from "../app/features/bookings/bookings.types";
+import type { Room } from "../app/features/rooms/rooms.types";
+const room={id:7,khach:3} as Room;
+const existing={id:1,maPhong:7,ngayDen:"2027-01-10T00:00:00",ngayDi:"2027-01-12T00:00:00",soLuongKhach:2,maNguoiDung:1} satisfies Booking;
+test("adjacent stays do not overlap; crossing dates do",()=>{assert.equal(overlaps({checkIn:"2027-01-08",checkOut:"2027-01-10",guests:2},existing),false);assert.equal(overlaps({checkIn:"2027-01-12",checkOut:"2027-01-14",guests:2},existing),false);assert.equal(overlaps({checkIn:"2027-01-11",checkOut:"2027-01-13",guests:2},existing),true);});
+test("capacity and existing bookings filter rooms",()=>{assert.equal(available(room,{checkIn:"2027-01-11",checkOut:"2027-01-13",guests:2},[existing]),false);assert.equal(available(room,{checkIn:"2027-01-12",checkOut:"2027-01-13",guests:4},[existing]),false);assert.equal(available(room,{checkIn:"2027-01-12",checkOut:"2027-01-13",guests:3},[existing]),true);});
+test("night count uses calendar days",()=>{assert.equal(nights({checkIn:"2027-03-27",checkOut:"2027-03-30",guests:1}),3);});
