@@ -1,11 +1,13 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- preserve the supplied Hotux HTML asset markup. */
 
-import { useEffect } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import Form from "next/form";
 import { routes } from "@/config/routes";
 import { locationsThunks } from "@/features/locations/locations.thunks";
+import { StayDateFields } from "@/features/reservations/components/StayDateFields";
+import { validSearch } from "@/features/reservations/flow";
 import {
   initializeHotuxHome,
   legacyScriptBundles,
@@ -19,6 +21,19 @@ export function HomeBanner() {
     (state) => state.locations,
   );
   const locationRequest = requests.list;
+  const [stay, setStay] = useState({ checkIn: "", checkOut: "" });
+  const [error, setError] = useState("");
+
+  function validateSubmit(event: FormEvent<HTMLFormElement>) {
+    const data = new FormData(event.currentTarget);
+    const search = { ...stay, guests: Number(data.get("guests")), locationId: Number(data.get("maViTri")) };
+    if (!validSearch(search)) {
+      event.preventDefault();
+      setError("Chọn địa điểm, ngày nhận từ hôm nay, ngày trả sau ngày nhận và ít nhất 1 khách.");
+    } else {
+      setError("");
+    }
+  }
 
   useEffect(() => {
     const task = dispatch(locationsThunks.list());
@@ -145,13 +160,14 @@ export function HomeBanner() {
           <div className="overlay" />
         </div>
 
-        <div className="banner-form">
+        <div className="banner-form home-stay-search">
           <div className="container">
             <Form
-              action={routes.reservation.availability}
+              action={routes.rooms.list}
               className="form-content"
+              onSubmit={validateSubmit}
             >
-              <div className="table-item">
+              <div className="table-item stay-location">
                 <div className="form-group form-icon">
                   <select
                     id="home-location"
@@ -179,69 +195,34 @@ export function HomeBanner() {
                   </select>
                 </div>
               </div>
-              <div className="table-item">
+              <StayDateFields idPrefix="home" value={stay} showLabels={false} showNights={false} legacyPicker onChange={(value) => { setStay(value); setError(""); }} />
+              <div className="table-item stay-guests">
                 <div className="form-group form-icon">
-                  <div className="date-range-inner-wrapper">
-                    <input
-                      id="date-range2"
-                      name="checkIn"
-                      type="text"
-                      className="form-control"
-                      placeholder="Nhận phòng"
-                      aria-label="Ngày nhận phòng"
-                      required
-                    />
-                    <span className="input-group-addon" aria-hidden="true">
-                      <i className="fa fa-calendar" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="table-item">
-                <div className="form-group form-icon">
-                  <div className="date-range-inner-wrapper">
-                    <input
-                      id="date-range3"
-                      name="checkOut"
-                      type="text"
-                      className="form-control"
-                      placeholder="Trả phòng"
-                      aria-label="Ngày trả phòng"
-                      required
-                    />
-                    <span className="input-group-addon" aria-hidden="true">
-                      <i className="fa fa-calendar" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="table-item">
-                <div className="form-group form-icon">
-                  <select
-                    id="home-guests"
-                    name="guests"
-                    className="wide"
-                    defaultValue="1"
-                    aria-label="Khách"
-                  >
-                    {Array.from({ length: 10 }, (_, index) => index + 1).map(
-                      (guestCount) => (
-                        <option value={guestCount} key={guestCount}>
-                          {guestCount} khách
-                        </option>
-                      ),
-                    )}
+                  <select id="home-guests" name="guests" className="wide" defaultValue="1" aria-label="Số khách" required>
+                    {Array.from({ length: 20 }, (_, index) => index + 1).map((count) => (
+                      <option value={count} key={count}>{count} khách</option>
+                    ))}
                   </select>
                 </div>
               </div>
-              <div className="table-item">
+              <div className="table-item stay-submit">
                 <div className="form-btn">
-                  <button type="submit" className="btn btn-orange">
-                    Kiểm tra đặt phòng
+                  <button
+                    type="submit"
+                    className="btn btn-orange"
+                    disabled={locationRequest.status !== "succeeded"}
+                  >
+                    Kiểm tra phòng trống
                   </button>
                 </div>
               </div>
             </Form>
+            {error && <p role="alert" className="stay-search-error">{error}</p>}
+            {locationRequest.status === "failed" && (
+              <p role="alert" className="stay-search-error">
+                Không thể tải địa điểm. <button type="button" className="btn btn-orange" onClick={() => { void dispatch(locationsThunks.list()); }}>Thử lại</button>
+              </p>
+            )}
           </div>
         </div>
       </section>

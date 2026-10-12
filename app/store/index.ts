@@ -1,11 +1,12 @@
 import { combineReducers, configureStore, type UnknownAction } from "@reduxjs/toolkit";
 import auth, { logout } from "@/features/auth/auth.slice";
 import rooms from "@/features/rooms/rooms.slice";
+import locationRooms from "@/features/rooms/location-rooms.slice";
 import bookings from "@/features/bookings/bookings.slice";
 import locations from "@/features/locations/locations.slice";
 import users from "@/features/users/users.slice";
 import reviews from "@/features/reviews/reviews.slice";
-const combinedReducer = combineReducers({ auth, rooms, bookings, locations, users, reviews });
+const combinedReducer = combineReducers({ auth, rooms, locationRooms, bookings, locations, users, reviews });
 export type RootState = ReturnType<typeof combinedReducer>;
 function rootReducer(state: RootState | undefined, action: UnknownAction) {
   if (!state || !logout.match(action)) return combinedReducer(state, action);
@@ -18,6 +19,7 @@ function rootReducer(state: RootState | undefined, action: UnknownAction) {
   return {
     ...resetState,
     rooms: state.rooms,
+    locationRooms: state.locationRooms,
     locations: state.locations,
   };
 }

@@ -7,6 +7,7 @@ import {
   HOME_PAGE,
   HOME_NAMED_PAGE,
   ROOM_DETAIL_PAGE,
+  ROOMS_BY_LOCATION_PAGE,
   RESERVATION_STEPS,
   ROOMS_PAGE,
   UI_PAGE,
@@ -19,6 +20,7 @@ export const clientRoutes = {
   rooms: {
     list: ROOMS_PAGE,
     detail: ROOM_DETAIL_PAGE,
+    byLocation: ROOMS_BY_LOCATION_PAGE,
   },
   bookings: BOOKINGS_PAGE,
   reservation: RESERVATION_STEPS,

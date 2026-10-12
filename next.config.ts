@@ -25,6 +25,13 @@ const nextConfig: NextConfig = {
         pathname: "/avatar/**",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "acihome.vn",
+        port: "",
+        pathname: "/uploads/**",
+        search: "",
+      },
     ],
   },
 };

@@ -11,7 +11,15 @@ export const roomsService = {
     options?.params && Object.keys(options.params).length ? roomEndpoints.search : roomEndpoints.base, options)),
   search: (params: PageQuery, options?: RequestOptions) => api.get<Page<Room>>(roomEndpoints.search, { ...options, params }),
 
-  byLocation: (maViTri: number, options?: RequestOptions) => api.get<Room[]>(roomEndpoints.byLocation, { ...options, params: { maViTri } }),
+  byLocation: async (maViTri: number, options?: RequestOptions) => {
+    const rooms = await api.get<Room[]>(roomEndpoints.byLocation, {
+      ...options,
+      params: { maViTri },
+    });
+    if (!Array.isArray(rooms))
+      throw { status: 502, message: "Danh sách phòng theo vị trí không đúng định dạng." };
+    return rooms;
+  },
   uploadImage: (id: number, file: File, options?: RequestOptions) => {
     const data = new FormData(); data.append("formFile", file);
     return api.post<unknown>(roomEndpoints.uploadImage, data, { ...options, params: { maPhong: id } });

@@ -29,6 +29,12 @@ Các dấu / ở bảng là tương đối so với đường dẫn tài nguyên
 - `locationsService.uploadImage`: POST /vi-tri/upload-hinh-vitri?maViTri=...
 - `usersService.uploadAvatar`: POST /users/upload-avatar.
 
+### Chọn vị trí và đặt phòng
+
+Trang chủ tải `GET /vi-tri` để hiển thị các điểm đến. Thẻ điểm đến và ô tìm kiếm dẫn tới `/rooms?maViTri=<id>`. Trang kết quả gọi `GET /vi-tri/{id}` để hiển thị tên vị trí và `GET /phong-thue/lay-phong-theo-vi-tri?maViTri=<id>` để lấy toàn bộ phòng của vị trí đó. Kết quả có sắp xếp và nút xem thêm; trạng thái rỗng hoặc lỗi API không hiển thị phòng mẫu.
+
+Nút đặt trên mỗi phòng mở `/reservation/availability?maPhong=<id>`. Sau khi khách chọn ngày và số người, bước tiếp theo lấy chi tiết phòng đó rồi kiểm tra đơn đặt trước khi xác nhận. `POST /vi-tri` trong Swagger dùng để **tạo vị trí**, không dùng cho thao tác khách chọn vị trí.
+
 Upload dùng **FormData**, tên field **formFile**. Không tự gán Content-Type multipart/form-data; browser phải thêm boundary. Proxy chuyển tiếp byte và Content-Type nguyên vẹn.
 
 Với rooms/locations/users, gọi thunk.list có query sẽ chọn endpoint phân trang; không truyền query sẽ tải danh sách thường. Với bookings, truyền `{ maNguoiDung: user.id }` để dùng endpoint theo người dùng.

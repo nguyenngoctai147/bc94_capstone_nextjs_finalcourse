@@ -69,6 +69,30 @@ test("real thunk dispatch transitions through pending, fulfillment and normalize
   await store.dispatch(roomsThunks.list());
   assert.equal(store.getState().rooms.requests.list.error?.message, "Missing token");
 });
+test("location selection fetches only its rooms and ignores stale results", async () => {
+  const room = { id: 12, maViTri: 7, tenPhong: "Phòng tại Quận 1" } as Room;
+  const calls: InternalAxiosRequestConfig[] = [];
+  http.defaults.adapter = async (config) => {
+    calls.push(config);
+    return response(config, config.params?.maViTri === 7 ? [room] : []);
+  };
+
+  const store = makeStore();
+  await store.dispatch(roomsThunks.byLocation(7));
+  assert.equal(calls[0].url, "/phong-thue/lay-phong-theo-vi-tri");
+  assert.equal(calls[0].params.maViTri, 7);
+  assert.deepEqual(store.getState().locationRooms.items.map((item) => item.id), [12]);
+  assert.equal(store.getState().rooms.items.length, 0);
+
+  store.dispatch(roomsThunks.byLocation.pending("older", 8));
+  store.dispatch(roomsThunks.byLocation.pending("newer", 9));
+  store.dispatch(roomsThunks.byLocation.fulfilled([room], "older", 8));
+  assert.equal(store.getState().locationRooms.locationId, 9);
+  assert.equal(store.getState().locationRooms.items.length, 0);
+  store.dispatch(roomsThunks.byLocation.fulfilled([], "newer", 9));
+  assert.equal(store.getState().locationRooms.status, "succeeded");
+  assert.equal(store.getState().locationRooms.items.length, 0);
+});
 test("login removes unexpected password; logout clears private state and keeps the public catalogue", async () => {
   http.defaults.adapter = async (config) => response(config, { user: { id: 1, name: "Guest", role: "USER", password: "must-not-store" }, token: "session-token" });
   const store = makeStore(); await store.dispatch(login({ email: "guest@example.com", password: "test-only" }));

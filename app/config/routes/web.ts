@@ -3,10 +3,14 @@ export const HOME_NAMED_PAGE = "/trang-chu";
 
 export const ROOMS_PAGE = "/rooms";
 export const ROOM_DETAIL_PAGE = (id: number | string) => `${ROOMS_PAGE}/${encodeURIComponent(id)}`;
+export const ROOMS_BY_LOCATION_PAGE = (id: number | string) =>
+  `${ROOMS_PAGE}?maViTri=${encodeURIComponent(id)}`;
 export const BOOKINGS_PAGE = "/bookings";
 export const RESERVATION_PAGE = "/reservation";
 export const RESERVATION_STEPS = {
   availability: `${RESERVATION_PAGE}/availability`,
+  forRoom: (id: number | string) =>
+    `${RESERVATION_PAGE}/availability?maPhong=${encodeURIComponent(id)}`,
   selectRoom: `${RESERVATION_PAGE}/room-select`,
   booking: `${RESERVATION_PAGE}/booking`,
   confirmation: `${RESERVATION_PAGE}/confirmation`,

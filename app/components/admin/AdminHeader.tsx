@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { routes } from "@/config/routes";
+import { resolveApiImageSrc } from "@/lib/api/images";
 import { useAppSelector } from "@/store/hooks";
 import { useClientReady } from "@/hooks/useClientReady";
 import { Icon } from "./AdminIcon";
@@ -12,6 +13,7 @@ export function AdminHeader({ onMenu }: { onMenu: () => void }) {
   const { user: storedUser, hydrated } = useAppSelector((state) => state.auth);
   const clientReady = useClientReady();
   const user = clientReady && hydrated ? storedUser : null;
+  const avatarSrc = resolveApiImageSrc(user?.avatar) ?? "/assets/images/review1.jpg";
   const [dropdown, setDropdown] = useState<"notification" | "profile" | null>(
     null,
   );
@@ -120,7 +122,7 @@ export function AdminHeader({ onMenu }: { onMenu: () => void }) {
             >
               <Image
                 className="wd-30 ht-30 rounded-circle"
-                src={user?.avatar || "/assets/images/review1.jpg"}
+                src={avatarSrc}
                 alt="profile"
                 width={30}
                 height={30}
@@ -134,7 +136,7 @@ export function AdminHeader({ onMenu }: { onMenu: () => void }) {
                 <div className="mb-3">
                   <Image
                     className="wd-80 ht-80 rounded-circle"
-                    src={user?.avatar || "/assets/images/review1.jpg"}
+                    src={avatarSrc}
                     alt=""
                     width={80}
                     height={80}
