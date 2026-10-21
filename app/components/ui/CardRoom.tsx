@@ -1,12 +1,89 @@
 import Link from "next/link";
 import { routes } from "@/config/routes";
+import { roomAmenities } from "@/features/rooms/room-amenities";
 import type { Room } from "@/features/rooms/rooms.types";
+import { withStaySearch, type Search } from "@/features/reservations/flow";
 import { ApiImage } from "./ApiImage";
 
-export default function CardRoom({ room }: { room: Room }) {
+type CardRoomProps = {
+  room: Room;
+  search?: Search | null;
+  variant?: "grid" | "list";
+  rating?: number;
+};
+
+function RoomRating({ rating }: { rating?: number }) {
+  const hasRating = rating !== undefined;
+  const normalizedRating = hasRating
+    ? Math.max(0, Math.min(5, Math.round(rating)))
+    : 0;
+
   return (
-    <div className="room-item">
-      <div className="room-image">
+    <div
+      className="deal-rating"
+      aria-label={
+        hasRating ? `Đánh giá ${normalizedRating} trên 5` : "Chưa có đánh giá"
+      }
+    >
+      {Array.from({ length: 5 }, (_, index) => (
+        <span
+          className={`fa fa-star${index < normalizedRating ? " checked" : ""}`}
+          aria-hidden="true"
+          key={index}
+        />
+      ))}
+    </div>
+  );
+}
+
+function RoomServices({ room, className = "" }: { room: Room; className?: string }) {
+  const featuredAmenity = roomAmenities.find(({ key }) => room[key]);
+
+  return (
+    <div className={`room-services mar-bottom-15 ${className}`}>
+      <ul>
+        <li>
+          <i className="fa fa-bed" aria-hidden="true" /> {room.phongNgu} phòng
+          ngủ
+        </li>
+        {featuredAmenity ? (
+          <li>
+            <i className={`fa ${featuredAmenity.icon}`} aria-hidden="true" />{" "}
+            {featuredAmenity.label}
+          </li>
+        ) : (
+          <li>
+            <i className="fa fa-bath" aria-hidden="true" /> {room.phongTam} phòng
+            tắm
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}
+
+export default function CardRoom({
+  room,
+  search,
+  variant = "grid",
+  rating,
+}: CardRoomProps) {
+  const isList = variant === "list";
+  const detailHref = withStaySearch(routes.rooms.detail(room.id), search);
+  const bookingHref = withStaySearch(
+    routes.reservation.forRoom(room.id),
+    search,
+  );
+
+  return (
+    <article className={isList ? "room-grid" : "room-item room-card-static"}>
+      <div
+        className={
+          isList
+            ? "grid-image location-room-image"
+            : "room-image room-card-static__image"
+        }
+      >
         <ApiImage
           src={room.hinhAnh}
           width={500}
@@ -14,33 +91,44 @@ export default function CardRoom({ room }: { room: Room }) {
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           alt={`Phòng ${room.tenPhong}`}
           fallback={
-            <div className="d-flex align-items-center justify-content-center bg-light text-muted" style={{ minHeight: 220 }}>
+            <div className="room-image-fallback room-card-static__image-fallback">
               Chưa có ảnh phòng
             </div>
           }
         />
       </div>
-      <div className="room-content">
-        <div className="room-title">
-          <h4>{room.tenPhong}</h4>
-          <p>${room.giaTien.toLocaleString("vi-VN")} / đêm</p>
+
+      <div
+        className={isList ? "grid-content" : "room-content room-card-static__content"}
+      >
+        <div className={`room-title ${isList ? "" : "room-card-static__title"}`}>
+          <h4>
+            <Link href={detailHref}>{room.tenPhong}</Link>
+          </h4>
+          <p>${room.giaTien.toLocaleString("vi-VN")}/Đêm</p>
+          <RoomRating rating={rating} />
         </div>
-        <p className="mb-2">{room.khach} khách · {room.phongNgu} phòng ngủ · {room.giuong} giường</p>
-        <div className="room-btns mar-top-20">
-          <Link
-            href={routes.rooms.detail(room.id)}
-            className="btn btn-black mar-right-10"
-          >
+
+        <RoomServices
+          room={room}
+          className={isList ? "" : "room-card-static__services"}
+        />
+
+        <div
+          className={
+            isList
+              ? "grid-btn mar-top-20"
+              : "room-btns mar-top-20 room-card-static__actions"
+          }
+        >
+          <Link href={detailHref} className="btn btn-black mar-right-10">
             Xem chi tiết
           </Link>
-          <Link
-            href={routes.reservation.forRoom(room.id)}
-            className="btn btn-orange"
-          >
-            Chọn ngày để đặt
+          <Link href={bookingHref} className="btn btn-orange">
+            Đặt ngay
           </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

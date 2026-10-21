@@ -1,5 +1,5 @@
 import { authEndpoints } from "@/config/endpoints";
-import { api } from "@/lib/api/http";
+import { api } from "@/services/api";
 import type { RequestOptions } from "@/lib/api/types";
 import type { AuthSession, LoginInput, RegisterInput } from "./auth.types";
 import type { User } from "@/features/users/users.types";

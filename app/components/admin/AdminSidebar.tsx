@@ -34,9 +34,9 @@ export function AdminSidebar({
             src="/assets/images/logo-black.png"
             alt="logo"
             className="w-75"
-            width={156}
-            height={49}
-            priority
+            width={155}
+            height={31}
+            preload
             style={{ height: "auto" }}
           />
         </Link>

@@ -3,7 +3,7 @@
 import CardDestination from "@/components/ui/CardDestination";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { locationsThunks } from "@/features/locations/locations.thunks";
+import { fetchLocations } from "@/features/locations/locations.slice";
 import {
   initializeHotuxTeamSlider,
   legacyScriptBundles,
@@ -16,11 +16,6 @@ export default function DanhSachViTri() {
   const dispatch = useAppDispatch();
   const { items, requests } = useAppSelector((state) => state.locations);
   const request = requests.list;
-
-  useEffect(() => {
-    const task = dispatch(locationsThunks.list());
-    return () => task.abort();
-  }, [dispatch]);
 
   useEffect(() => {
     if (request.status !== "succeeded" || items.length === 0) return;
@@ -67,7 +62,7 @@ export default function DanhSachViTri() {
                       type="button"
                       className="btn btn-orange"
                       onClick={() => {
-                        void dispatch(locationsThunks.list());
+                        void dispatch(fetchLocations());
                       }}
                     >
                       Thử lại

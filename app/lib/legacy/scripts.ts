@@ -38,7 +38,8 @@ export const legacyScriptBundles = {
   ],
 } as const;
 
-type LegacyScriptSource = (typeof legacyScriptBundles)[keyof typeof legacyScriptBundles][number];
+type LegacyScriptSource =
+  (typeof legacyScriptBundles)[keyof typeof legacyScriptBundles][number];
 
 type HotuxJQueryCollection = {
   length: number;
@@ -53,7 +54,12 @@ type HotuxJQueryCollection = {
 
 type HotuxJQuery = {
   (target: string | Element): HotuxJQueryCollection;
-  fn?: { slick?: unknown; dateRangePicker?: unknown; niceSelect?: unknown; modal?: unknown };
+  fn?: {
+    slick?: unknown;
+    dateRangePicker?: unknown;
+    niceSelect?: unknown;
+    modal?: unknown;
+  };
 };
 
 type HotuxWindow = Window & {
@@ -63,9 +69,11 @@ type HotuxWindow = Window & {
 };
 
 function hasHotuxPlugins(jQuery: HotuxJQuery | undefined) {
-  return typeof jQuery?.fn?.slick === "function"
-    && typeof jQuery.fn.dateRangePicker === "function"
-    && typeof jQuery.fn.niceSelect === "function";
+  return (
+    typeof jQuery?.fn?.slick === "function" &&
+    typeof jQuery.fn.dateRangePicker === "function" &&
+    typeof jQuery.fn.niceSelect === "function"
+  );
 }
 
 function getHotuxJQuery() {
@@ -89,9 +97,7 @@ type HotuxSwiperConstructor = new (
   options: Record<string, unknown>,
 ) => HotuxSwiperInstance;
 
-export function loadLegacyScripts(
-  bundle: readonly LegacyScriptSource[],
-) {
+export function loadLegacyScripts(bundle: readonly LegacyScriptSource[]) {
   return enqueueVendorScripts(async () => {
     const hotuxWindow = window as HotuxWindow;
     let jQuery = hotuxWindow.hotuxJQuery ?? getHotuxJQuery();
@@ -101,10 +107,13 @@ export function loadLegacyScripts(
           // Older sessions can retain loaded tags but lose the plugin-owning
           // jQuery after the dashboard bundle replaces the globals.
           const existing = document.querySelector(`script[src="${source}"]`);
-          const stale = !!existing && existing.getAttribute("data-hotux-load-state") !== "loading";
+          const stale =
+            !!existing &&
+            existing.getAttribute("data-hotux-load-state") !== "loading";
           await loadVendorScript(source, stale);
           jQuery = hotuxWindow.jQuery;
-          if (!jQuery?.fn) throw new Error("Không thể khởi tạo jQuery của Hotux");
+          if (!jQuery?.fn)
+            throw new Error("Không thể khởi tạo jQuery của Hotux");
           hotuxWindow.hotuxJQuery = jQuery;
         }
         hotuxWindow.jQuery = hotuxWindow.$ = jQuery;
@@ -112,11 +121,16 @@ export function loadLegacyScripts(
       }
 
       await loadVendorScript(source);
-      const needsReload = source === "/assets/legacy/js/plugin.js"
-        ? !hasHotuxPlugins(jQuery)
-        : source === "/assets/legacy/js/bootstrap.min.js" && typeof jQuery?.fn?.modal !== "function";
+      const needsReload =
+        source === "/assets/legacy/js/plugin.js"
+          ? !hasHotuxPlugins(jQuery)
+          : source === "/assets/legacy/js/bootstrap.min.js" &&
+            typeof jQuery?.fn?.modal !== "function";
       if (needsReload) await loadVendorScript(source, true);
-      if (source === "/assets/legacy/js/plugin.js" && !hasHotuxPlugins(jQuery)) {
+      if (
+        source === "/assets/legacy/js/plugin.js" &&
+        !hasHotuxPlugins(jQuery)
+      ) {
         throw new Error("Không thể khởi tạo bộ plugin Hotux sau khi tải lại");
       }
     }
@@ -188,14 +202,20 @@ export function initializeHotuxTeamSlider(root: ParentNode = document) {
  */
 export function initializeHotuxHome(root: ParentNode = document) {
   const $ = getHotuxJQuery();
-  const Swiper = (window as typeof window & { Swiper?: HotuxSwiperConstructor }).Swiper;
+  const Swiper = (window as typeof window & { Swiper?: HotuxSwiperConstructor })
+    .Swiper;
   if (!$ || !Swiper) return () => undefined;
 
   const swiperElement = root.querySelector<HTMLElement>(".swiper-container");
-  const swiper = swiperElement ? new Swiper(swiperElement, homeSwiperOptions) : undefined;
+  const swiper = swiperElement
+    ? new Swiper(swiperElement, homeSwiperOptions)
+    : undefined;
 
   const galleryElement = root.querySelector<HTMLElement>(".gallery-slider");
-  if (galleryElement && !galleryElement.classList.contains("slick-initialized")) {
+  if (
+    galleryElement &&
+    !galleryElement.classList.contains("slick-initialized")
+  ) {
     $(galleryElement).slick({
       infinite: true,
       slidesToShow: 6,
@@ -253,7 +273,8 @@ function getDateRangePicker(element: HotuxJQueryCollection) {
 
 function destroySliders(jQuery: HotuxJQuery, sliders: HTMLElement[]) {
   for (const slider of sliders) {
-    if (slider.classList.contains("slick-initialized")) jQuery(slider).slick("unslick");
+    if (slider.classList.contains("slick-initialized"))
+      jQuery(slider).slick("unslick");
   }
 }
 
@@ -264,15 +285,23 @@ export function initializeHotuxAbout(root: ParentNode = document) {
   const sliders: HTMLElement[] = [];
   const definitions = [
     [".team-slider", { ...teamSliderOptions, arrows: false, dots: false }],
-    [".review-slider", {
-      infinite: true, slidesToShow: 2, slidesToScroll: 1,
-      arrows: false, dots: true, autoplay: true,
-      responsive: [{ breakpoint: 1000, settings: { slidesToShow: 1 } }],
-    }],
+    [
+      ".review-slider",
+      {
+        infinite: true,
+        slidesToShow: 2,
+        slidesToScroll: 1,
+        arrows: false,
+        dots: true,
+        autoplay: true,
+        responsive: [{ breakpoint: 1000, settings: { slidesToShow: 1 } }],
+      },
+    ],
   ] as const;
   for (const [selector, options] of definitions) {
     root.querySelectorAll<HTMLElement>(selector).forEach((slider) => {
-      if (!slider.classList.contains("slick-initialized")) $(slider).slick(options);
+      if (!slider.classList.contains("slick-initialized"))
+        $(slider).slick(options);
       sliders.push(slider);
     });
   }
@@ -326,9 +355,13 @@ export function initializeHotuxRoomDetail(root: ParentNode = document) {
   if (!$) return () => undefined;
   const sliders: HTMLElement[] = [];
 
-  const initializeSlick = (selector: string, options: Record<string, unknown>) => {
+  const initializeSlick = (
+    selector: string,
+    options: Record<string, unknown>,
+  ) => {
     root.querySelectorAll<HTMLElement>(selector).forEach((slider) => {
-      if (!slider.classList.contains("slick-initialized")) $(slider).slick(options);
+      if (!slider.classList.contains("slick-initialized"))
+        $(slider).slick(options);
       sliders.push(slider);
     });
   };
@@ -363,8 +396,11 @@ export function initializeHotuxRoomDetail(root: ParentNode = document) {
     ],
   });
 
-  root.querySelectorAll<HTMLSelectElement>(".check-in select.wide").forEach((select) => {
-    if (!select.nextElementSibling?.classList.contains("nice-select")) $(select).niceSelect();
-  });
+  root
+    .querySelectorAll<HTMLSelectElement>(".check-in select.wide")
+    .forEach((select) => {
+      if (!select.nextElementSibling?.classList.contains("nice-select"))
+        $(select).niceSelect();
+    });
   return () => destroySliders($, sliders);
 }

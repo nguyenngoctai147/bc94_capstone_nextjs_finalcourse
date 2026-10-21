@@ -1,4 +1,4 @@
-# Stay — Khung Next.js cho đặt phòng & quản lý Airbnb
+# Hotux — Đặt phòng & quản lý lưu trú
 
 Source dùng Next.js **16.3.5 App Router**, React 19, TypeScript strict, Bootstrap **5.2.3** (phiên bản có sẵn trong project), Redux Toolkit, React Redux và Axios. Mục tiêu là khung để ghép giao diện HTML/CSS/JS của bạn, chưa phải sản phẩm hoàn chỉnh.
 
@@ -44,8 +44,9 @@ Thiếu cấu hình không làm build thất bại. Khi gọi API, giao diện h
 | `/account` | PageTemplate, thông tin tài khoản |
 | `/blog`, `/gioi-thieu`, `/lien-he`, `/ui` | PageTemplate cho các trang nội dung |
 | `/login`, `/register` | AuthTemplate, form có validation |
-| `/admin` | AdminTemplate, trang điều hướng mẫu công khai |
-| `/admin/rooms`, `/admin/bookings`, `/admin/locations`, `/admin/users`, `/admin/reviews` | Khung danh sách, yêu cầu vai trò ADMIN ở giao diện |
+| `/admin` | AdminTemplate, tổng quan từ dữ liệu API, yêu cầu ADMIN |
+| `/admin/rooms`, `/admin/bookings`, `/admin/locations`, `/admin/users`, `/admin/reviews` | Danh sách API, tìm trong danh sách, phân trang và làm mới; yêu cầu ADMIN |
+| `/admin/slider`, `/admin/bookings/add`, `/admin/users/detail` | Trang minh họa có thông báo rõ; chưa lưu lên backend |
 | `/ui` | Xem và thử component Bootstrap, form mẫu không gửi API |
 | `/api/backend/[...path]` | Proxy server tới backend CyberSoft |
 
@@ -75,24 +76,24 @@ app/
   components/
     ui/                      # Button, Input, Select, Textarea, Card...
     auth/                    # RequireAuth
-    navigation/              # NavLinks, AccountMenu
+    navigation/              # HotuxHeader, HotuxFooter, menu tài khoản
     admin/                   # Khung bảng danh sách
     examples/                # Bộ component minh họa
   config/
     routes/                  # web.ts, webSeo.ts, domain routes, navigation
     endpoints/               # core.api.ts, next.api.ts, apiNotToken.ts, tài nguyên
-  templates/                 # AdminTemplate, AuthTemplate, ClientTemplate
+  templates/                 # AdminTemplate, AuthTemplate, ClientTemplate, PageTemplate
   features/
     <feature>/
       *.types.ts             # Model và DTO
       *.service.ts           # Gọi endpoint + Axios
-      *.thunks.ts            # Async actions
-      *.slice.ts             # State và reducer
+      *.slice.ts             # createAsyncThunk + createSlice + reducer
       components/            # UI riêng theo nghiệp vụ
   lib/
-    api/                     # HTTP, proxy, policy, response, lỗi, CRUD service
+    api/                     # proxy, policy, response, lỗi, CRUD service
     validation/              # Hàm validation thuần
-  store/                     # makeStore, typed hooks, CRUD factory, thunk factory
+  services/api.ts            # Axios dùng chung
+  store/                     # makeStore, typed hooks, request-state helpers
   providers/                 # StoreProvider theo từng instance, không singleton
   hooks/                     # useForm
   styles/                    # Hướng dẫn CSS
@@ -107,7 +108,11 @@ docs/
 tests/                       # Test validation, Axios, thunk/slice, proxy
 ```
 
-Giữ `app/` ở thư mục gốc để tiếp nối source khởi tạo. Alias `@/*` trỏ tới gốc project. Các trang chỉ lắp ráp component; logic nghiệp vụ nằm trong `features/`.
+Giữ `app/` ở thư mục gốc để tiếp nối source khởi tạo. Alias `@/*` ưu tiên `app/*`, sau đó mới đến gốc project. Các trang chỉ lắp ráp component; logic nghiệp vụ nằm trong `features/`. `PageTemplate` dùng `ClientTemplate` để website chỉ có một header, một main và một footer.
+
+`HomePage` là nội dung dùng chung cho `/` và `/trang-chu`, đồng thời tải danh sách phòng/vị trí một lần cho các section con. `/rooms` dùng cùng `RoomList` cho toàn bộ danh mục và truy vấn theo vị trí; bộ lọc, sắp xếp và phân trang áp dụng trên danh sách API đã tải. Không dùng phòng mẫu khi API lỗi hoặc chưa có dữ liệu.
+
+Source áp dụng cách trình bày đã học trong React: thunk và slice cùng module, component cha tải dữ liệu, component con nhận props, state UI dùng useState và form có các hàm handleChange/handleBlur/submit riêng. Xem [hướng dẫn study và thứ tự đọc code](docs/study-architecture.md) để đối chiếu với ListMovie, Movie, FormValidation, api.js và store/index.js.
 
 ## Luồng dữ liệu
 
@@ -145,10 +150,10 @@ Form đăng ký kiểm tra xác nhận mật khẩu. Form đặt phòng kiểm t
 - Có service/thunk/slice CRUD cho phòng, đặt phòng, vị trí, người dùng, đánh giá; có service phân trang, tìm kiếm và upload theo Swagger.
 - Axios hỗ trợ đủ **GET, POST, PUT, PATCH, DELETE**. **Swagger hiện không có PATCH**: service nghiệp vụ trả lỗi 405 rõ ràng; không tự thay PATCH bằng PUT. Đánh giá cũng không có GET chi tiết theo id. Xem `docs/api.md`.
 - Trang quản trị đang có shell và bảng đọc dữ liệu. Bạn ghép form thêm/sửa/xóa từ giao diện tĩnh rồi nối vào thunk tương ứng.
-- Login lưu user/token **trong bộ nhớ Redux**; reload trang sẽ cần đăng nhập lại. Chưa có refresh token, cookie session hoặc khôi phục phiên. Redux DevTools tắt mặc định để không ghi credential trong action metadata.
+- Login lưu user/token đã whitelist vào **Redux và localStorage**; provider khôi phục phiên sau hydration và đồng bộ giữa các tab. Chưa có refresh token hoặc cookie session. Redux DevTools tắt mặc định để không ghi credential trong action metadata. Xem `docs/auth-session.md`.
 - `RequireAuth` chỉ là guard giao diện. Backend phải xác thực và phân quyền trên từng endpoint. Proxy chỉ giới hạn path/method, giữ tokenCybersoft ở server và chuyển tiếp header `token`; nó chưa phải hệ thống session/authorization production. Đặc biệt Swagger có các endpoint users/dat-phong không khai báo user token; cần thống nhất bảo vệ backend trước triển khai thật.
 - Swagger mô tả request nhưng không có response schema đầy đủ. Model phản hồi `content`, `user/token`, phân trang là adapter cần xác minh bằng token thật. Snapshot giúp đối chiếu khi backend thay đổi.
-- Chưa ghép bộ HTML/CSS/images riêng của bạn vì chúng chưa có trong repository. Các trang hiện tại là giao diện mẫu có thể thay thế.
+- Giao diện Hotux dùng asset có sẵn trong `public/assets`. Thông tin liên hệ mẫu được tập trung tại `app/config/site.ts`; thay bằng thông tin doanh nghiệp trước khi xuất bản.
 - Chưa gọi thao tác ghi vào backend thật. Test API dùng adapter/backend giả lập cục bộ.
 
 ## Kiểm tra
@@ -163,4 +168,4 @@ npm start
 
 Test bao phủ 5 HTTP method, xóa users bằng query, tìm kiếm có phân trang, multipart upload, response 204, lỗi/thiếu cấu hình, giới hạn proxy, validation ngày/sức chứa, store độc lập, stale request, hủy request và logout.
 
-Đọc tiếp: [Kiến trúc & ghép giao diện](docs/architecture.md) · [API & Swagger](docs/api.md).
+Đọc tiếp: [Kiến trúc & ghép giao diện](docs/architecture.md) · [API & Swagger](docs/api.md) · [Rà soát source và giao diện](docs/source-review.md).

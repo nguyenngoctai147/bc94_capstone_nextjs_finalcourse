@@ -1,27 +1,40 @@
 "use client";
 
+import { useMemo } from "react";
 import CardRoom from "@/components/ui/CardRoom";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { roomsThunks } from "@/features/rooms/rooms.thunks";
+import { fetchRooms } from "@/features/rooms/rooms.slice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useEffect } from "react";
 
 const HOME_ROOM_LIMIT = 6;
 
 export default function DatPhong() {
   const dispatch = useAppDispatch();
   const { items, requests } = useAppSelector((state) => state.rooms);
+  const reviews = useAppSelector((state) => state.reviews.items);
   const request = requests.list;
   const rooms = items.slice(0, HOME_ROOM_LIMIT);
+  const ratingsByRoom = useMemo(() => {
+    const totals = reviews.reduce((result, review) => {
+      const current = result.get(review.maPhong) ?? { total: 0, count: 0 };
+      result.set(review.maPhong, {
+        total: current.total + review.saoBinhLuan,
+        count: current.count + 1,
+      });
+      return result;
+    }, new Map<number, { total: number; count: number }>());
 
-  useEffect(() => {
-    const task = dispatch(roomsThunks.list());
-    return () => task.abort();
-  }, [dispatch]);
+    return new Map(
+      Array.from(totals, ([roomId, value]) => [
+        roomId,
+        value.total / value.count,
+      ]),
+    );
+  }, [reviews]);
 
   return (
-    <section className="rooms rooms-style1 ds-section">
+    <section className="rooms ds-section">
       <div className="container">
         <div className="section-title">
           <h2>
@@ -30,13 +43,13 @@ export default function DatPhong() {
           <p>Những chỗ nghỉ nổi bật được đề xuất cho quý khách</p>
         </div>
         <div className="room-outer">
-          <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-layout">
+          <div className="row">
             {request.status === "idle" || request.status === "loading" ? (
-              <div className="tw-col-span-full tw-text-center tw-py-8">
+              <div className="col-12 text-center pad-top-30 pad-bottom-30">
                 <LoadingSpinner label="Đang tải danh sách phòng" />
               </div>
             ) : request.status === "failed" ? (
-              <div className="tw-col-span-full">
+              <div className="col-12">
                 <EmptyState
                   title="Không thể tải phòng"
                   description={request.error?.message}
@@ -45,7 +58,7 @@ export default function DatPhong() {
                       type="button"
                       className="btn btn-orange"
                       onClick={() => {
-                        void dispatch(roomsThunks.list());
+                        void dispatch(fetchRooms());
                       }}
                     >
                       Thử lại
@@ -54,9 +67,16 @@ export default function DatPhong() {
                 />
               </div>
             ) : rooms.length > 0 ? (
-              rooms.map((room) => <CardRoom key={room.id} room={room} />)
+              rooms.map((room) => (
+                <div
+                  className="col-lg-4 col-md-6 mar-bottom-30 d-flex"
+                  key={room.id}
+                >
+                  <CardRoom room={room} rating={ratingsByRoom.get(room.id)} />
+                </div>
+              ))
             ) : (
-              <div className="tw-col-span-full">
+              <div className="col-12">
                 <EmptyState
                   title="Chưa có phòng"
                   description="Danh sách phòng hiện chưa có dữ liệu."

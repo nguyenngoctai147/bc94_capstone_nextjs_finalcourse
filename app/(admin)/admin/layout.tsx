@@ -1,5 +1,5 @@
+/* eslint-disable @next/next/no-page-custom-font, @next/next/no-css-tags -- Hotux dashboard CSS is served from public so its relative font URLs remain intact. */
 import { AdminTemplate } from "@/templates/AdminTemplate";
-import { AdminVendorScripts } from "@/components/admin/AdminVendorScripts";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +14,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <link rel="stylesheet" href="/assets/dashboard/vendors/core/core.css" />
       <link rel="stylesheet" href="/assets/dashboard/fonts/feather-font/css/iconfont.css" />
       <link rel="stylesheet" href="/assets/dashboard/css/style.css" />
-      <AdminVendorScripts />
       <RequireAuth role="ADMIN">
         <AdminTemplate>{children}</AdminTemplate>
       </RequireAuth>

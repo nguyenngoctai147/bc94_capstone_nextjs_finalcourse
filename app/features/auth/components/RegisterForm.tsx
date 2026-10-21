@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { Alert, Button, Input, Select } from "@/components/ui";
 import { useForm } from "@/hooks/useForm";
@@ -12,7 +13,8 @@ import {
 } from "@/lib/validation/rules";
 import { routes } from "@/config/routes";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { register } from "../auth.thunks";
+import { register } from "../auth.slice";
+
 export function RegisterForm() {
   const dispatch = useAppDispatch();
   const request = useAppSelector((state) => state.auth.register);
@@ -48,6 +50,23 @@ export function RegisterForm() {
       ],
     },
   );
+
+  const handleRegister = form.handleSubmit(async (values) => {
+    const { name, email, password, phone, birthday, gender } = values;
+    const result = await dispatch(
+      register({
+        name,
+        email,
+        password,
+        phone,
+        birthday,
+        gender: gender === "true",
+      }),
+    );
+
+    if (register.fulfilled.match(result)) form.reset();
+  });
+
   return (
     <>
       <h1 className="h3 mb-4">Tạo tài khoản</h1>
@@ -58,49 +77,49 @@ export function RegisterForm() {
           <Link href={routes.auth.login}>đăng nhập</Link>.
         </Alert>
       )}
-      <form
-        noValidate
-        onSubmit={form.handleSubmit(async (values) => {
-          const { name, email, password, phone, birthday, gender } = values;
-          const result = await dispatch(
-            register({
-              name,
-              email,
-              password,
-              phone,
-              birthday,
-              gender: gender === "true",
-            }),
-          );
-          if (register.fulfilled.match(result)) form.reset();
-        })}
-      >
+      <form noValidate onSubmit={handleRegister}>
         <Input
           label="Họ tên"
           autoComplete="name"
           required
-          {...form.field("name")}
+          name="name"
+          value={form.values.name}
+          error={form.errors.name}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Input
           label="Email"
           type="email"
           autoComplete="email"
           required
-          {...form.field("email")}
+          name="email"
+          value={form.values.email}
+          error={form.errors.email}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Input
           label="Số điện thoại"
           type="tel"
           autoComplete="tel"
           required
-          {...form.field("phone")}
+          name="phone"
+          value={form.values.phone}
+          error={form.errors.phone}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Input
           label="Ngày sinh"
           type="date"
           autoComplete="bday"
           required
-          {...form.field("birthday")}
+          name="birthday"
+          value={form.values.birthday}
+          error={form.errors.birthday}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Select
           label="Giới tính"
@@ -108,7 +127,11 @@ export function RegisterForm() {
             { value: "true", label: "Nam" },
             { value: "false", label: "Nữ" },
           ]}
-          {...form.field("gender")}
+          name="gender"
+          value={form.values.gender}
+          error={form.errors.gender}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Input
           label="Mật khẩu"
@@ -116,14 +139,22 @@ export function RegisterForm() {
           autoComplete="new-password"
           required
           hint="Tối thiểu 8 ký tự theo quy tắc form mẫu."
-          {...form.field("password")}
+          name="password"
+          value={form.values.password}
+          error={form.errors.password}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Input
           label="Xác nhận mật khẩu"
           type="password"
           autoComplete="new-password"
           required
-          {...form.field("confirmPassword")}
+          name="confirmPassword"
+          value={form.values.confirmPassword}
+          error={form.errors.confirmPassword}
+          onChange={form.handleChange}
+          onBlur={form.handleBlur}
         />
         <Button type="submit" loading={form.submitting} className="w-100">
           Đăng ký

@@ -2,7 +2,7 @@ import { PageTemplate } from "@/templates/PageTemplate";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PageTemplate title="Contact Us" breadcrumb="Contact Us">
+    <PageTemplate title="Liên hệ" content="bare">
       {children}
     </PageTemplate>
   );

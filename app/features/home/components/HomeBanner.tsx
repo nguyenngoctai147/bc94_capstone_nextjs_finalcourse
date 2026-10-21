@@ -5,7 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import Form from "next/form";
 import { routes } from "@/config/routes";
-import { locationsThunks } from "@/features/locations/locations.thunks";
+import { fetchLocations } from "@/features/locations/locations.slice";
 import { StayDateFields } from "@/features/reservations/components/StayDateFields";
 import { validSearch } from "@/features/reservations/flow";
 import {
@@ -36,11 +36,6 @@ export function HomeBanner() {
   }
 
   useEffect(() => {
-    const task = dispatch(locationsThunks.list());
-    return () => task.abort();
-  }, [dispatch]);
-
-  useEffect(() => {
     let cancelled = false;
     let cleanup: () => void = () => undefined;
 
@@ -64,96 +59,24 @@ export function HomeBanner() {
         <div className="slider">
           <div className="swiper-container">
             <div className="swiper-wrapper">
-              <div
-                className="swiper-slide"
-                style={{
-                  backgroundImage: "url('/assets/images/slider/slider4.jpg')",
-                }}
-              >
-                <div className="swiper-content">
-                  <div className="slider-logo">
-                    <img src="/assets/images/icons/bed-logo.png" alt="Image" />
+              {["slider4.jpg", "slider2.jpg", "slider3.jpg"].map((image, index) => {
+                const Heading = index === 0 ? "h1" : "h2";
+                return (
+                  <div className="swiper-slide" key={image} style={{ backgroundImage: `url('/assets/images/slider/${image}')` }}>
+                    <div className="swiper-content">
+                      <div className="slider-logo"><img src="/assets/images/icons/bed-logo.png" alt="" /></div>
+                      <p className="home-banner-eyebrow" data-animation="animated fadeInUp">Tận hưởng từng chuyến đi</p>
+                      <Heading className="home-banner-title" data-animation="animated fadeInUp">Hotel <span>Hotux</span></Heading>
+                      <Link href={routes.rooms.list} data-animation="animated fadeInUp" className="slider-btn btn-or mar-right-10">
+                        <i className="fa fa-book" aria-hidden="true" /> Khám phá chỗ nghỉ
+                      </Link>
+                      <Link href={routes.reservation.availability} data-animation="animated fadeInUp" className="slider-btn btn-wt">
+                        <i className="fa fa-book" aria-hidden="true" /> Đặt phòng ngay
+                      </Link>
+                    </div>
                   </div>
-                  <h3 data-animation="animated fadeInUp">The lap of Luxury</h3>
-                  <h1 data-animation="animated fadeInUp">
-                    Hotel <span>Hotux</span>
-                  </h1>
-                  <Link
-                    href={routes.rooms.list}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-or mar-right-10"
-                  >
-                    <i className="fa fa-book" /> Explore Our Rooms
-                  </Link>
-                  <Link
-                    href={routes.reservation.availability}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-wt"
-                  >
-                    <i className="fa fa-book" /> Book A Room Now
-                  </Link>
-                </div>
-              </div>
-              <div
-                className="swiper-slide"
-                style={{
-                  backgroundImage: "url('/assets/images/slider/slider2.jpg')",
-                }}
-              >
-                <div className="swiper-content">
-                  <div className="slider-logo">
-                    <img src="/assets/images/icons/bed-logo.png" alt="Image" />
-                  </div>
-                  <h3 data-animation="animated fadeInUp">The lap of Luxury</h3>
-                  <h1 data-animation="animated fadeInUp">
-                    Hotel <span>Hotux</span>
-                  </h1>
-                  <Link
-                    href={routes.rooms.list}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-or mar-right-10"
-                  >
-                    <i className="fa fa-book" /> Explore Our Rooms
-                  </Link>
-                  <Link
-                    href={routes.reservation.availability}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-wt"
-                  >
-                    <i className="fa fa-book" /> Book A Room Now
-                  </Link>
-                </div>
-              </div>
-              <div
-                className="swiper-slide"
-                style={{
-                  backgroundImage: "url('/assets/images/slider/slider3.jpg')",
-                }}
-              >
-                <div className="swiper-content">
-                  <div className="slider-logo">
-                    <img src="/assets/images/icons/bed-logo.png" alt="Image" />
-                  </div>
-                  <h3 data-animation="animated fadeInUp">The lap of Luxury</h3>
-                  <h1 data-animation="animated fadeInUp">
-                    Hotel <span>Hotux</span>
-                  </h1>
-                  <Link
-                    href={routes.rooms.list}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-or mar-right-10"
-                  >
-                    <i className="fa fa-book" /> Explore Our Rooms
-                  </Link>
-                  <Link
-                    href={routes.reservation.availability}
-                    data-animation="animated fadeInUp"
-                    className="slider-btn btn-wt"
-                  >
-                    <i className="fa fa-book" /> Book A Room Now
-                  </Link>
-                </div>
-              </div>
+                );
+              })}
             </div>
             <div className="swiper-pagination" />
           </div>
@@ -220,7 +143,7 @@ export function HomeBanner() {
             {error && <p role="alert" className="stay-search-error">{error}</p>}
             {locationRequest.status === "failed" && (
               <p role="alert" className="stay-search-error">
-                Không thể tải địa điểm. <button type="button" className="btn btn-orange" onClick={() => { void dispatch(locationsThunks.list()); }}>Thử lại</button>
+                Không thể tải địa điểm. <button type="button" className="btn btn-orange" onClick={() => { void dispatch(fetchLocations()); }}>Thử lại</button>
               </p>
             )}
           </div>

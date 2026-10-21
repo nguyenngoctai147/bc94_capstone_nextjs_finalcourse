@@ -1,10 +1,5 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { TestimonialManagementPage } from "@/features/reviews/components/TestimonialManagementPage";
+import { ResourcePanel } from "@/components/admin/ResourcePanel";
 
 export default function Page() {
-  return (
-    <RequireAuth role="ADMIN">
-      <TestimonialManagementPage />
-    </RequireAuth>
-  );
+  return <ResourcePanel resource="reviews" />;
 }

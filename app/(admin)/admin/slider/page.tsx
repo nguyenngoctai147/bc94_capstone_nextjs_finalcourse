@@ -1,6 +1,6 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
+import { Alert } from "@/components/ui";
 import { SliderManagementPage } from "@/features/sliders/components/SliderManagementPage";
 
 export default function Page() {
-  return <RequireAuth role="ADMIN"><SliderManagementPage /></RequireAuth>;
+  return <><Alert variant="info">Trang mẫu banner. Thay đổi chỉ áp dụng trong phiên xem hiện tại.</Alert><SliderManagementPage /></>;
 }

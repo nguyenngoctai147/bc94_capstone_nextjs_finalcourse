@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
 
 export function AdminContent({ children }: { children: ReactNode }) {
-  return <div className="page-content">{children}</div>;
+  return <main className="page-content" id="admin-main-content">{children}</main>;
 }

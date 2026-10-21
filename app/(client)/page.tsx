@@ -1,10 +1,10 @@
 import { ClientTemplate } from "@/templates/ClientTemplate";
-import TrangChuPage from "./trang-chu/page";
+import { HomePage as HomeContent } from "@/features/home/components/HomePage";
 
 export default function HomePage() {
   return (
     <ClientTemplate>
-      <TrangChuPage />
+      <HomeContent />
     </ClientTemplate>
   );
 }

@@ -1,6 +1,6 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { CompanyProfilePage } from "@/features/users/components/CompanyProfilePage";
+import { redirect } from "next/navigation";
+import { routes } from "@/config/routes";
 
 export default function Page() {
-  return <RequireAuth role="ADMIN"><CompanyProfilePage /></RequireAuth>;
+  redirect(routes.admin.profile);
 }

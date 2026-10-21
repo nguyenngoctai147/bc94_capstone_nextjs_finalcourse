@@ -6,7 +6,7 @@ export default function ReservationLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PageTemplate title="Reservation" breadcrumb="Reservation">
+    <PageTemplate title="Đặt phòng" content="bare">
       {children}
     </PageTemplate>
   );

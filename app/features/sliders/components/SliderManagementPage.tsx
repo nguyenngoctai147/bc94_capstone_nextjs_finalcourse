@@ -41,7 +41,7 @@ function SliderModal({ id, title, slider, open, onClose, children }: { id: strin
         <div className="modal-content">
           {title && <div className="modal-header text-center"><h5 className="modal-title" id="exampleModalLabel">{title}</h5></div>}
           <div className="modal-body">{slider ? <>
-            <div className="sliderimages mb-3"><Image src={`/assets/images/${slider.image}`} alt="sliderimages" width={900} height={480} /></div>
+            <div className="sliderimages mb-3"><Image className="admin-slider-preview" src={`/assets/images/${slider.image}`} alt="sliderimages" width={900} height={600} sizes="(max-width: 767px) 100vw, 720px" /></div>
             <h5 className="mb-1">{slider.subtitle}</h5>
             <h2 className="mb-1">{slider.title}</h2>
             <p className="mb-0">{slider.description}</p>
@@ -101,7 +101,7 @@ export function SliderManagementPage() {
           <table id="dataTableExample" className="table">
             <thead><tr><th>ID</th><th>Start date</th><th>Image</th><th>Title</th><th>Subtitle</th><th className="text-center">Published</th><th className="text-center">Action</th></tr></thead>
             <tbody>{filteredSliders.map((slider, index) => <tr key={`${slider.id}-${index}`}>
-              <td>{slider.id}</td><td>{slider.startDate}</td><td className="w-25"><Image src={`/assets/images/${slider.image}`} alt="image" width={900} height={480} /></td><td>{slider.title}</td><td>{slider.subtitle}</td>
+              <td>{slider.id}</td><td>{slider.startDate}</td><td className="w-25"><Image className="admin-slider-thumbnail" src={`/assets/images/${slider.image}`} alt="image" width={225} height={150} sizes="225px" /></td><td>{slider.title}</td><td>{slider.subtitle}</td>
               <td className="text-center"><span className="form-check form-switch"><input type="checkbox" className="form-check-input" id={`formSwitch${index + 1}`} /></span></td>
               <td className="text-center"><ul className="d-flex list-unstyled mb-0 justify-content-center">
                 <li className="me-2"><a href="#viewslider" aria-label={`View ${slider.title}`} onClick={(event) => { preventNavigation(event); openView(slider); }}><Icon className="link-icon" name="eye" /></a></li>

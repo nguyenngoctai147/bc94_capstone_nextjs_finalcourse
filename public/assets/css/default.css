@@ -856,7 +856,7 @@ section.icon-left:after {
   height: 500px;
   width: 100%;
   content: "";
-  background: url("../images/bg-icon-1.png") no-repeat;
+  background: none;
   background-position: center;
   background-size: contain;
   top: 0;
@@ -870,7 +870,7 @@ section.icon-right:after {
   height: 400px;
   width: 80%;
   content: "";
-  background: url("../images/bg-icon-2.png") no-repeat;
+  background: none;
   background-position: center;
   background-size: contain;
   top: 0;

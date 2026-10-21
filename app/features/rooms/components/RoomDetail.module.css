@@ -1,0 +1,295 @@
+.detailLayout {
+  align-items: flex-start;
+}
+
+.mainImage {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #f4f5f6;
+}
+
+.mainImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+.imageFallback {
+  display: grid;
+  min-height: 430px;
+  place-items: center;
+  color: #6c757d;
+  background: #f4f5f6;
+}
+
+.thumbnailList {
+  margin-top: 10px;
+}
+
+.thumbnail {
+  width: 128px;
+  padding: 4px;
+  border: 2px solid #fe4e37;
+  background: #fff;
+}
+
+.thumbnail img {
+  display: block;
+  width: 100%;
+  height: 76px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.ratingLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingLine i,
+.reviewRating i {
+  color: #f6a800;
+}
+
+.tabList {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  height: 100%;
+  border: 0;
+}
+
+.detailBox {
+  min-height: 300px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 28px 0;
+}
+
+.facts p {
+  margin: 0;
+  padding: 14px;
+  background: #f8f9fa;
+}
+
+.amenities {
+  margin-top: 24px;
+}
+
+.placeImage {
+  min-height: 185px;
+  background: #f4f5f6;
+}
+
+.placeImage img {
+  width: 100%;
+  height: 185px;
+  object-fit: cover;
+}
+
+.placeTitle {
+  margin: 0;
+}
+
+.placeTitle a {
+  color: inherit;
+}
+
+.locationGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.locationItem {
+  position: relative;
+  min-height: 74px;
+  padding: 16px 14px 16px 54px;
+  background: #f8f9fa;
+}
+
+.locationItem i {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #fe4e37;
+}
+
+.locationItem p {
+  margin: 0;
+}
+
+.locationVisual {
+  position: relative;
+  min-height: 300px;
+  margin-top: 24px;
+  overflow: hidden;
+  background: #eef0f2;
+}
+
+.locationVisual img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.locationCaption {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  margin: 0;
+  padding: 12px 16px;
+  color: #fff;
+  background: rgba(25, 31, 36, .82);
+}
+
+.reviewAvatar,
+.reviewAvatarFallback {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+}
+
+.reviewAvatar {
+  object-fit: cover;
+}
+
+.reviewAvatarFallback {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #fe4e37;
+}
+
+.reviewDate {
+  color: #757575;
+}
+
+.reviewForm {
+  padding-top: 28px;
+  border-top: 1px solid #ececec;
+}
+
+.reviewForm textarea {
+  width: 100%;
+}
+
+.sidebar {
+  top: 96px !important;
+}
+
+.reservationForm {
+  padding: 30px;
+}
+
+.priceIcon {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 12px;
+  object-fit: contain;
+}
+
+.sidebarFormContent {
+  display: block !important;
+}
+
+.sidebarFormContent :global(.table-item) {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.sidebarRoomImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+}
+
+.relatedCard {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.relatedCard :global(.room-image) {
+  width: 100%;
+  height: 230px;
+  flex: 0 0 230px;
+}
+
+.relatedImage {
+  display: block;
+  width: 100% !important;
+  height: 230px !important;
+  aspect-ratio: auto !important;
+  object-fit: cover;
+  object-position: center;
+  transform: none !important;
+}
+
+.relatedContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.relatedButtons {
+  margin-top: auto;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: static !important;
+  }
+
+  .locationGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 639px) {
+  .imageFallback { min-height: 240px; }
+
+  .titleRow {
+    flex-direction: column;
+  }
+
+  .facts {
+    grid-template-columns: 1fr;
+  }
+
+  .tabList li,
+  .tabButton {
+    width: 100%;
+  }
+}

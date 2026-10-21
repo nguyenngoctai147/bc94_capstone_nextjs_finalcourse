@@ -1,32 +1,31 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { HotuxFooter, HotuxHeader } from "@/components/navigation";
+import { ClientTemplate } from "./ClientTemplate";
 import { routes } from "@/config/routes";
 
 type PageTemplateProps = {
   children: ReactNode;
-  title?: string;
+  title: string;
   breadcrumb?: string;
   content?: "contained" | "bare";
 };
 
 export function PageTemplate({
   children,
-  title = "Reservation",
+  title,
   breadcrumb = title,
   content = "contained",
 }: PageTemplateProps) {
   return (
-    <div className="ds-site">
-      <HotuxHeader />
+    <ClientTemplate>
       <section className="breadcrumb-outer">
         <div className="container">
           <div className="breadcrumb-content">
-            <h2>{title}</h2>
-            <nav aria-label="breadcrumb">
+            <h1>{title}</h1>
+            <nav aria-label="Đường dẫn trang">
               <ul className="breadcrumb">
                 <li className="breadcrumb-item">
-                  <Link href={routes.home}>Home</Link>
+                  <Link href={routes.home}>Trang chủ</Link>
                 </li>
                 <li className="breadcrumb-item active" aria-current="page">
                   {breadcrumb}
@@ -41,10 +40,6 @@ export function PageTemplate({
           <div className="container">{children}</div>
         </section>
       ) : children}
-      <HotuxFooter />
-      <div id="back-to-top">
-        <a href="#"></a>
-      </div>
-    </div>
+    </ClientTemplate>
   );
 }

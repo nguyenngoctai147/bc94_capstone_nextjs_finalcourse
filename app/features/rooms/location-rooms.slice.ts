@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { ApiError } from "@/lib/api/types";
 import type { Room } from "./rooms.types";
-import { roomsThunks } from "./rooms.thunks";
+import { fetchRoomsByLocation } from "./rooms.slice";
 
 type LocationRoomsState = {
   locationId: number | null;
@@ -23,21 +23,21 @@ const locationRoomsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(roomsThunks.byLocation.pending, (state, action) => {
+    builder.addCase(fetchRoomsByLocation.pending, (state, action) => {
       state.locationId = action.meta.arg;
       state.items = [];
       state.status = "loading";
       state.error = null;
       state.requestId = action.meta.requestId;
     });
-    builder.addCase(roomsThunks.byLocation.fulfilled, (state, action) => {
+    builder.addCase(fetchRoomsByLocation.fulfilled, (state, action) => {
       if (state.requestId !== action.meta.requestId) return;
       state.items = action.payload;
       state.status = "succeeded";
       state.error = null;
       state.requestId = undefined;
     });
-    builder.addCase(roomsThunks.byLocation.rejected, (state, action) => {
+    builder.addCase(fetchRoomsByLocation.rejected, (state, action) => {
       if (state.requestId !== action.meta.requestId) return;
       state.status = action.meta.aborted ? "idle" : "failed";
       state.error = action.meta.aborted

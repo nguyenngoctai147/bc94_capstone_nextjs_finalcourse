@@ -11,22 +11,25 @@ export function Pagination({
   onChange: (page: number) => void;
 }) {
   const count = Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
+  const currentPage = Math.min(Math.max(1, page), count);
   return (
     <nav aria-label="Phân trang" className="d-flex align-items-center gap-3">
       <button
+        type="button"
         className="btn btn-outline-secondary btn-sm"
-        disabled={page <= 1}
-        onClick={() => onChange(page - 1)}
+        disabled={currentPage <= 1}
+        onClick={() => onChange(currentPage - 1)}
       >
         Trước
       </button>
       <span aria-live="polite">
-        Trang {page} / {count}
+        Trang {currentPage} / {count}
       </span>
       <button
+        type="button"
         className="btn btn-outline-secondary btn-sm"
-        disabled={page >= count}
-        onClick={() => onChange(page + 1)}
+        disabled={currentPage >= count}
+        onClick={() => onChange(currentPage + 1)}
       >
         Sau
       </button>

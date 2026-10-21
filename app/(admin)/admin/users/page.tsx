@@ -1,6 +1,5 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { UserManagementPage } from "@/features/users/components/UserManagementPage";
+import { ResourcePanel } from "@/components/admin/ResourcePanel";
 
 export default function Page() {
-  return <RequireAuth role="ADMIN"><UserManagementPage /></RequireAuth>;
+  return <ResourcePanel resource="users" />;
 }

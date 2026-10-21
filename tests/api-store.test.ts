@@ -1,21 +1,46 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
-import { http, api } from "../app/lib/api/http";
+import { http, api } from "../app/services/api";
 import { toPage, unwrapResponse } from "../app/lib/api/response";
 import { usersService } from "../app/features/users/users.service";
 import { roomsService } from "../app/features/rooms/rooms.service";
 import { makeStore } from "../app/store";
-import { roomsThunks } from "../app/features/rooms/rooms.thunks";
-import { locationsThunks } from "../app/features/locations/locations.thunks";
-import { login } from "../app/features/auth/auth.thunks";
+import { fetchRooms, fetchRoomDetail, patchRoom, fetchRoomsByLocation } from "../app/features/rooms/rooms.slice";
+import { fetchLocations } from "../app/features/locations/locations.slice";
+import { login } from "../app/features/auth/auth.slice";
+import { fetchBookings, createBooking, deleteBooking } from "../app/features/bookings/bookings.slice";
 import { logout } from "../app/features/auth/auth.slice";
 import type { Room } from "../app/features/rooms/rooms.types";
 import type { Location } from "../app/features/locations/locations.types";
+import type { Booking } from "../app/features/bookings/bookings.types";
 
 const original = http.defaults.adapter;
 afterEach(() => { http.defaults.adapter = original; });
 const response = (config: InternalAxiosRequestConfig, content: unknown) => ({ data: { statusCode: 200, content }, status: 200, statusText: "OK", headers: {}, config });
+
+test("explicit booking thunks invalidate cached lists and handle partial write responses", async () => {
+  const store = makeStore();
+  const booking: Booking = { id: 19, maPhong: 2, maNguoiDung: 7, ngayDen: "2030-10-20", ngayDi: "2030-10-23", soLuongKhach: 2 };
+  store.dispatch(fetchBookings.pending("cached-bookings", undefined));
+  store.dispatch(fetchBookings.fulfilled(toPage([booking]), "cached-bookings", undefined));
+
+  const calls: InternalAxiosRequestConfig[] = [];
+  http.defaults.adapter = async (config) => {
+    calls.push(config);
+    return response(config, config.method === "post" ? { id: 43 } : undefined);
+  };
+
+  await store.dispatch(createBooking({ maPhong: 3, maNguoiDung: 7, ngayDen: "2030-11-01", ngayDi: "2030-11-03", soLuongKhach: 2 })).unwrap();
+  assert.equal(store.getState().bookings.requests.create.status, "succeeded");
+  assert.equal(store.getState().bookings.invalidated, true);
+  assert.deepEqual(store.getState().bookings.items, [booking]);
+
+  await store.dispatch(deleteBooking(19)).unwrap();
+  assert.equal(store.getState().bookings.requests.remove.status, "succeeded");
+  assert.deepEqual(store.getState().bookings.items, []);
+  assert.deepEqual(calls.map((request) => [request.method, request.url]), [["post", "/dat-phong"], ["delete", "/dat-phong/19"]]);
+});
 test("unwrap envelopes, plain data, paginated lists and application errors", () => {
   assert.equal(unwrapResponse({ statusCode: 200, content: 42 }), 42);
   assert.deepEqual(toPage([1, 2]).data, [1, 2]);
@@ -44,29 +69,29 @@ test("REST methods, user deletion query, paginated search and multipart upload",
 });
 test("unsupported PATCH becomes a serializable thunk error", async () => {
   const store = makeStore();
-  await store.dispatch(roomsThunks.patch({ id: 1, data: { wifi: true } }));
+  await store.dispatch(patchRoom({ id: 1, data: { wifi: true } }));
   assert.equal(store.getState().rooms.requests.patch.error?.status, 405);
 });
 test("stores are isolated; stale results and aborted requests cannot overwrite newer data", async () => {
   const first = makeStore(); const second = makeStore();
   const room = { id: 2, tenPhong: "Latest" } as Room;
-  first.dispatch(roomsThunks.list.pending("old", undefined));
-  first.dispatch(roomsThunks.list.pending("new", undefined));
-  first.dispatch(roomsThunks.list.fulfilled(toPage([room]), "new", undefined));
-  first.dispatch(roomsThunks.list.fulfilled(toPage([{ id: 1 } as Room]), "old", undefined));
+  first.dispatch(fetchRooms.pending("old", undefined));
+  first.dispatch(fetchRooms.pending("new", undefined));
+  first.dispatch(fetchRooms.fulfilled(toPage([room]), "new", undefined));
+  first.dispatch(fetchRooms.fulfilled(toPage([{ id: 1 } as Room]), "old", undefined));
   assert.equal(first.getState().rooms.items[0].id, 2);
   assert.equal(second.getState().rooms.items.length, 0);
-  first.dispatch(roomsThunks.detail.pending("abort", 1));
-  first.dispatch(roomsThunks.detail.rejected({ name: "AbortError", message: "Aborted" }, "abort", 1));
+  first.dispatch(fetchRoomDetail.pending("abort", 1));
+  first.dispatch(fetchRoomDetail.rejected({ name: "AbortError", message: "Aborted" }, "abort", 1));
   assert.equal(first.getState().rooms.requests.detail.status, "idle");
 });
 test("real thunk dispatch transitions through pending, fulfillment and normalized failure", async () => {
   const store = makeStore();
   http.defaults.adapter = async (config) => response(config, [{ id: 1 }]);
-  await store.dispatch(roomsThunks.list());
+  await store.dispatch(fetchRooms());
   assert.equal(store.getState().rooms.requests.list.status, "succeeded");
   http.defaults.adapter = async () => { throw { status: 503, message: "Missing token" }; };
-  await store.dispatch(roomsThunks.list());
+  await store.dispatch(fetchRooms());
   assert.equal(store.getState().rooms.requests.list.error?.message, "Missing token");
 });
 test("location selection fetches only its rooms and ignores stale results", async () => {
@@ -78,18 +103,18 @@ test("location selection fetches only its rooms and ignores stale results", asyn
   };
 
   const store = makeStore();
-  await store.dispatch(roomsThunks.byLocation(7));
+  await store.dispatch(fetchRoomsByLocation(7));
   assert.equal(calls[0].url, "/phong-thue/lay-phong-theo-vi-tri");
   assert.equal(calls[0].params.maViTri, 7);
   assert.deepEqual(store.getState().locationRooms.items.map((item) => item.id), [12]);
   assert.equal(store.getState().rooms.items.length, 0);
 
-  store.dispatch(roomsThunks.byLocation.pending("older", 8));
-  store.dispatch(roomsThunks.byLocation.pending("newer", 9));
-  store.dispatch(roomsThunks.byLocation.fulfilled([room], "older", 8));
+  store.dispatch(fetchRoomsByLocation.pending("older", 8));
+  store.dispatch(fetchRoomsByLocation.pending("newer", 9));
+  store.dispatch(fetchRoomsByLocation.fulfilled([room], "older", 8));
   assert.equal(store.getState().locationRooms.locationId, 9);
   assert.equal(store.getState().locationRooms.items.length, 0);
-  store.dispatch(roomsThunks.byLocation.fulfilled([], "newer", 9));
+  store.dispatch(fetchRoomsByLocation.fulfilled([], "newer", 9));
   assert.equal(store.getState().locationRooms.status, "succeeded");
   assert.equal(store.getState().locationRooms.items.length, 0);
 });
@@ -100,10 +125,10 @@ test("login removes unexpected password; logout clears private state and keeps t
   assert.ok(!("password" in store.getState().auth.user!));
   const room = { id: 2, tenPhong: "Public room" } as Room;
   const location = { id: 3, tenViTri: "Public location" } as Location;
-  store.dispatch(roomsThunks.list.pending("catalogue", undefined));
-  store.dispatch(roomsThunks.list.fulfilled(toPage([room]), "catalogue", undefined));
-  store.dispatch(locationsThunks.list.pending("locations", undefined));
-  store.dispatch(locationsThunks.list.fulfilled(toPage([location]), "locations", undefined));
+  store.dispatch(fetchRooms.pending("catalogue", undefined));
+  store.dispatch(fetchRooms.fulfilled(toPage([room]), "catalogue", undefined));
+  store.dispatch(fetchLocations.pending("locations", undefined));
+  store.dispatch(fetchLocations.fulfilled(toPage([location]), "locations", undefined));
   store.dispatch(logout());
   assert.equal(store.getState().auth.token, null);
   assert.equal(store.getState().auth.hydrated, true);

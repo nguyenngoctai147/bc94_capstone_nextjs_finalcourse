@@ -14,9 +14,13 @@
 
 Không cần chuyển toàn bộ ứng dụng sang Client Component. Các layout và page mặc định là Server Component; StoreProvider, form và danh sách tương tác là Client Component.
 
-Không có Bootstrap JS toàn cục trong khung này; các component hiện tại không cần JS plugin. Khi tích hợp plugin Bootstrap, khởi tạo phía client và dispose instance trong cleanup. Giữ CSS Bootstrap đã cài, không nạp lại qua CDN. Tailwind package cũ còn trong package.json nhưng không import CSS/preflight.
+Không có Bootstrap JS toàn cục trong khung này; các component hiện tại không cần JS plugin. Khi tích hợp plugin Bootstrap, khởi tạo phía client và dispose instance trong cleanup. Giữ CSS Bootstrap đã cài, không nạp lại qua CDN. Tailwind dùng utilities với prefix `tw-` trong globals.css; Preflight đã tắt để dùng cùng Bootstrap/Hotux.
 
-Header/footer Hotux từ HTML mẫu hiện đã được tách thành `app/components/navigation/HotuxHeader.tsx` và `HotuxFooter.tsx`. `ClientTemplate` dùng cho `/` và `/trang-chu`; các layout con của `app/(client)` dùng `PageTemplate` cho `rooms`, `bookings`, `account`, `blog`, `gioi-thieu`, `lien-he` và `ui`. Layout cha `(client)/layout.tsx` chỉ passthrough để không lồng hai template. Footer dùng ảnh tại `/assets/images/...`. CSS legacy vẫn được nạp từ `public/assets/css` trong root layout, còn JS legacy chỉ được tải theo từng page khi một component thực sự cần plugin đó.
+Header/footer Hotux nằm tại `app/components/navigation/`. `ClientTemplate` quản lý header, main, footer, skip link và liên kết về đầu trang. `PageTemplate` dùng lại `ClientTemplate`, thêm tiêu đề và breadcrumb. Layout cha `(client)/layout.tsx` chỉ passthrough. Dùng `content="bare"` khi component nghiệp vụ đã có section/container, tránh lồng container và tăng gutter hai lần. CSS legacy được nạp từ `public/assets/css` trong root layout; JS legacy chỉ tải khi component thực sự cần plugin đó. About, Contact, Blog, RoomList và dashboard hiện không cần JS legacy.
+
+`features/home/components/HomePage.tsx` là nội dung chung cho hai route trang chủ. Parent này tải phòng và vị trí; các section con đọc cùng state và giữ hành vi thử lại. Không import một `page.tsx` từ route khác để tái sử dụng nội dung.
+
+`features/rooms/components/RoomList.tsx` nhận `locationId` tùy chọn và `search`. Toàn bộ phòng dùng `rooms.requests.list`; phòng theo vị trí dùng slice riêng `locationRooms` để giữ kiểm tra request cũ. Lịch trống được tải bằng service vào state cục bộ, không ghi đè danh sách đặt phòng của tài khoản. `CardRoom` dùng hai kiểu list/grid và giữ ngày, số khách trong URL. Tiện nghi dùng chung từ `features/rooms/room-amenities.ts`.
 
 ## 2. Quản lý route và menu
 
@@ -40,7 +44,7 @@ import { clientRoutes } from "@/config/routes";
 <Link href={clientRoutes.rooms.detail(123)}>Chi tiết phòng</Link>
 ```
 
-Khi thêm trang, tạo `page.tsx` đúng thư mục, thêm URL vào nhóm route tương ứng, rồi thêm một `NavItem` vào `navigation.ts`. Header Hotux dùng `hotuxNavigation`; sidebar dùng `clientNavigation` hoặc `adminNavigation`. `isRouteActive` kiểm tra theo ranh giới segment để tránh `/rooms` và `/rooms-other` trùng nhau.
+Khi thêm trang, tạo `page.tsx` đúng thư mục, thêm URL vào nhóm route tương ứng, rồi thêm một `NavItem` vào `navigation.ts`. Header Hotux dùng `hotuxNavigation`; sidebar admin lấy tên/URL từ `adminNavigation`, còn `components/admin/admin-navigation.ts` chỉ bổ sung icon. `isRouteActive` kiểm tra theo ranh giới segment để tránh `/rooms` và `/rooms-other` trùng nhau.
 
 AdminTemplate, AuthTemplate, ClientTemplate và PageTemplate là component dùng qua `layout.tsx`. Không dùng file đặc biệt `template.tsx` vì không cần remount toàn bộ layout mỗi lần chuyển trang. Khi thêm page nội dung mới, tạo `layout.tsx` cạnh page và bọc children bằng `PageTemplate` với `title`/`breadcrumb` tương ứng.
 
@@ -60,12 +64,12 @@ Ví dụ module mới có backend endpoint `/amenities` (chỉ là ví dụ, ch�
 1. Tạo `features/amenities/amenities.types.ts`.
 2. Tạo `config/endpoints/amenities.ts` cho base path và các path đặc biệt, export module đó từ `config/endpoints/index.ts`, rồi thêm rule chính xác vào `lib/api/backend-policy.ts`.
 3. Tạo service bằng `createCrudService<Amenity, CreateAmenity, UpdateAmenity>(endpoint)`.
-4. Tạo thunk bằng `createCrudThunks("amenities", amenitiesService)`.
-5. Tạo slice bằng `createCrudSlice("amenities", amenitiesThunks)`.
+4. Tạo `amenities.slice.ts`, khai báo thunk `fetchAmenities` bằng `createAsyncThunk` và gọi service trong try/catch.
+5. Khai báo initialState và `createSlice` trong cùng file; viết rõ addCase pending/fulfilled/rejected. Tham khảo `locations.slice.ts` và `store/request-state.ts`.
 6. Thêm reducer vào `combineReducers` trong `store/index.ts`.
 7. Thêm component/page/menu theo yêu cầu.
 
-Lấy `features/locations/` làm mẫu. Các service nên import endpoint group tương ứng (`roomEndpoints`, `bookingEndpoints`...) thay vì nối chuỗi URL trong service. Nếu API khác chuẩn CRUD, override phương thức trong service như users.remove (query string) hoặc bookings.list (theo người dùng). Không sửa generic factory để nhét logic riêng của một module.
+Lấy `features/locations/` làm mẫu. Các service nên import endpoint group tương ứng (`roomEndpoints`, `bookingEndpoints`...) thay vì nối chuỗi URL trong service. Nếu API khác chuẩn CRUD, override phương thức trong service như users.remove (query string) hoặc bookings.list (theo người dùng). Hàm tạo CRUD service chỉ dùng cho HTTP chung; logic riêng nằm trong domain service.
 
 Tài nguyên mới chỉ bật `{ patch: true }` sau khi backend có endpoint PATCH và đã cập nhật policy proxy.
 
@@ -74,7 +78,7 @@ Tài nguyên mới chỉ bật `{ patch: true }` sau khi backend có endpoint PA
 ```tsx
 "use client";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { roomsThunks } from "@/features/rooms/rooms.thunks";
+import { createRoom, fetchRooms, fetchRoomDetail } from "@/features/rooms/rooms.slice";
 import type { CreateRoom } from "@/features/rooms/rooms.types";
 
 // Bên trong component:
@@ -82,9 +86,9 @@ const dispatch = useAppDispatch();
 const request = useAppSelector((state) => state.rooms.requests.create);
 
 async function save(values: CreateRoom) {
-  const result = await dispatch(roomsThunks.create(values));
-  if (roomsThunks.create.fulfilled.match(result)) {
-    await dispatch(roomsThunks.list());
+  const result = await dispatch(createRoom(values));
+  if (createRoom.fulfilled.match(result)) {
+    await dispatch(fetchRooms());
     // đóng form hoặc chuyển trang
   }
 }
@@ -98,7 +102,7 @@ Với effect tải dữ liệu:
 
 ```tsx
 useEffect(() => {
-  const task = dispatch(roomsThunks.detail(id));
+  const task = dispatch(fetchRoomDetail(id));
   return () => task.abort();
 }, [dispatch, id]);
 ```
@@ -106,22 +110,31 @@ useEffect(() => {
 ## 5. Thunk tùy chỉnh cho endpoint đặc biệt
 
 ```ts
-import { createRequestThunk } from "@/store/create-api-thunk";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import type { ApiThunkConfig } from "@/store/request-state";
+import { toApiError } from "@/lib/api/errors";
 import { roomsService } from "@/features/rooms/rooms.service";
 
-export const uploadRoomImage = createRequestThunk(
+export const uploadRoomImage = createAsyncThunk<unknown, { id: number; file: File }, ApiThunkConfig>(
   "rooms/uploadImage",
-  ({ id, file }: { id: number; file: File }, options) =>
-    roomsService.uploadImage(id, file, options),
+  async ({ id, file }, { getState, signal, rejectWithValue }) => {
+    try {
+      return await roomsService.uploadImage(id, file, { signal, token: getState().auth.token });
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
+    }
+  },
 );
 ```
 
-Factory tự chuyển token người dùng và AbortSignal vào service, chuẩn hóa lỗi bằng rejectWithValue. Thêm pending/fulfilled/rejected vào slice nếu cần lưu trạng thái upload dùng chung. File/FormData chỉ dùng làm đối số yêu cầu, không lưu vào Redux state. Với file input: đọc `event.target.files?.[0]` rồi truyền vào thunk.
+Thunk truyền token người dùng và AbortSignal vào service, chuẩn hóa lỗi bằng rejectWithValue. Thêm pending/fulfilled/rejected vào slice nếu cần lưu trạng thái upload dùng chung. File/FormData chỉ dùng làm đối số yêu cầu, không lưu vào Redux state. Với file input: đọc `event.target.files?.[0]` rồi truyền vào thunk.
 
 ## 6. Authentication
 
 Một StoreProvider giữ một store ổn định bằng lazy useState. Không export store singleton trên server. Đây là cách áp dụng nguyên tắc store theo instance/request trong [hướng dẫn Redux Toolkit cho Next.js](https://redux-toolkit.js.org/usage/nextjs).
 
-Login nhận `{ user, token }`. Redux chỉ lưu các field profile đã chọn cùng token; logout reset mọi slice để không giữ dữ liệu tài khoản trước. Phiên hiện chỉ sống trong bộ nhớ. Chưa có endpoint refresh/me trong Swagger để tự xây luồng khôi phục phiên đáng tin cậy.
+Login nhận `{ user, token }`. Redux và localStorage chỉ lưu profile đã whitelist cùng token. Logout xóa phiên và reset state riêng tư; danh mục phòng/vị trí công khai được giữ lại. `StoreProvider` khôi phục phiên trình duyệt sau hydration; xem `docs/auth-session.md`. Chưa có endpoint refresh/me trong Swagger để tự kiểm chứng lại phiên phía server.
+
+Guard `RequireAuth role="ADMIN"` đặt một lần tại layout admin. Các page bên dưới chỉ render nội dung. `ResourcePanel` là bảng đọc dùng chung cho năm tài nguyên; không tự tạo chức năng ghi khi chưa có form và validation tương ứng.
 
 RequireAuth dùng cho trải nghiệm điều hướng. Khi phát triển thành sản phẩm thực, cần session được kiểm chứng phía server và phân quyền backend, không dựa vào giá trị role phía client.

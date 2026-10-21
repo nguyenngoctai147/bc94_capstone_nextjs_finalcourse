@@ -1,13 +1,25 @@
 import { combineReducers, configureStore, type UnknownAction } from "@reduxjs/toolkit";
-import auth, { logout } from "@/features/auth/auth.slice";
-import rooms from "@/features/rooms/rooms.slice";
-import locationRooms from "@/features/rooms/location-rooms.slice";
-import bookings from "@/features/bookings/bookings.slice";
-import locations from "@/features/locations/locations.slice";
-import users from "@/features/users/users.slice";
-import reviews from "@/features/reviews/reviews.slice";
-const combinedReducer = combineReducers({ auth, rooms, locationRooms, bookings, locations, users, reviews });
+import authReducer, { logout } from "@/features/auth/auth.slice";
+import roomsReducer from "@/features/rooms/rooms.slice";
+import locationRoomsReducer from "@/features/rooms/location-rooms.slice";
+import bookingsReducer from "@/features/bookings/bookings.slice";
+import locationsReducer from "@/features/locations/locations.slice";
+import usersReducer from "@/features/users/users.slice";
+import reviewsReducer from "@/features/reviews/reviews.slice";
+
+// Đăng ký reducer của từng feature, giống store/index.js trong bài React.
+const combinedReducer = combineReducers({
+  auth: authReducer,
+  rooms: roomsReducer,
+  locationRooms: locationRoomsReducer,
+  bookings: bookingsReducer,
+  locations: locationsReducer,
+  users: usersReducer,
+  reviews: reviewsReducer,
+});
+
 export type RootState = ReturnType<typeof combinedReducer>;
+
 function rootReducer(state: RootState | undefined, action: UnknownAction) {
   if (!state || !logout.match(action)) return combinedReducer(state, action);
 
@@ -23,10 +35,14 @@ function rootReducer(state: RootState | undefined, action: UnknownAction) {
     locations: state.locations,
   };
 }
-export const makeStore = () => configureStore({
-  reducer: rootReducer,
-  // Auth action metadata contains credentials; keep Redux DevTools off by default.
-  devTools: false,
-});
+// Next.js tạo store theo Provider, tránh dùng chung dữ liệu giữa các lần render server.
+export const makeStore = () => {
+  return configureStore({
+    reducer: rootReducer,
+    // Metadata của action đăng nhập có mật khẩu; không ghi vào Redux DevTools.
+    devTools: false,
+  });
+};
+
 export type AppStore = ReturnType<typeof makeStore>;
 export type AppDispatch = AppStore["dispatch"];

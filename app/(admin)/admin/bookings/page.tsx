@@ -1,6 +1,5 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { LiveBookingManagement } from "@/features/bookings/components/LiveBookingManagement";
+import { ResourcePanel } from "@/components/admin/ResourcePanel";
 
 export default function Page() {
-  return <RequireAuth role="ADMIN"><LiveBookingManagement /></RequireAuth>;
+  return <ResourcePanel resource="bookings" />;
 }

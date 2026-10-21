@@ -8,10 +8,10 @@ const stateAttribute = "data-hotux-load-state";
 
 function getRuntime() {
   const vendorWindow = window as VendorWindow;
-  return vendorWindow.hotuxVendorScripts ??= {
+  return (vendorWindow.hotuxVendorScripts ??= {
     loading: new Map(),
     queue: Promise.resolve(),
-  };
+  });
 }
 
 /** Keep dependency chains ordered even across route changes and Fast Refresh. */
@@ -24,7 +24,9 @@ export function enqueueVendorScripts(task: () => Promise<void>) {
 
 export function loadVendorScript(source: string, reload = false) {
   const runtime = getRuntime();
-  const existing = document.querySelector<HTMLScriptElement>(`script[src="${source}"]`);
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[src="${source}"]`,
+  );
   const state = existing?.getAttribute(stateAttribute);
 
   if (reload || state === "failed") {
@@ -39,7 +41,8 @@ export function loadVendorScript(source: string, reload = false) {
   const promise = new Promise<void>((resolve, reject) => {
     // An untracked tag is not proof that a dynamically inserted script ran.
     const reuse = !reload && state === "loading";
-    const script = reuse && existing ? existing : document.createElement("script");
+    const script =
+      reuse && existing ? existing : document.createElement("script");
     if (!reuse && !reload) existing?.remove();
     const handleLoad = () => {
       script.setAttribute(stateAttribute, "loaded");

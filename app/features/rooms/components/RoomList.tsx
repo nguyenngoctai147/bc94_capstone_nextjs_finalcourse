@@ -1,401 +1,97 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- this component intentionally preserves the static theme's image markup. */
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { EmptyState, LoadingSpinner } from "@/components/ui";
 import { routes } from "@/config/routes";
-import { legacyScriptBundles, loadLegacyScripts } from "@/lib/legacy/scripts";
+import { fetchLocationDetail } from "@/features/locations/locations.slice";
+import { bookingsService } from "@/features/bookings/bookings.service";
+import type { Booking } from "@/features/bookings/bookings.types";
+import { nights, type Search } from "@/features/reservations/flow";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchRooms, fetchRoomsByLocation } from "../rooms.slice";
+import { filterRooms, initialRoomFilters, type RoomFiltersValue, type SortOrder } from "../room-list.utils";
 import type { Room } from "../rooms.types";
-import { roomsThunks } from "../rooms.thunks";
+import { RoomCatalogueCards, RoomCatalogueShell, type RoomViewMode } from "./RoomCatalogue";
+import { RoomCataloguePagination } from "./RoomCataloguePagination";
 
 const PAGE_SIZE = 5;
-const STATIC_IMAGES = [
-  "/assets/images/room-list/grid1.jpg",
-  "/assets/images/room-list/grid2.jpg",
-  "/assets/images/room-list/grid3.jpg",
-  "/assets/images/room-list/grid4.jpg",
-  "/assets/images/room-list/grid5.jpg",
-] as const;
+const EMPTY_ROOMS: readonly Room[] = [];
+type RoomListProps = { locationId?: number; search?: Search | null };
 
-const ROOM_TYPES = [
-  "Single Rooms",
-  "Double Rooms",
-  "Studio Rooms",
-  "Kingsize Rooms",
-  "Presidentsuite Rooms",
-  "Murphy Rooms",
-  "Connecting Rooms",
-] as const;
-
-const SERVICES = [
-  "24/7 Reception",
-  "Parking",
-  "Bar",
-  "Restaurant",
-  "Satellite Television",
-  "Lift/ELevator",
-  "Luggage Storage",
-] as const;
-
-type RoomListCard = Pick<
-  Room,
-  "id" | "tenPhong" | "giaTien" | "moTa" | "phongNgu"
->;
-
-const STATIC_ROOMS = [
-  {
-    id: 1,
-    tenPhong: "Standard Suite",
-    giaTien: 900,
-    phongNgu: 3,
-    moTa: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis",
-  },
-  {
-    id: 2,
-    tenPhong: "Deluxe Suite",
-    giaTien: 800,
-    phongNgu: 3,
-    moTa: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis",
-  },
-  {
-    id: 3,
-    tenPhong: "Superior Suite",
-    giaTien: 1000,
-    phongNgu: 3,
-    moTa: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis",
-  },
-  {
-    id: 4,
-    tenPhong: "Normal Suite",
-    giaTien: 200,
-    phongNgu: 3,
-    moTa: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis",
-  },
-  {
-    id: 5,
-    tenPhong: "Royal Suite",
-    giaTien: 1200,
-    phongNgu: 3,
-    moTa: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis",
-  },
-] as const satisfies readonly RoomListCard[];
-
-function visiblePages(page: number, count: number) {
-  if (count <= 5) return Array.from({ length: count }, (_, index) => index + 1);
-  const pages = [1, 2, 3, 4, count];
-  return [...new Set(pages.filter((item) => item <= count))];
-}
-
-function StaticCheckbox({
-  label,
-  last = false,
-}: {
-  label: React.ReactNode;
-  last?: boolean;
-}) {
-  return (
-    <div
-      className={`pretty p-default p-thick p-pulse${last ? "" : " mar-bottom-15"}`}
-    >
-      <input type="checkbox" />
-      <div className="state p-warning-o">
-        <label>{label}</label>
-      </div>
-    </div>
-  );
-}
-
-function Rating({ stars }: { stars: number }) {
-  return (
-    <span className="rating">
-      {Array.from({ length: stars }, (_, index) => (
-        <span className="fa fa-star" key={index} />
-      ))}
-    </span>
-  );
-}
-
-export function RoomList({ embedded = false }: { embedded?: boolean } = {}) {
+export function RoomList({ locationId, search }: RoomListProps) {
   const dispatch = useAppDispatch();
-  const state = useAppSelector((root) => root.rooms);
+  const catalogue = useAppSelector((state) => state.rooms);
+  const locationResult = useAppSelector((state) => state.locationRooms);
+  const location = useAppSelector((state) => state.locations.selected);
+  const token = useAppSelector((state) => state.auth.token);
+  const [filters, setFilters] = useState<RoomFiltersValue>(initialRoomFilters);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("recommended");
+  const [viewMode, setViewMode] = useState<RoomViewMode>("list");
   const [page, setPage] = useState(1);
-  const query = useMemo(
-    () => ({ pageIndex: page, pageSize: PAGE_SIZE, keyword: "" }),
-    [page],
-  );
-  const request = state.requests.list;
-  const hasApiRooms = request.status === "succeeded" && state.items.length > 0;
-  const rooms = hasApiRooms ? state.items : STATIC_ROOMS;
-  const total = hasApiRooms ? state.total : 80;
-  const pageCount = hasApiRooms
-    ? Math.max(1, Math.ceil(total / PAGE_SIZE))
-    : 10;
-  const first = (page - 1) * PAGE_SIZE + 1;
-  const last = Math.min(page * PAGE_SIZE, total);
+  const [reloadCount, setReloadCount] = useState(0);
+  const [availability, setAvailability] = useState<{ status: "loading" | "succeeded" | "failed"; items: Booking[] }>({ status: search ? "loading" : "succeeded", items: [] });
 
   useEffect(() => {
-    const task = dispatch(roomsThunks.list(query));
-    return () => task.abort();
-  }, [dispatch, query]);
+    const roomsTask = locationId === undefined ? dispatch(fetchRooms()) : dispatch(fetchRoomsByLocation(locationId));
+    const locationTask = locationId === undefined ? null : dispatch(fetchLocationDetail(locationId));
+    return () => { roomsTask.abort(); locationTask?.abort(); };
+  }, [dispatch, locationId, reloadCount]);
 
   useEffect(() => {
-    void loadLegacyScripts(legacyScriptBundles.hotuxRoomList);
-  }, []);
+    if (!search) return;
+    const controller = new AbortController();
+    const fetchAvailability = async () => {
+      try {
+        const result = await bookingsService.list({ token, signal: controller.signal });
+        if (!controller.signal.aborted) setAvailability({ status: "succeeded", items: result.data });
+      } catch {
+        if (!controller.signal.aborted) setAvailability({ status: "failed", items: [] });
+      }
+    };
+    void fetchAvailability();
+    return () => controller.abort();
+  }, [search, token, reloadCount]);
 
-  const roomListContent = (
-        <div className="row flex-row-reverse">
-          <div className="col-lg-9">
-            <div className="list-results">
-              <div className="list-results-sort pad-top-5">
-                <p className="mar-0">
-                  Showing {first}-{last} of {total} results
-                </p>
-              </div>
-              <div className="click-menu">
-                <select
-                  className="wide"
-                  defaultValue="0"
-                  aria-label="Sort rooms"
-                >
-                  <option data-icon="fa fa-long-arrow-alt-up" value="0">
-                    Price
-                  </option>
-                  <option data-icon="fa fa-user" value="1">
-                    Name
-                  </option>
-                  <option data-icon="fa fa-star" value="2">
-                    Rating
-                  </option>
-                </select>
-                <div className="change-list f-active mar-right-10">
-                  <Link href={routes.rooms.list} aria-label="List view">
-                    <i className="fa fa-bars" />
-                  </Link>
-                </div>
-                <div className="change-grid">
-                  <Link href={routes.rooms.list} aria-label="Grid view">
-                    <i className="fa fa-th" />
-                  </Link>
-                </div>
-              </div>
-            </div>
+  const request = locationId === undefined ? catalogue.requests.list : locationResult;
+  const isCurrent = locationId === undefined || locationResult.locationId === locationId;
+  const isLoading = !isCurrent || request.status === "idle" || request.status === "loading" || (request.status !== "failed" && Boolean(search) && availability.status === "loading");
+  const sourceRooms = request.status !== "succeeded" || !isCurrent ? EMPTY_ROOMS : locationId === undefined ? catalogue.items : locationResult.items;
+  const highestPrice = sourceRooms.reduce((highest, room) => Math.max(highest, room.giaTien), 0);
+  const place = location?.id === locationId ? location : null;
+  const hasFilters = filters.bedrooms !== "all" || filters.amenities.length > 0 || filters.maxPrice !== null;
+  const hasAvailabilityError = Boolean(search) && availability.status === "failed";
+  const rooms = useMemo(() => {
+    if (search && availability.status !== "succeeded") return [];
+    return filterRooms(sourceRooms, { filters, sortOrder, locationId, search, bookings: availability.items });
+  }, [sourceRooms, filters, sortOrder, locationId, search, availability]);
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(rooms.length / PAGE_SIZE)));
+  const offset = (currentPage - 1) * PAGE_SIZE;
+  const visibleRooms = rooms.slice(offset, offset + PAGE_SIZE);
+  const handleRetry = () => { if (search) setAvailability({ status: "loading", items: [] }); setReloadCount((current) => current + 1); };
+  const handleFiltersChange = (nextFilters: RoomFiltersValue) => { setFilters(nextFilters); setPage(1); };
+  const handleResetFilters = () => { setFilters(initialRoomFilters); setPage(1); };
+  const handleSortChange = (nextSortOrder: SortOrder) => { setSortOrder(nextSortOrder); setPage(1); };
+  const getResultsMessage = () => {
+    if (isLoading) return "Đang tìm chỗ nghỉ...";
+    if (request.status === "failed" || hasAvailabilityError) return "Chưa tải được kết quả";
+    if (rooms.length === 0) return "Không có kết quả";
+    return `Hiển thị ${offset + 1}–${Math.min(offset + PAGE_SIZE, rooms.length)} trong ${rooms.length} kết quả`;
+  };
+  const renderRoomList = () => {
+    const retryButton = <button type="button" className="btn btn-orange" onClick={handleRetry}>Thử lại</button>;
+    if (isLoading) return <div className="location-room-status text-center"><LoadingSpinner label="Đang tải danh sách phòng" /></div>;
+    if (request.status === "failed") return <EmptyState title="Không thể tải danh sách phòng" description={request.error?.message} action={retryButton} />;
+    if (hasAvailabilityError) return <EmptyState title="Không thể kiểm tra lịch trống" description="Vui lòng thử lại để tìm phòng phù hợp với ngày đã chọn." action={retryButton} />;
+    if (visibleRooms.length === 0) return <EmptyState title={sourceRooms.length ? "Không có phòng phù hợp" : "Chưa có phòng"} description={hasFilters ? "Thử xóa bộ lọc để xem thêm chỗ nghỉ." : "Hãy chọn điểm đến hoặc ngày lưu trú khác."} action={hasFilters ? <button type="button" className="btn btn-orange" onClick={handleResetFilters}>Xóa bộ lọc</button> : <Link href={routes.home} className="btn btn-orange">Khám phá điểm đến</Link>} />;
+    return <RoomCatalogueCards rooms={visibleRooms} search={search} viewMode={viewMode} />;
+  };
 
-            <div className="list-content">
-              <div className="list-grid">
-                {rooms.map((room, index) => (
-                    <StaticRoomCard key={room.id} room={room} index={index} embedded={embedded} />
-                ))}
-              </div>
-            </div>
-
-            {total > 0 ? (
-              <nav
-                className="pagination-content text-center"
-                aria-label="Room list pagination"
-              >
-                <ul className="pagination">
-                  <li className={`page-item${page === 1 ? " disabled" : ""}`}>
-                    <a
-                      href="#"
-                      className="page-link"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        setPage(1);
-                      }}
-                      aria-label="First page"
-                    >
-                      <i
-                        className="fa fa-angle-double-left"
-                        aria-hidden="true"
-                      />
-                    </a>
-                  </li>
-                  {visiblePages(page, pageCount).map((item, index, items) => (
-                    <Fragment key={item}>
-                      {index === items.length - 1 &&
-                      item - items[index - 1] > 1 ? (
-                        <li className="page-item">
-                          <a
-                            href="#"
-                            className="page-link"
-                            onClick={(event) => event.preventDefault()}
-                          >
-                            ...
-                          </a>
-                        </li>
-                      ) : null}
-                      <li
-                        className={`page-item${page === item ? " active" : ""}`}
-                      >
-                        <a
-                          href="#"
-                          className="page-link"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            setPage(item);
-                          }}
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    </Fragment>
-                  ))}
-                  <li
-                    className={`page-item${page === pageCount ? " disabled" : ""}`}
-                  >
-                    <a
-                      href="#"
-                      className="page-link"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        setPage(pageCount);
-                      }}
-                      aria-label="Last page"
-                    >
-                      <i
-                        className="fa fa-angle-double-right"
-                        aria-hidden="true"
-                      />
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            ) : null}
-          </div>
-
-          <div className="col-lg-3 sidebar">
-            <div className="list-sidebar">
-              <div className="room-type list-sidebar-item">
-                <h4>Room Types</h4>
-                {ROOM_TYPES.map((type, index) => (
-                  <StaticCheckbox
-                    key={type}
-                    label={type}
-                    last={index === ROOM_TYPES.length - 1}
-                  />
-                ))}
-              </div>
-              <div className="price list-sidebar-item">
-                <h4>Price</h4>
-                <div className="range-slider">
-                  <div
-                    data-min="0"
-                    data-max="2000"
-                    data-unit="$"
-                    data-min-name="min_price"
-                    data-max-name="max_price"
-                    className="range-slider-ui ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"
-                    aria-disabled="false"
-                  >
-                    <span className="min-value">0 $</span>
-                    <span className="max-value">2000 $</span>
-                    <div
-                      className="ui-slider-range ui-widget-header ui-corner-all full"
-                      style={{ left: "0%", width: "100%" }}
-                    />
-                  </div>
-                  <div className="clearfix" />
-                </div>
-              </div>
-              <div className="ratings list-sidebar-item">
-                <h4>Ratings</h4>
-                {[5, 5, 3, 2, 1].map((stars, index, ratings) => (
-                  <StaticCheckbox
-                    key={`${stars}-${index}`}
-                    label={<Rating stars={stars} />}
-                    last={index === ratings.length - 1}
-                  />
-                ))}
-              </div>
-              <div className="services list-sidebar-item">
-                <h4>Services</h4>
-                {SERVICES.map((service, index) => (
-                  <StaticCheckbox
-                    key={service}
-                    label={service}
-                    last={index === SERVICES.length - 1}
-                  />
-                ))}
-              </div>
-              <div className="info-1 list-sidebar-item">
-                <i className="fa fa-phone-volume" />
-                <h5>Need help? Call us</h5>
-                <a href="tel://004542344599" className="phone">
-                  +45 423 445 99
-                </a>
-                <small>Monday to Friday 9.00am - 7.30pm</small>
-              </div>
-            </div>
-          </div>
-        </div>
-  );
-
-  return embedded ? (
-    <div className="room-list mar-top-60">{roomListContent}</div>
-  ) : (
-    <section className="room-list"><div className="container">{roomListContent}</div></section>
-  );
-}
-
-function StaticRoomCard({
-  room,
-  index,
-  embedded,
-}: {
-  room: RoomListCard;
-  index: number;
-  embedded: boolean;
-}) {
-  const image = STATIC_IMAGES[index % STATIC_IMAGES.length];
-  const stars = index === 3 ? 4 : 5;
-
-  return (
-    <div className="room-grid">
-      <div className="grid-image">
-        <img src={image} alt="image" />
-      </div>
-      <div className="grid-content">
-        <div className="room-title">
-          <h4>{room.tenPhong}</h4>
-          <p className="mar-top-5">
-            <i className="fa fa-tag" /> ${room.giaTien}/Night
-          </p>
-          <div className="deal-rating">
-            {Array.from({ length: stars }, (_, star) => (
-              <span className="fa fa-star checked" key={star} />
-            ))}
-          </div>
-        </div>
-        <div className="room-detail">
-          <p>
-            {room.moTa ||
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ex neque, sodales accumsan sapien et, auctor vulputate quam donec vitae consectetur turpis"}
-          </p>
-        </div>
-        <div className="room-services">
-          <div className="row">
-            <div className={embedded ? "col-md-4 col-sm-6 col-xs-6" : "col-md-6 col-sm-6 col-xs-6"}>
-              <i className="fa fa-bed" aria-hidden="true" /> {room.phongNgu}{" "}
-              Bedrooms
-            </div>
-            <div className={embedded ? "col-md-4 col-sm-6 col-xs-6" : "col-md-6 col-sm-6 col-xs-6"}>
-              <i className="fa fa-wifi" aria-hidden="true" /> Quick Service
-            </div>
-          </div>
-        </div>
-        <div className="grid-btn mar-top-20">
-          <Link
-            href={routes.rooms.detail(room.id)}
-            className="btn btn-black mar-right-10"
-          >
-            VIEW DETAILS
-          </Link>
-          <Link href={routes.reservation.availability} className="btn btn-orange">
-            BOOK NOW
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  return <RoomCatalogueShell
+    header={search ? <div className="list-filter room-search-summary"><p className="mar-0">Nhận phòng: {search.checkIn} · Trả phòng: {search.checkOut} · {search.guests} khách · {nights(search)} đêm</p><Link href={routes.home}>Thay đổi tìm kiếm</Link></div> : undefined}
+    title={locationId === undefined ? "Tất cả chỗ nghỉ" : place ? `${place.tenViTri}, ${place.tinhThanh}` : `Chỗ nghỉ tại vị trí #${locationId}`}
+    resultMessage={getResultsMessage()} sortOrder={sortOrder} sortDisabled={isLoading || request.status === "failed" || hasAvailabilityError} onSortChange={handleSortChange} viewMode={viewMode} onViewModeChange={setViewMode}
+    filters={{ values: filters, highestPrice, disabled: isLoading || request.status === "failed" || hasAvailabilityError, onChange: handleFiltersChange, onReset: handleResetFilters }} busy={isLoading}
+    pagination={!isLoading && request.status === "succeeded" && !hasAvailabilityError && rooms.length > PAGE_SIZE ? <RoomCataloguePagination page={currentPage} pageSize={PAGE_SIZE} total={rooms.length} onChange={setPage} /> : undefined}
+  >{renderRoomList()}</RoomCatalogueShell>;
 }

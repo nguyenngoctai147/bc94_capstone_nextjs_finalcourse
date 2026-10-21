@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Stay • Đặt phòng & quản lý", template: "%s | Stay" },
+  title: { default: "Hotux • Đặt phòng & quản lý", template: "%s | Hotux" },
   description: "Nền tảng đặt phòng và quản lý lưu trú.",
 };
 
@@ -22,9 +22,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <StoreProvider>{children}</StoreProvider>
-        <div id="back-to-top">
-          <a href="#"></a>
-        </div>
       </body>
     </html>
   );

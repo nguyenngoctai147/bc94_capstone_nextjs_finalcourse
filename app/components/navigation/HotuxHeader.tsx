@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import logo from "../../../public/assets/images/logo.png";
+import darkLogo from "../../../public/assets/images/logo-black.png";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -14,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/features/auth/auth.slice";
 import { useClientReady } from "@/hooks/useClientReady";
 import type { User } from "@/features/users/users.types";
+import { siteInfo } from "@/config/site";
 
 const Icon = ({ name }: { name: string }) => (
   <i className={`fa ${name}`} aria-hidden="true" />
@@ -83,24 +87,14 @@ export function HotuxHeader() {
           <div className="links links-left">
             <ul>
               <li>
-                <a href="mailto:info@hotux.com.np">
-                  <Icon name="fa-envelope" /> info@hotux.com.np
+                <a href={`mailto:${siteInfo.email}`}>
+                  <Icon name="fa-envelope" /> {siteInfo.email}
                 </a>
               </li>
               <li>
-                <a href="tel:+977222333444">
-                  <Icon name="fa-phone" /> 977-222-333-444
+                <a href={`tel:${siteInfo.phone}`}>
+                  <Icon name="fa-phone" /> {siteInfo.phoneLabel}
                 </a>
-              </li>
-              <li>
-                <label className="visually-hidden" htmlFor="hotux-language">
-                  Ngôn ngữ
-                </label>
-                <select id="hotux-language" className="wide" defaultValue="Eng">
-                  <option>Eng</option>
-                  <option>Fra</option>
-                  <option>Esp</option>
-                </select>
               </li>
             </ul>
           </div>
@@ -109,12 +103,12 @@ export function HotuxHeader() {
               {user ? (
                 <AuthenticatedAccountMenu user={user} />
               ) : (
-                <li><Link href={authRoutes.login}><Icon name="fa-user" /> Login</Link></li>
+                <li><Link href={authRoutes.login}><Icon name="fa-user" /> Đăng nhập</Link></li>
               )}
               {!user && (
                 <li>
                   <Link href={authRoutes.register}>
-                    <Icon name="fa-pencil" /> Register
+                    <Icon name="fa-pencil" /> Đăng ký
                   </Link>
                 </li>
               )}
@@ -150,16 +144,6 @@ export function HotuxHeader() {
                       <Icon name="fa-instagram" />
                     </a>
                   </li>
-                  <li>
-                    <a
-                      href="https://plus.google.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label="Google Plus"
-                    >
-                      <Icon name="fa-google-plus" />
-                    </a>
-                  </li>
                 </ul>
               </li>
             </ul>
@@ -175,17 +159,22 @@ export function HotuxHeader() {
                 href={clientRoutes.home}
                 onClick={() => setMobileOpen(false)}
               >
-                <img
-                  src="/assets/images/logo.png"
+                <Image
+                  src={logo}
                   alt="Hotux"
                   className="logo-white"
                 />
-                <img
-                  src="/assets/images/logo-black.png"
-                  alt="Hotux"
+                <Image
+                  src={darkLogo}
+                  alt=""
                   className="logo-black"
                 />
               </Link>
+              <button type="button" className="site-menu-toggle" aria-controls="hotux-navigation"
+                aria-expanded={mobileOpen} aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+                onClick={() => setMobileOpen((value) => !value)}>
+                <Icon name={mobileOpen ? "fa-times" : "fa-bars"} />
+              </button>
             </div>
             <div
               id="hotux-navigation"
@@ -202,6 +191,7 @@ export function HotuxHeader() {
                       {item.children ? (
                         <a
                           href={item.href}
+                          aria-current={active ? "page" : undefined}
                           className="dropdown-toggle"
                           aria-haspopup="true"
                           aria-expanded={openMenu === item.label}
@@ -246,11 +236,10 @@ export function HotuxHeader() {
               </ul>
               <div className="nav-btn">
                 <Link href={clientRoutes.reservation.availability} className="btn btn-orange">
-                  Book Now
+                  Đặt phòng
                 </Link>
               </div>
             </div>
-            <div id="slicknav-mobile" />
           </nav>
         </div>
       </div>

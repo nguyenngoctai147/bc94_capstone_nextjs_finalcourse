@@ -1,6 +1,6 @@
 import { roomEndpoints } from "@/config/endpoints";
 import { createCrudService } from "@/lib/api/crud-service";
-import { api } from "@/lib/api/http";
+import { api } from "@/services/api";
 import { toPage } from "@/lib/api/response";
 import type { Page, PageQuery, RequestOptions } from "@/lib/api/types";
 import type { Room, CreateRoom, UpdateRoom } from "./rooms.types";

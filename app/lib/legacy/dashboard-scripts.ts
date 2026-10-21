@@ -22,10 +22,13 @@ export function loadDashboardScripts() {
     try {
       if (!jQuery) {
         const existing = document.querySelector(`script[src="${coreSource}"]`);
-        const stale = !!existing && existing.getAttribute("data-hotux-load-state") !== "loading";
+        const stale =
+          !!existing &&
+          existing.getAttribute("data-hotux-load-state") !== "loading";
         await loadVendorScript(coreSource, stale);
         jQuery = dashboardWindow.jQuery;
-        if (!jQuery?.fn) throw new Error("Không thể khởi tạo jQuery của Dashboard");
+        if (!jQuery?.fn)
+          throw new Error("Không thể khởi tạo jQuery của Dashboard");
         dashboardWindow.hotuxDashboardJQuery = jQuery;
       }
       // Restore immediately after Core executes, before waiting on other assets:

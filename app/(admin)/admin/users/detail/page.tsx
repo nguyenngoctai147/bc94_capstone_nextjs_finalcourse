@@ -1,10 +1,6 @@
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { UserDetailPage } from "@/features/users/components/UserDetailPage";
+import { redirect } from "next/navigation";
+import { routes } from "@/config/routes";
 
 export default function Page() {
-  return (
-    <RequireAuth role="ADMIN">
-      <UserDetailPage />
-    </RequireAuth>
-  );
+  redirect(routes.admin.users);
 }

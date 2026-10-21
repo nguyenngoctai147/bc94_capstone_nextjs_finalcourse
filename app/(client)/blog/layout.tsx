@@ -1,12 +1,9 @@
-import { HotuxFooter, HotuxHeader } from "@/components/navigation";
+import { PageTemplate } from "@/templates/PageTemplate";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="ds-site">
-      <HotuxHeader />
+    <PageTemplate title="Cẩm nang lưu trú" content="bare">
       {children}
-      <HotuxFooter />
-      <div id="back-to-top"><a href="#" /></div>
-    </div>
+    </PageTemplate>
   );
 }

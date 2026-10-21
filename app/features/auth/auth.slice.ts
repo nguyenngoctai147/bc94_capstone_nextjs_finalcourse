@@ -1,8 +1,35 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { User } from "@/features/users/users.types";
-import type { RequestState } from "@/store/crud";
-import { login, register } from "./auth.thunks";
+import type { ApiThunkConfig, RequestState } from "@/store/request-state";
+import { toApiError } from "@/lib/api/errors";
+import { authService } from "./auth.service";
+import type { AuthSession, LoginInput, RegisterInput } from "./auth.types";
 import { toSafeUser } from "./auth.session";
+
+export const login = createAsyncThunk<AuthSession, LoginInput, ApiThunkConfig>(
+  "auth/login",
+  async (values, { getState, signal, rejectWithValue }) => {
+    try {
+      const result = await authService.login(values, { signal, token: getState().auth.token });
+      return result;
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
+    }
+  },
+);
+
+export const register = createAsyncThunk<User, RegisterInput, ApiThunkConfig>(
+  "auth/register",
+  async (values, { getState, signal, rejectWithValue }) => {
+    try {
+      const result = await authService.register(values, { signal, token: getState().auth.token });
+      return result;
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
+    }
+  },
+);
+
 type AuthState = {
   user: User | null;
   token: string | null;

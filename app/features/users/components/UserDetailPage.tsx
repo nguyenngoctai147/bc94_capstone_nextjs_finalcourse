@@ -1,190 +1,154 @@
 "use client";
 
-import Image from "next/image";
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Icon } from "@/components/admin";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AdminPageHeader, Icon } from "@/components/admin";
+import { Alert, Button, Input, LoadingSpinner, Select } from "@/components/ui";
+import { ApiImage } from "@/components/ui/ApiImage";
+import { routes } from "@/config/routes";
+import { useForm } from "@/hooks/useForm";
+import { toApiError } from "@/lib/api/errors";
+import { email, localToday, phone, required, validDate } from "@/lib/validation/rules";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUserDetail, updateUser } from "../users.slice";
+import type { User } from "../users.types";
 
-type UserDetailForm = {
-  firstName: string;
-  lastName: string;
+type UserDetailValues = {
+  name: string;
   email: string;
   phone: string;
-  username: string;
-  password: string;
+  birthday: string;
+  gender: string;
+  role: string;
 };
 
-const initialForm: UserDetailForm = {
-  firstName: "Amiah",
-  lastName: "Burton",
-  email: "me@foneui.com",
-  phone: "+00 1234 5678 9",
-  username: "amiahburton",
-  password: "",
+const toDateInput = (value: string) => {
+  const isoDate = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoDate) return `${isoDate[1]}-${isoDate[2]}-${isoDate[3]}`;
+  const localDate = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return localDate ? `${localDate[3]}-${localDate[2]}-${localDate[1]}` : "";
 };
 
-export function UserDetailPage() {
-  const [form, setForm] = useState<UserDetailForm>(initialForm);
-  const [selectedImage, setSelectedImage] = useState("");
-  const [saved, setSaved] = useState(false);
-  const fullName = `${form.firstName} ${form.lastName}`.trim() || "Amiah Burton";
+export function UserDetailPage({ id }: { id: number }) {
+  const dispatch = useAppDispatch();
+  const { selected, request } = useAppSelector((state) => ({
+    selected: state.users.selected?.id === id ? state.users.selected : null,
+    request: state.users.requests.detail,
+  }));
 
-  const updateField = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setSaved(false);
-    setForm((current) => ({ ...current, [name]: value }));
-  };
-
-  const updateImage = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedImage(event.target.files?.[0]?.name ?? "");
-    setSaved(false);
-  };
-
-  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSaved(true);
-  };
+  useEffect(() => {
+    const task = dispatch(fetchUserDetail(id));
+    return () => task.abort();
+  }, [dispatch, id]);
 
   return (
     <>
-      <div className="row">
-        <div className="col-12 grid-margin">
-          <div className="card">
-            <div className="position-relative rounded overflow-hidden">
-              <figure className="profile-cover overflow-hidden mb-0 d-flex justify-content-center">
-                <Image
-                  src="/assets/images/calltoaction.jpg"
-                  className="rounded-top w-100"
-                  alt="profile cover"
-                  width={1600}
-                  height={500}
-                  priority
-                  style={{ height: "auto" }}
-                />
-              </figure>
-              <div className="d-flex justify-content-between align-items-center position-absolute bottom-10 w-100 px-3 ms-4">
-                <div>
-                  <Image
-                    className="wd-70 rounded-circle"
-                    src="/assets/images/review1.jpg"
-                    alt={`${fullName} profile`}
-                    width={70}
-                    height={70}
-                  />
-                  <span className="h4 ms-2 bg-white rounded p-2 px-3">
-                    {fullName}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AdminPageHeader
+        title={selected?.name ?? `Người dùng #${id}`}
+        description="Xem và cập nhật hồ sơ người dùng trên hệ thống."
+        breadcrumbs={[
+          { label: "Tổng quan", href: routes.admin.dashboard },
+          { label: "Người dùng", href: routes.admin.users },
+          { label: `#${id}` },
+        ]}
+        action={<Link href={routes.admin.users} className="btn btn-outline-primary"><Icon className="me-1" name="arrow-left" size={18} />Quay lại danh sách</Link>}
+      />
 
-      <div className="row profile-body">
-        <div className="col-lg-4">
-          <div className="card rounded">
-            <div className="card-body">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <h6 className="card-title mb-0">About</h6>
-              </div>
-              <p>
-                Hi! I&apos;m Amiah the Senior UI Designer at foneui. We hope you
-                enjoy the design and quality of Social. Excepteur sint occaecat
-                cupidatat non proident, sunt in culpa qui officia deserunt
-                mollit anim id est laborum.
-              </p>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Joined:</label>
-                <p>November 15, 2021</p>
-              </div>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Address:</label>
-                <p>New York, USA</p>
-              </div>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Email:</label>
-                <p>{form.email || "me@foneui.com"}</p>
-              </div>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Phone No.:</label>
-                <p>{form.phone || "+00 1234 5678 9"}</p>
-              </div>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Birthday:</label>
-                <p>Jan 15, 1995</p>
-              </div>
-              <div className="mt-3">
-                <label className="fw-bolder mb-0 text-uppercase">Website:</label>
-                <p>www.foneui.com</p>
-              </div>
-              <div className="mt-3 d-flex social-links">
-                <button className="btn btn-icon border btn-xs me-2" type="button" aria-label="GitHub">
-                  <Icon name="github" />
-                </button>
-                <button className="btn btn-icon border btn-xs me-2" type="button" aria-label="Twitter">
-                  <Icon name="twitter" />
-                </button>
-                <button className="btn btn-icon border btn-xs me-2" type="button" aria-label="Instagram">
-                  <Icon name="instagram" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-8">
-          <div className="card">
-            <div className="card-body">
-              <h4 className="mb-4">User Profile</h4>
-              <form className="forms-sample" onSubmit={saveProfile}>
-                <div className="row">
-                  <div className="col-lg-12 mb-3">
-                    <label htmlFor="upload" className="form-label">User Image</label>
-                    <input
-                      className="form-control"
-                      type="file"
-                      id="upload"
-                      accept="image/*"
-                      onChange={updateImage}
-                    />
-                    {selectedImage && <p className="tx-12 text-muted mt-2 mb-0">Selected: {selectedImage}</p>}
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="firstname" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="firstname" name="firstName" autoComplete="given-name" value={form.firstName} onChange={updateField} />
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="lastname" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="lastname" name="lastName" autoComplete="family-name" value={form.lastName} onChange={updateField} />
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="email" className="form-label">Email Address</label>
-                    <input type="email" className="form-control" id="email" name="email" autoComplete="email" value={form.email} onChange={updateField} />
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="phoneno" className="form-label">Phone Number</label>
-                    <input type="tel" className="form-control" id="phoneno" name="phone" autoComplete="tel" value={form.phone} onChange={updateField} />
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="username" className="form-label">Username</label>
-                    <input type="text" className="form-control" id="username" name="username" autoComplete="username" value={form.username} onChange={updateField} />
-                  </div>
-                  <div className="col-lg-6 mb-3">
-                    <label htmlFor="password" className="form-label">Password</label>
-                    <input type="password" className="form-control" id="password" name="password" autoComplete="new-password" value={form.password} onChange={updateField} />
-                  </div>
-                  <div className="text-center">
-                    <button type="submit" className="btn btn-primary btn-icon-text">
-                      <Icon className="btn-icon-prepend" name="plus" /> Update Profile
-                    </button>
-                    {saved && <p className="text-success mt-2 mb-0" role="status">Profile updated.</p>}
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
+      {(request.status === "idle" || request.status === "loading") && (
+        <div className="card"><div className="card-body"><LoadingSpinner label="Đang tải hồ sơ người dùng" /></div></div>
+      )}
+      {request.status === "failed" && (
+        <Alert variant="danger">{request.error?.message ?? "Không tải được hồ sơ người dùng."}</Alert>
+      )}
+      {selected && <UserProfileForm key={`${selected.id}-${selected.email}`} user={selected} />}
     </>
+  );
+}
+
+function UserProfileForm({ user }: { user: User }) {
+  const dispatch = useAppDispatch();
+  const [feedback, setFeedback] = useState<{ variant: "success" | "danger"; message: string } | null>(null);
+  const form = useForm<UserDetailValues>({
+    name: user.name,
+    email: user.email,
+    phone: user.phone ?? "",
+    birthday: toDateInput(user.birthday),
+    gender: String(user.gender),
+    role: user.role,
+  }, {
+    name: [required("Vui lòng nhập họ tên.")],
+    email: [required("Vui lòng nhập email."), email],
+    phone: [phone],
+    birthday: [required(), validDate, (value) => value <= localToday() ? undefined : "Ngày sinh không được ở tương lai."],
+    gender: [required()],
+    role: [required()],
+  });
+
+  const handleUpdateUser = form.handleSubmit(async (values) => {
+    setFeedback(null);
+    try {
+      await dispatch(updateUser({
+        id: user.id,
+        data: {
+          name: values.name.trim(),
+          email: values.email.trim(),
+          phone: values.phone.trim(),
+          birthday: values.birthday,
+          gender: values.gender === "true",
+          role: values.role,
+        },
+      })).unwrap();
+      await dispatch(fetchUserDetail(user.id)).unwrap();
+      setFeedback({ variant: "success", message: "Đã cập nhật hồ sơ người dùng." });
+    } catch (error) {
+      setFeedback({ variant: "danger", message: toApiError(error).message });
+    }
+  });
+
+  return (
+    <div className="row profile-body">
+      <div className="col-lg-4 grid-margin stretch-card">
+        <div className="card w-100 rounded">
+          <div className="card-body text-center">
+            <ApiImage
+              className="wd-100 ht-100 rounded-circle object-fit-cover mb-3"
+              src={user.avatar}
+              alt={`Ảnh đại diện của ${user.name}`}
+              width={100}
+              height={100}
+              fallback={<span className="d-inline-flex align-items-center justify-content-center rounded-circle bg-light wd-100 ht-100 mb-3"><Icon name="user" size={38} /></span>}
+            />
+            <h2 className="h4 mb-1">{form.values.name || user.name}</h2>
+            <p className="text-muted mb-4">{form.values.email || user.email}</p>
+            <dl className="text-start mb-0">
+              <div className="mb-3"><dt className="text-uppercase tx-11">Mã người dùng</dt><dd className="mb-0">#{user.id}</dd></div>
+              <div className="mb-3"><dt className="text-uppercase tx-11">Điện thoại</dt><dd className="mb-0">{form.values.phone || "Chưa cập nhật"}</dd></div>
+              <div className="mb-3"><dt className="text-uppercase tx-11">Ngày sinh</dt><dd className="mb-0">{form.values.birthday || "Chưa cập nhật"}</dd></div>
+              <div><dt className="text-uppercase tx-11">Vai trò</dt><dd className="mb-0"><span className={`badge ${form.values.role === "ADMIN" ? "bg-primary" : "bg-secondary"}`}>{form.values.role}</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <div className="col-lg-8 grid-margin stretch-card">
+        <div className="card w-100">
+          <div className="card-body">
+            <h2 className="h5 mb-4">Thông tin hồ sơ</h2>
+            {feedback && <Alert variant={feedback.variant}>{feedback.message}</Alert>}
+            <form className="forms-sample" noValidate onSubmit={handleUpdateUser}>
+              <div className="row">
+                <div className="col-lg-6"><Input label="Họ tên" name="name" autoComplete="name" required value={form.values.name} error={form.errors.name} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+                <div className="col-lg-6"><Input label="Email" name="email" type="email" autoComplete="email" required value={form.values.email} error={form.errors.email} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+                <div className="col-lg-6"><Input label="Số điện thoại" name="phone" type="tel" autoComplete="tel" value={form.values.phone} error={form.errors.phone} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+                <div className="col-lg-6"><Input label="Ngày sinh" name="birthday" type="date" max={localToday()} autoComplete="bday" required value={form.values.birthday} error={form.errors.birthday} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+                <div className="col-lg-6"><Select label="Giới tính" name="gender" options={[{ value: "true", label: "Nam" }, { value: "false", label: "Nữ" }]} value={form.values.gender} error={form.errors.gender} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+                <div className="col-lg-6"><Select label="Vai trò" name="role" options={[{ value: "USER", label: "USER" }, { value: "ADMIN", label: "ADMIN" }]} value={form.values.role} error={form.errors.role} onChange={form.handleChange} onBlur={form.handleBlur} /></div>
+              </div>
+              <Button type="submit" loading={form.submitting}>Lưu thay đổi</Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

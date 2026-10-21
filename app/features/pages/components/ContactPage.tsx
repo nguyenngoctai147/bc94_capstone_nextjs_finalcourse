@@ -1,43 +1,78 @@
 "use client";
 
-import { useEffect } from "react";
-import { legacyScriptBundles, loadLegacyScripts } from "@/lib/legacy/scripts";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { siteInfo } from "@/config/site";
+import styles from "./HotuxPages.module.css";
+
+type ContactValues = { firstName: string; lastName: string; email: string; phone: string; message: string };
+type ContactErrors = Partial<Record<keyof ContactValues, string>>;
+const initialValues: ContactValues = { firstName: "", lastName: "", email: "", phone: "", message: "" };
+
+const supportItems = [
+  ["Hỗ trợ khách hàng", "Giải đáp thông tin tài khoản và cách sử dụng hệ thống."],
+  ["Hỗ trợ kỹ thuật", "Tiếp nhận vấn đề khi tìm kiếm, đăng nhập hoặc xem dữ liệu."],
+  ["Tư vấn đặt phòng", "Hướng dẫn kiểm tra ngày trống, chọn phòng và xác nhận."],
+] as const;
+
+function validate(values: ContactValues): ContactErrors {
+  const errors: ContactErrors = {};
+  if (!values.firstName.trim()) errors.firstName = "Vui lòng nhập tên.";
+  if (!values.lastName.trim()) errors.lastName = "Vui lòng nhập họ.";
+  if (!/^\S+@\S+\.\S+$/.test(values.email)) errors.email = "Email chưa đúng định dạng.";
+  if (values.phone && !/^[0-9+()\s.-]{8,20}$/.test(values.phone)) errors.phone = "Số điện thoại chưa hợp lệ.";
+  if (values.message.trim().length < 10) errors.message = "Nội dung cần ít nhất 10 ký tự.";
+  return errors;
+}
 
 export function ContactPage() {
-  useEffect(() => {
-    void loadLegacyScripts(legacyScriptBundles.hotuxContact);
-  }, []);
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const key = event.target.name as keyof ContactValues;
+    setValues((current) => ({ ...current, [key]: event.target.value }));
+    setErrors((current) => ({ ...current, [key]: undefined }));
+    setSubmitted(false);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextErrors = validate(values);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+    setSubmitted(true);
+  };
 
   return (
-    <section className="contact">
-      <div className="container">
-        <div className="contact-info"><div className="row">
-          <div className="col-lg-4 col-md-12 mar-bottom-30"><div className="info-item"><div className="info-icon"><i className="fa fa-map-marker" /></div><div className="info-content"><p>445 Mount Eden Road, Mt Edenward land</p></div></div></div>
-          <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="info-item info-item-or"><div className="info-icon"><i className="fa fa-phone" /></div><div className="info-content"><p>977-444-666-888</p><p>977-444-222-000</p></div></div></div>
-          <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="info-item"><div className="info-icon"><i className="fa fa-envelope" /></div><div className="info-content"><p>info@hotux.com.np</p><p>help@hotux.com.np</p></div></div></div>
-        </div></div>
+    <section className="contact"><div className="container">
+      <div className="contact-info"><div className="row">
+        <div className="col-lg-4 col-md-12 mar-bottom-30"><div className="info-item"><div className="info-icon"><i className="fa fa-map-marker" /></div><div className="info-content"><p>{siteInfo.address}</p></div></div></div>
+        <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="info-item info-item-or"><div className="info-icon"><i className="fa fa-phone" /></div><div className="info-content"><p><a href={`tel:${siteInfo.phone}`}>{siteInfo.phoneLabel}</a></p><p>Hỗ trợ trong giờ làm việc</p></div></div></div>
+        <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="info-item"><div className="info-icon"><i className="fa fa-envelope" /></div><div className="info-content"><p><a href={`mailto:${siteInfo.email}`}>{siteInfo.email}</a></p><p>Phản hồi yêu cầu hỗ trợ</p></div></div></div>
+      </div></div>
 
-        <div className="contact-support"><div className="row">
-          <div className="col-lg-4 col-md-12 mar-bottom-30"><div className="support-item"><h4>Costumer Support</h4><p className="mar-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec hendrerit facilisis nisi.</p></div></div>
-          <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="support-item"><h4>Technical Support</h4><p className="mar-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec hendrerit facilisis nisi.</p></div></div>
-          <div className="col-lg-4 col-md-6 mar-bottom-30"><div className="support-item"><h4>Booking Queries</h4><p className="mar-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec hendrerit facilisis nisi.</p></div></div>
-        </div></div>
+      <div className="contact-support"><div className="row">{supportItems.map(([title, description]) => <div className="col-lg-4 col-md-6 mar-bottom-30" key={title}><article className="support-item"><h2 className="h4">{title}</h2><p className="mar-0">{description}</p></article></div>)}</div></div>
 
-        <div className="contact-map"><div className="row">
-          <div className="col-lg-6"><div id="map" style={{ height: "535px", width: "100%" }} /></div>
-          <div className="col-lg-6"><div id="contact-form" className="contact-form">
-            <h3>Keep in Touch</h3><div id="contactform-error-msg" />
-            <form method="post" action="#" name="contactform" id="contactform">
-              <div className="form-group"><input type="text" name="first_name" className="form-control" id="fname" placeholder="First Name" /></div>
-              <div className="form-group"><input type="text" name="last_name" className="form-control" id="lname" placeholder="Last Name" /></div>
-              <div className="form-group"><input type="email" name="email" className="form-control" id="email" placeholder="Email" /></div>
-              <div className="form-group"><input type="text" name="phone" className="form-control" id="phnumber" placeholder="Phone" /></div>
-              <div className="textarea"><textarea name="comments" placeholder="Enter a message" /></div>
-              <div className="comment-btn text-right"><input type="submit" className="btn btn-orange" id="submit" value="Send Message" /></div>
-            </form>
-          </div></div>
+      <div className="contact-map"><div className="row g-0">
+        <div className="col-lg-6"><div className={styles.mapPlaceholder}>
+          <span className="eyebrow text-white">Hotux Support</span><h2 className="white mar-top-15">Luôn sẵn sàng hỗ trợ chuyến đi của bạn</h2>
+          <p>Gửi thông tin qua biểu mẫu hoặc liên hệ trực tiếp với chúng tôi để được hướng dẫn về chỗ nghỉ và đặt phòng.</p>
+          <p><i className="fa fa-map-marker me-2" /> {siteInfo.address}</p><p><i className="fa fa-phone me-2" /> <a href={`tel:${siteInfo.phone}`}>{siteInfo.phoneLabel}</a></p>
         </div></div>
-      </div>
-    </section>
+        <div className="col-lg-6"><div id="contact-form" className="contact-form">
+          <h2 className="h3">Giữ liên lạc</h2><p>Điền thông tin dưới đây; Hotux sẽ dùng email bạn cung cấp để phản hồi.</p>
+          {submitted && <div className="alert alert-success" role="status">Biểu mẫu hợp lệ. Bạn có thể gửi nội dung tới <a href={`mailto:${siteInfo.email}`}>{siteInfo.email}</a>.</div>}
+          <form noValidate onSubmit={handleSubmit}>
+            <div className="form-group"><label className="visually-hidden" htmlFor="contact-first-name">Tên</label><input id="contact-first-name" name="firstName" className="form-control" placeholder="Tên" value={values.firstName} onChange={handleChange} aria-invalid={Boolean(errors.firstName)} />{errors.firstName && <span className={styles.fieldError}>{errors.firstName}</span>}</div>
+            <div className="form-group"><label className="visually-hidden" htmlFor="contact-last-name">Họ</label><input id="contact-last-name" name="lastName" className="form-control" placeholder="Họ" value={values.lastName} onChange={handleChange} aria-invalid={Boolean(errors.lastName)} />{errors.lastName && <span className={styles.fieldError}>{errors.lastName}</span>}</div>
+            <div className="form-group"><label className="visually-hidden" htmlFor="contact-email">Email</label><input id="contact-email" name="email" type="email" className="form-control" placeholder="Email" value={values.email} onChange={handleChange} aria-invalid={Boolean(errors.email)} />{errors.email && <span className={styles.fieldError}>{errors.email}</span>}</div>
+            <div className="form-group"><label className="visually-hidden" htmlFor="contact-phone">Điện thoại</label><input id="contact-phone" name="phone" className="form-control" placeholder="Số điện thoại (không bắt buộc)" value={values.phone} onChange={handleChange} aria-invalid={Boolean(errors.phone)} />{errors.phone && <span className={styles.fieldError}>{errors.phone}</span>}</div>
+            <div className="textarea"><label className="visually-hidden" htmlFor="contact-message">Nội dung</label><textarea id="contact-message" name="message" placeholder="Nội dung cần hỗ trợ" value={values.message} onChange={handleChange} aria-invalid={Boolean(errors.message)} />{errors.message && <span className={styles.fieldError}>{errors.message}</span>}</div>
+            <div className="comment-btn text-end"><button type="submit" className="btn btn-orange">Kiểm tra nội dung</button></div>
+          </form>
+        </div></div>
+      </div></div>
+    </div></section>
   );
 }

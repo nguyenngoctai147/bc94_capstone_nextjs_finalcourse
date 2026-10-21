@@ -1,0 +1,16 @@
+.galleryImage {
+  position: relative;
+  width: 100%;
+  height: auto !important;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #20262b;
+}
+
+.galleryImage img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: center;
+}
