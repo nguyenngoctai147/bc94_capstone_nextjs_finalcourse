@@ -45,7 +45,7 @@ export function DesignSystemGuide() {
     </nav>
 
     <section id="typography" className={styles.section}>
-      <SectionHeading number="01" title="Typography" description="Poppins cho tiêu đề, Lato cho nội dung. Phân cấp thị giác độc lập với thẻ HTML, căn trái là mặc định." />
+      <SectionHeading number="01" title="Typography" description="Roboto dùng thống nhất cho tiêu đề và nội dung, hỗ trợ đầy đủ tiếng Việt. Phân cấp thị giác độc lập với thẻ HTML, căn trái là mặc định." />
       <div className={styles.panel}>
         {typeSamples.map(([variant, label, size, sample]) => <div key={variant} className={styles.typeRow}>
           <div><Typography variant="label">{label}</Typography><Typography variant="caption" tone="muted">{size} · --ds-text-{variant}</Typography></div>

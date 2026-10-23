@@ -8,8 +8,14 @@
  */
 @tailwind utilities;
 
-/* Match the static Hotux theme's body defaults from default.css. */
-body { background: #fff; color: #444; font-family: 'Lato', sans-serif; }
+/* Roboto is self-hosted by next/font and includes the Vietnamese subset. */
+html { font-family: var(--font-roboto), Arial, sans-serif; }
+html body { background: #fff; color: #444; font-family: var(--font-roboto), Arial, sans-serif; }
+html body :is(h1, h2, h3, h4, h5, h6, button, input, select, textarea) { font-family: var(--font-roboto), Arial, sans-serif; }
+html body .header_top .header_top_inner .pull-left a,
+html body .header_menu .navbar.navbar-default .nav.navbar-nav.navbar-right .book_btn .book_now_btn {
+  font-family: var(--font-roboto), Arial, sans-serif;
+}
 a { text-underline-offset: 3px; }
 /* Keep design-system tokens out of the supplied dashboard theme. */
 :is(.ds-site, .auth-shell) .btn-primary { --bs-btn-bg: var(--ds-primary); --bs-btn-border-color: var(--ds-primary); --bs-btn-hover-bg: var(--ds-primary-hover); --bs-btn-hover-border-color: var(--ds-primary-hover); --bs-btn-active-bg: var(--ds-primary-hover); --bs-btn-active-border-color: var(--ds-primary-hover); --bs-btn-disabled-bg: var(--ds-primary); --bs-btn-disabled-border-color: var(--ds-primary); }
@@ -96,3 +102,9 @@ a { text-underline-offset: 3px; }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
+.main-wrapper {
+  --bs-font-sans-serif: var(--font-roboto), Arial, sans-serif;
+  --bs-body-font-family: var(--bs-font-sans-serif);
+  font-family: var(--bs-body-font-family);
+}
+.main-wrapper .apexcharts-tooltip * { font-family: var(--font-roboto), Arial, sans-serif !important; }

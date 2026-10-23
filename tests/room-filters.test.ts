@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { filterRooms, initialRoomFilters } from "../app/features/rooms/room-list.utils";
+import { filterRooms, initialRoomFilters, selectRelatedRooms } from "../app/features/rooms/room-list.utils";
 import type { Room } from "../app/features/rooms/rooms.types";
 import type { Booking } from "../app/features/bookings/bookings.types";
 
@@ -41,4 +41,18 @@ test("room search respects location, guest capacity and overlapping bookings tog
     search: { checkIn: "2030-10-20", checkOut: "2030-10-23", guests: 2 }, bookings,
   });
   assert.deepEqual(result.map((room) => room.id), [1]);
+});
+
+test("related rooms prefer the same location and fill empty slots without duplicates", () => {
+  const currentRoom = makeRoom({ id: 1, maViTri: 10 });
+  const nearbyRooms = [currentRoom, makeRoom({ id: 2, maViTri: 10 })];
+  const fallbackRooms = [
+    makeRoom({ id: 2, maViTri: 10 }),
+    makeRoom({ id: 3, maViTri: 20 }),
+    makeRoom({ id: 4, maViTri: 30 }),
+  ];
+
+  const related = selectRelatedRooms(currentRoom, nearbyRooms, fallbackRooms);
+
+  assert.deepEqual(related.map((room) => room.id), [2, 3, 4]);
 });

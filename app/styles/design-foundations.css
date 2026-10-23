@@ -23,6 +23,10 @@
 .ds-site .breadcrumb-content h1 { color: white; text-transform: uppercase; margin: 0 0 var(--ds-space-4); }
 .ds-site .swiper-content .home-banner-title { font-size: clamp(2.5rem, 6vw, 5rem); color: white; text-transform: uppercase; }
 .ds-site .swiper-content .home-banner-eyebrow { color: white; font-size: var(--ds-text-h4); text-transform: uppercase; }
+.ds-site .home-banner > .slider {
+  height: 100vh;
+  height: 100svh;
+}
 .ds-site section.banner .swiper-slide {
   background-position: center;
   background-repeat: no-repeat;
@@ -32,6 +36,13 @@
   width: auto;
   height: auto;
   object-fit: contain;
+}
+@media (max-width: 991px) {
+  .ds-site .home-banner > .slider {
+    height: calc(100vh - 85px);
+    height: calc(100svh - 85px);
+    min-height: 500px;
+  }
 }
 .ds-site .room-image-fallback { min-height: 220px; height: 100%; display: grid; place-items: center; background: var(--ds-canvas); color: var(--ds-muted); padding: var(--ds-space-4); }
 .ds-site .room-item { height: 100%; display: flex; flex-direction: column; }

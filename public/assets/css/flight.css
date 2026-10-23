@@ -628,7 +628,7 @@ Change the following styles to modify the appearance of the menu.
   font-size: 15px;
   color: #fff;
   opacity: .60;
-  font-family: "Open Sans", sans-serif;
+  font-family: var(--font-roboto), Arial, sans-serif;
   letter-spacing: .45px;
   margin-right: 22px;
   -webkit-transition: all 150ms linear;
@@ -904,7 +904,7 @@ Change the following styles to modify the appearance of the menu.
   display: inline-block;
   padding: 0px 25px;
   font-size: 14px;
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-roboto), Arial, sans-serif;
   font-weight: bold;
   letter-spacing: .28px;
   position: relative;

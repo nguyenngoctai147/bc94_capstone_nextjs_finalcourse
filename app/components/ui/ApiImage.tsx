@@ -9,11 +9,23 @@ type ApiImageProps = Omit<ComponentProps<typeof Image>, "src" | "onError"> & {
   fallback?: ReactNode;
 };
 
-export function ApiImage({ src, alt, fallback = null, ...props }: ApiImageProps) {
+export function ApiImage({
+  src,
+  alt,
+  fallback = null,
+  ...props
+}: ApiImageProps) {
   const imageSrc = resolveApiImageSrc(src);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
   if (!imageSrc || failedSrc === imageSrc) return <>{fallback}</>;
 
-  return <Image {...props} src={imageSrc} alt={alt} onError={() => setFailedSrc(imageSrc)} />;
+  return (
+    <Image
+      {...props}
+      src={imageSrc}
+      alt={alt}
+      onError={() => setFailedSrc(imageSrc)}
+    />
+  );
 }

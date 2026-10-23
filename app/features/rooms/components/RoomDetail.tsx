@@ -13,6 +13,7 @@ import { checkoutAfter, today, validSearch, withStaySearch, type Search } from "
 import { toApiError } from "@/lib/api/errors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { roomsService } from "../rooms.service";
+import { RELATED_ROOM_LIMIT, selectRelatedRooms } from "../room-list.utils";
 import type { Room } from "../rooms.types";
 import { fetchRoomDetail } from "../rooms.slice";
 import {
@@ -27,6 +28,7 @@ import {
 import styles from "./RoomDetail.module.css";
 
 const initialReviewForm: ReviewFormValue = { stars: "5", content: "" };
+type RelatedRoomsState = { roomId: number; items: Room[] } | null;
 
 export function RoomDetail({ id, search }: { id: number; search?: Search | null }) {
   const router = useRouter();
@@ -37,7 +39,7 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
   const room = request.status === "succeeded" && selected?.id === id ? selected : null;
   const [tab, setTab] = useState<RoomDetailTab>("overview");
   const [reviews, setReviews] = useState<RoomReview[]>([]);
-  const [related, setRelated] = useState<Room[]>([]);
+  const [relatedState, setRelatedState] = useState<RelatedRoomsState>(null);
   const [location, setLocation] = useState<Location | null>(null);
   const [stay, setStay] = useState({ checkIn: search?.checkIn ?? today(), checkOut: search?.checkOut ?? checkoutAfter(today(), 1) });
   const [guests, setGuests] = useState(search?.guests ?? 1);
@@ -57,14 +59,41 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
     if (!room) return;
     const controller = new AbortController();
 
+    const loadRelatedRooms = async () => {
+      let nearbyRooms: Room[] = [];
+
+      try {
+        nearbyRooms = await roomsService.byLocation(room.maViTri, {
+          signal: controller.signal,
+        });
+      } catch {
+        // The full catalogue below remains a safe fallback when this endpoint fails.
+      }
+
+      const nearbyRelatedRooms = selectRelatedRooms(room, nearbyRooms, []);
+      if (nearbyRelatedRooms.length === RELATED_ROOM_LIMIT) {
+        return nearbyRelatedRooms;
+      }
+
+      try {
+        const catalogue = await roomsService.list({ signal: controller.signal });
+        return selectRelatedRooms(room, nearbyRooms, catalogue.data);
+      } catch {
+        return nearbyRelatedRooms;
+      }
+    };
+
     void Promise.allSettled([
       reviewsService.byRoom(room.id, { signal: controller.signal }),
-      roomsService.byLocation(room.maViTri, { signal: controller.signal }),
+      loadRelatedRooms(),
       locationsService.detail(room.maViTri, { signal: controller.signal }),
-    ]).then(([reviewResult, roomResult, locationResult]) => {
+    ]).then(([reviewResult, relatedResult, locationResult]) => {
       if (controller.signal.aborted) return;
       setReviews(reviewResult.status === "fulfilled" ? reviewResult.value : []);
-      setRelated(roomResult.status === "fulfilled" ? roomResult.value.filter((item) => item.id !== room.id).slice(0, 3) : []);
+      setRelatedState({
+        roomId: room.id,
+        items: relatedResult.status === "fulfilled" ? relatedResult.value : [],
+      });
       setLocation(locationResult.status === "fulfilled" ? locationResult.value : null);
     });
 
@@ -85,6 +114,8 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
   if (!room) {
     return <section className="content ds-content"><div className="container text-center py-5"><LoadingSpinner label="Đang tải thông tin phòng" /></div></section>;
   }
+
+  const related = relatedState?.roomId === room.id ? relatedState.items : [];
 
   const handleReserve = () => {
     const selection: Search = { ...stay, guests, roomId: room.id, locationId: room.maViTri };

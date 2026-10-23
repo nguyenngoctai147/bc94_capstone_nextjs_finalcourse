@@ -675,7 +675,7 @@ header.main_header_area.headerstyle-2 .slicknav_nav{top: 74px;}
   font-size: 15px;
   color: #fff;
   opacity: .60;
-  font-family: "Open Sans", sans-serif;
+  font-family: var(--font-roboto), Arial, sans-serif;
   letter-spacing: .45px;
   margin-right: 22px;
   -webkit-transition: all 150ms linear;
@@ -987,7 +987,7 @@ header.main_header_area.headerstyle-2 .header_menu .navbar.navbar-default .navba
   display: inline-block;
   padding: 0px 25px;
   font-size: 14px;
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-roboto), Arial, sans-serif;
   font-weight: bold;
   letter-spacing: .28px;
   position: relative;

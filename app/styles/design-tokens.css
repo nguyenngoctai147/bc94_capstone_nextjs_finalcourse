@@ -22,9 +22,9 @@
   --ds-info: #245d9c;
   --ds-info-soft: #eef5ff;
 
-  --ds-font-body: "Lato", Arial, sans-serif;
-  --ds-font-heading: "Poppins", Arial, sans-serif;
-  --ds-font-admin: "Roboto", Arial, sans-serif;
+  --ds-font-body: var(--font-roboto), Arial, sans-serif;
+  --ds-font-heading: var(--font-roboto), Arial, sans-serif;
+  --ds-font-admin: var(--font-roboto), Arial, sans-serif;
   --ds-text-caption: .75rem;
   --ds-text-label: .875rem;
   --ds-text-body: 1rem;

@@ -13,7 +13,7 @@
 
 Giữ màu cam Hotux `--ds-brand` cho nhận diện. `--ds-primary` đậm hơn dành cho nút có chữ trắng và văn bản nhấn mạnh. Màu trạng thái có cả màu chữ và màu nền nhẹ; luôn kèm mô tả/icon, không dựa riêng vào màu.
 
-Poppins cho tiêu đề, Lato cho nội dung, Roboto giữ nguyên cho dashboard. Cỡ chữ dùng rem; H1–H3 và lead dùng clamp để giãn theo viewport. Body 16px/1.65; label 14px; caption 12px (khi font gốc trình duyệt là 16px). Giữ thẻ heading theo cấu trúc tài liệu, không chọn thẻ chỉ vì kích thước.
+Roboto dùng thống nhất cho tiêu đề, nội dung và dashboard; font được self-host bằng `next/font` với tập ký tự tiếng Việt. Cỡ chữ dùng rem; H1–H3 và lead dùng clamp để giãn theo viewport. Body 16px/1.65; label 14px; caption 12px (khi font gốc trình duyệt là 16px). Giữ thẻ heading theo cấu trúc tài liệu, không chọn thẻ chỉ vì kích thước.
 
 Spacing theo nhịp 4px: 4/8/12/16/20/24/32/40/48/64/80. Dùng token theo vai trò khi có thể: gutter 16–32px, section 40–80px, grid gap 24px, padding card 16–24px.
 

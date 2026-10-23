@@ -16,6 +16,33 @@ export const initialRoomFilters: RoomFiltersValue = {
   maxPrice: null,
 };
 
+export const RELATED_ROOM_LIMIT = 3;
+
+/** Prefer rooms at the same location, then fill remaining slots from the catalogue. */
+export function selectRelatedRooms(
+  currentRoom: Room,
+  nearbyRooms: readonly Room[],
+  fallbackRooms: readonly Room[],
+  limit = RELATED_ROOM_LIMIT,
+) {
+  const selectedIds = new Set<number>([currentRoom.id]);
+  const appendUniqueRooms = (rooms: readonly Room[], selected: Room[]) => {
+    rooms.forEach((room) => {
+      if (selected.length >= limit || selectedIds.has(room.id)) return;
+      selected.push(room);
+      selectedIds.add(room.id);
+    });
+  };
+
+  const relatedRooms: Room[] = [];
+  appendUniqueRooms(
+    nearbyRooms.filter((room) => room.maViTri === currentRoom.maViTri),
+    relatedRooms,
+  );
+  appendUniqueRooms(fallbackRooms, relatedRooms);
+  return relatedRooms;
+}
+
 export function filterRooms(rooms: readonly Room[], options: {
   filters: RoomFiltersValue;
   sortOrder: SortOrder;
