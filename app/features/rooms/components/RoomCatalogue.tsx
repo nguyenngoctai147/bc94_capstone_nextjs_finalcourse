@@ -131,14 +131,14 @@ type RoomCatalogueCardProps = {
 function RoomAction({ action }: { action: RoomPrimaryAction }) {
   if (action.href) {
     return (
-      <BookingLink className="btn btn-orange" href={action.href}>
+      <BookingLink className={`btn btn-orange ${styles.cardButton} ${styles.primaryButton}`} href={action.href}>
         {action.label}
       </BookingLink>
     );
   }
 
   return (
-    <button type="button" className="btn btn-orange" onClick={action.onClick}>
+    <button type="button" className={`btn btn-orange ${styles.cardButton} ${styles.primaryButton}`} onClick={action.onClick}>
       {action.label}
     </button>
   );
@@ -154,12 +154,12 @@ function RoomServices({ room }: { room: Room }) {
         : `${room.khach} khách`;
 
   return (
-    <div className="room-services">
-      <div className="row">
-        <div className="col-sm-6">
+    <div className={`room-services ${styles.cardMeta}`}>
+      <div className={`row ${styles.metaRow}`}>
+        <div className={`col-sm-6 ${styles.metaItem}`}>
           <i className="fa fa-bed" aria-hidden="true" /> {room.phongNgu} phòng ngủ · {room.giuong} giường
         </div>
-        <div className="col-sm-6">
+        <div className={`col-sm-6 ${styles.metaItem}`}>
           <i className="fa fa-user" aria-hidden="true" /> Tối đa {room.khach} khách · {firstAmenity}
         </div>
       </div>
@@ -190,14 +190,14 @@ export function RoomCatalogueCard(props: RoomCatalogueCardProps) {
 
   if (viewMode === "grid") {
     return (
-      <article className="room-item">
+      <article className={`room-item ${styles.gridCard}`}>
         <div className="room-image">{image}</div>
-        <div className="room-content">
-          <h3><Link href={detailHref}>{room.tenPhong}</Link></h3>
-          <p className="h5">${room.giaTien.toLocaleString("vi-VN")} <small>/ đêm</small></p>
+        <div className={`room-content ${styles.gridCardContent}`}>
+          <h3 className={styles.cardTitle}><Link href={detailHref}>{room.tenPhong}</Link></h3>
+          <p className={styles.cardPrice}>${room.giaTien.toLocaleString("vi-VN")} <small>/ đêm</small></p>
           <RoomServices room={room} />
-          <div className="grid-btn mar-top-20">
-            <Link className="btn btn-black" href={detailHref}>Xem chi tiết</Link>
+          <div className={`grid-btn ${styles.cardActions}`}>
+            <Link className={`btn btn-black ${styles.cardButton}`} href={detailHref}>Xem chi tiết</Link>
             <RoomAction action={action} />
           </div>
         </div>
@@ -206,19 +206,19 @@ export function RoomCatalogueCard(props: RoomCatalogueCardProps) {
   }
 
   return (
-    <article className="room-grid">
-      <div className="grid-image location-room-image">{image}</div>
-      <div className="grid-content">
-        <div className="room-title">
-          <h3><Link href={detailHref}>{room.tenPhong}</Link></h3>
-          <p className="mar-0">${room.giaTien.toLocaleString("vi-VN")} <small>/ đêm</small></p>
+    <article className={`room-grid ${styles.listCard}`}>
+      <div className={`grid-image location-room-image ${styles.listCardImage}`}>{image}</div>
+      <div className={`grid-content ${styles.listCardContent}`}>
+        <div className={`room-title ${styles.cardHeader}`}>
+          <h3 className={styles.cardTitle}><Link href={detailHref}>{room.tenPhong}</Link></h3>
+          <p className={styles.cardPrice}>${room.giaTien.toLocaleString("vi-VN")} <small>/ đêm</small></p>
         </div>
-        <div className="room-detail">
+        <div className={`room-detail ${styles.cardDescription}`}>
           <p>{room.moTa || "Không gian lưu trú tiện nghi, phù hợp cho chuyến đi của bạn."}</p>
         </div>
         <RoomServices room={room} />
-        <div className="grid-btn mar-top-20">
-          <Link className="btn btn-black" href={detailHref}>Xem chi tiết</Link>
+        <div className={`grid-btn ${styles.cardActions}`}>
+          <Link className={`btn btn-black ${styles.cardButton}`} href={detailHref}>Xem chi tiết</Link>
           <RoomAction action={action} />
         </div>
       </div>

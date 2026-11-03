@@ -3,7 +3,9 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
 import { roomAmenities, type AmenityKey } from "../room-amenities";
 import type { RoomFiltersValue } from "../room-list.utils";
+import { siteInfo } from "@/config/site";
 import styles from "@/css/features/rooms/room-list.module.css";
+import { RoomAmenityIcon } from "./RoomAmenityIcon";
 
 export type RoomFiltersProps = {
   values: RoomFiltersValue;
@@ -42,30 +44,30 @@ export function RoomFilters(props: RoomFiltersProps) {
     ["2", "Phòng đôi"],
     ["3", "Từ 3 phòng ngủ"],
   ] as const).map(([value, label]) => (
-    <div className="pretty p-default p-thick p-pulse mar-bottom-15" key={value}>
-      <input id={`bedrooms-${value}`} type="checkbox" checked={values.bedrooms === value} disabled={disabled} onChange={() => handleBedroomsChange(value)} />
-      <div className="state p-warning-o"><label htmlFor={`bedrooms-${value}`}>{label}</label></div>
-    </div>
+    <label className={`${styles.filterOption} ${styles.compactOption}`} htmlFor={`bedrooms-${value}`} key={value}>
+      <input className={styles.filterCheckbox} id={`bedrooms-${value}`} type="checkbox" checked={values.bedrooms === value} disabled={disabled} onChange={() => handleBedroomsChange(value)} />
+      <span className={styles.checkmark} aria-hidden="true" />
+      <span className={styles.optionText}>{label}</span>
+    </label>
   ));
 
   const renderAmenities = () => roomAmenities.map(({ key, label }) => (
-    <div className="pretty p-default p-thick p-pulse mar-bottom-15" key={key}>
-      <input id={`amenity-${key}`} type="checkbox" checked={values.amenities.includes(key)} disabled={disabled} onChange={(event) => handleAmenityChange(key, event.target.checked)} />
-      <div className="state p-warning-o"><label htmlFor={`amenity-${key}`}>{label}</label></div>
-    </div>
+    <label className={styles.filterOption} htmlFor={`amenity-${key}`} key={key}>
+      <input className={styles.filterCheckbox} id={`amenity-${key}`} type="checkbox" checked={values.amenities.includes(key)} disabled={disabled} onChange={(event) => handleAmenityChange(key, event.target.checked)} />
+      <span className={styles.checkmark} aria-hidden="true" />
+      <span className={styles.optionIcon}><RoomAmenityIcon amenity={key} /></span>
+      <span className={styles.optionText}>{label}</span>
+    </label>
   ));
 
   const renderRatings = () => ([5, 4, 3, 2, 1] as const).map((rating) => (
-    <div className="pretty p-default p-thick p-pulse mar-bottom-15" key={rating}>
-      <input id={`rating-${rating}`} type="checkbox" checked={values.minRating === rating} disabled={disabled} onChange={() => handleRatingChange(rating)} />
-      <div className="state p-warning-o">
-        <label htmlFor={`rating-${rating}`}>
-          <span className={`rating ${styles.ratingStars}`} aria-label={`Từ ${rating} sao`}>
-            {Array.from({ length: rating }, (_, index) => <span className="fa fa-star" aria-hidden="true" key={index} />)}
-          </span>
-        </label>
-      </div>
-    </div>
+    <label className={`${styles.filterOption} ${styles.compactOption}`} htmlFor={`rating-${rating}`} key={rating}>
+      <input className={styles.filterCheckbox} id={`rating-${rating}`} type="checkbox" checked={values.minRating === rating} disabled={disabled} onChange={() => handleRatingChange(rating)} />
+      <span className={styles.checkmark} aria-hidden="true" />
+      <span className={styles.ratingStars} aria-label={`Từ ${rating} sao`}>
+        {Array.from({ length: rating }, (_, index) => <span className="fa fa-star" aria-hidden="true" key={index} />)}
+      </span>
+    </label>
   ));
 
   return (
@@ -74,22 +76,30 @@ export function RoomFilters(props: RoomFiltersProps) {
         {isOpen ? "Ẩn bộ lọc" : "Mở bộ lọc"}{selectedCount > 0 ? ` · ${selectedCount} đang chọn` : ""}
       </button>
       <div id="room-filters" className={`list-sidebar room-filters ${styles.filters} ${isOpen ? styles.filtersExpanded : ""}`} aria-disabled={disabled}>
-        <div className="room-type list-sidebar-item">
-          <h4>Loại phòng</h4>
+        <div className={`room-type list-sidebar-item ${styles.filterSection}`}>
+          <h4 className={styles.filterHeading}><i className="fa fa-bed" aria-hidden="true" />Loại phòng</h4>
           {renderBedrooms()}
         </div>
-        {highestPrice > 0 && <div className="price list-sidebar-item">
-          <h4>Giá</h4>
+        {highestPrice > 0 && <div className={`price list-sidebar-item ${styles.filterSection}`}>
+          <h4 className={styles.filterHeading}><i className="fa fa-usd" aria-hidden="true" />Giá</h4>
+          <span className={styles.priceHint}>Ngân sách tối đa mỗi đêm</span>
           <div className={styles.priceSlider}>
-            <span className={styles.priceStartThumb} aria-hidden="true" />
-            <input id="room-price" type="range" min="0" max={highestPrice} step="1" value={activePrice} disabled={disabled} onChange={handlePriceChange} style={{ "--price-progress": `${priceProgress}%` } as CSSProperties} />
+            <div className={styles.rangeControl}>
+              <span className={styles.priceStartThumb} aria-hidden="true" />
+              <input id="room-price" type="range" min="0" max={highestPrice} step="1" value={activePrice} disabled={disabled} onChange={handlePriceChange} style={{ "--price-progress": `${priceProgress}%` } as CSSProperties} />
+            </div>
             <div className={styles.priceValues}><output htmlFor="room-price">0 $</output><output htmlFor="room-price">{activePrice.toLocaleString("vi-VN")} $</output></div>
           </div>
         </div>}
-        <div className="ratings list-sidebar-item"><h4>Đánh giá</h4>{renderRatings()}</div>
-        <div className="services list-sidebar-item"><h4>Tiện nghi</h4>{renderAmenities()}</div>
-        {selectedCount > 0 && <button type="button" className="btn btn-outline-secondary w-100" disabled={disabled} onClick={onReset}>Xóa bộ lọc</button>}
-        <div className="info-1 list-sidebar-item"><h4>Cần hỗ trợ?</h4><p className="mar-0">Liên hệ chúng tôi để được tư vấn chỗ nghỉ phù hợp.</p><p className="mar-0"><i className="fa fa-phone" aria-hidden="true" /> 1900 0000</p></div>
+        <div className={`ratings list-sidebar-item ${styles.filterSection}`}><h4 className={styles.filterHeading}><i className="fa fa-star" aria-hidden="true" />Đánh giá</h4>{renderRatings()}</div>
+        <div className={`services list-sidebar-item ${styles.filterSection}`}><h4 className={styles.filterHeading}><i className="fa fa-sliders" aria-hidden="true" />Tiện nghi</h4>{renderAmenities()}</div>
+        {selectedCount > 0 && <button type="button" className={styles.resetButton} disabled={disabled} onClick={onReset}><i className="fa fa-refresh" aria-hidden="true" />Xóa bộ lọc</button>}
+        <div className={styles.supportBox}>
+          <span className={styles.supportIcon}><i className="fa fa-headphones" aria-hidden="true" /></span>
+          <h4>Cần hỗ trợ?</h4>
+          <p>Liên hệ Hotux để được tư vấn chỗ nghỉ phù hợp.</p>
+          <a href={`tel:${siteInfo.phone}`}><i className="fa fa-phone" aria-hidden="true" />{siteInfo.phoneLabel}</a>
+        </div>
       </div>
     </aside>
   );
