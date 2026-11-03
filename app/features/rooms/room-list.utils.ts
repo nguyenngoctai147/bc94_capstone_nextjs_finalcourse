@@ -8,17 +8,18 @@ export type RoomFiltersValue = {
   bedrooms: "all" | "1" | "2" | "3";
   amenities: AmenityKey[];
   maxPrice: number | null;
+  minRating: 1 | 2 | 3 | 4 | 5 | null;
 };
 
 export const initialRoomFilters: RoomFiltersValue = {
   bedrooms: "all",
   amenities: [],
   maxPrice: null,
+  minRating: null,
 };
 
 export const RELATED_ROOM_LIMIT = 3;
 
-/** Prefer rooms at the same location, then fill remaining slots from the catalogue. */
 export function selectRelatedRooms(
   currentRoom: Room,
   nearbyRooms: readonly Room[],
@@ -49,10 +50,10 @@ export function filterRooms(rooms: readonly Room[], options: {
   locationId?: number;
   search?: Search | null;
   bookings: Booking[];
+  ratingsByRoom?: ReadonlyMap<number, number>;
 }) {
-  const { filters, sortOrder, locationId, search, bookings } = options;
+  const { filters, sortOrder, locationId, search, bookings, ratingsByRoom } = options;
 
-  // filter tạo mảng mới, nên sort bên dưới không thay đổi mảng trong Redux.
   const result = rooms.filter((room) => {
     const matchesLocation = locationId === undefined || room.maViTri === locationId;
     const matchesStay = !search || available(room, search, bookings);
@@ -60,8 +61,10 @@ export function filterRooms(rooms: readonly Room[], options: {
       (filters.bedrooms === "3" ? room.phongNgu >= 3 : room.phongNgu === Number(filters.bedrooms));
     const matchesPrice = filters.maxPrice === null || room.giaTien <= filters.maxPrice;
     const matchesAmenities = filters.amenities.every((key) => room[key] === true);
+    const matchesRating = filters.minRating === null || !ratingsByRoom ||
+      (ratingsByRoom.get(room.id) ?? 0) >= filters.minRating;
 
-    return matchesLocation && matchesStay && matchesBedrooms && matchesPrice && matchesAmenities;
+    return matchesLocation && matchesStay && matchesBedrooms && matchesPrice && matchesAmenities && matchesRating;
   });
 
   if (sortOrder === "price-low") result.sort((first, second) => first.giaTien - second.giaTien);

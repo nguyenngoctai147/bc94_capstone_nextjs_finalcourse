@@ -1,14 +1,8 @@
-@import "./styles/design-tokens.css";
-@import "./styles/design-foundations.css";
+@import "./design-tokens.css";
+@import "./design-foundations.css";
 
-/*
- * Tailwind is utilities-only in this Bootstrap/Hotux application.
- * `preflight` is disabled in tailwind.config.js and base/components are
- * deliberately not imported, so Tailwind never applies a global reset.
- */
 @tailwind utilities;
 
-/* Roboto is self-hosted by next/font and includes the Vietnamese subset. */
 html { font-family: var(--font-roboto), Arial, sans-serif; }
 html body { background: #fff; color: #444; font-family: var(--font-roboto), Arial, sans-serif; }
 html body :is(h1, h2, h3, h4, h5, h6, button, input, select, textarea) { font-family: var(--font-roboto), Arial, sans-serif; }
@@ -16,8 +10,9 @@ html body .header_top .header_top_inner .pull-left a,
 html body .header_menu .navbar.navbar-default .nav.navbar-nav.navbar-right .book_btn .book_now_btn {
   font-family: var(--font-roboto), Arial, sans-serif;
 }
+.room-amenity-icon { display: inline-block; width: 1em; height: 1em; vertical-align: -.125em; }
+svg.room-amenity-icon { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 a { text-underline-offset: 3px; }
-/* Keep design-system tokens out of the supplied dashboard theme. */
 :is(.ds-site, .auth-shell) .btn-primary { --bs-btn-bg: var(--ds-primary); --bs-btn-border-color: var(--ds-primary); --bs-btn-hover-bg: var(--ds-primary-hover); --bs-btn-hover-border-color: var(--ds-primary-hover); --bs-btn-active-bg: var(--ds-primary-hover); --bs-btn-active-border-color: var(--ds-primary-hover); --bs-btn-disabled-bg: var(--ds-primary); --bs-btn-disabled-border-color: var(--ds-primary); }
 :is(.ds-site, .auth-shell) :is(.form-control, .form-select):focus { border-color: var(--ds-primary); box-shadow: var(--ds-focus-ring); }
 .brand { color: var(--ds-primary); font-size: 1.65rem; font-weight: 800; text-decoration: none; letter-spacing: -.08rem; }
@@ -58,8 +53,28 @@ a { text-underline-offset: 3px; }
 }
 .hotux-footer .footer-logo img { max-height: 52px; width: auto; object-fit: contain; }
 
-/* Dashboard images use explicit frames so API images cannot stretch table rows. */
-.main-wrapper :is(.wd-30.ht-30, .wd-40.ht-40, .wd-100.ht-100) { object-fit: cover; object-position: center; }
+.main-wrapper :is(.wd-30.ht-30, .wd-40.ht-40, .wd-100.ht-100) {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  aspect-ratio: 1 / 1;
+}
+.main-wrapper .wd-30.ht-30 {
+  width: 30px !important;
+  min-width: 30px;
+  height: 30px !important;
+}
+.main-wrapper .wd-40.ht-40 {
+  width: 40px !important;
+  min-width: 40px;
+  height: 40px !important;
+  flex: 0 0 40px;
+}
+.main-wrapper .wd-100.ht-100 {
+  width: 100px !important;
+  min-width: 100px;
+  height: 100px !important;
+}
 .main-wrapper .admin-slider-thumbnail,
 .main-wrapper .admin-slider-preview {
   display: block;
@@ -68,10 +83,17 @@ a { text-underline-offset: 3px; }
   object-position: center;
   background: #eef0f2;
 }
-.main-wrapper .admin-slider-thumbnail { max-width: 220px; aspect-ratio: 3 / 2; height: auto; }
+.main-wrapper .admin-slider-thumbnail {
+  display: block;
+  width: 160px !important;
+  max-width: 100%;
+  height: 160px !important;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center;
+}
 .main-wrapper .admin-slider-preview { aspect-ratio: 3 / 2; height: auto; max-height: min(60vh, 520px); }
 
-/* Logged-in account context menu, isolated from the legacy navigation dropdown. */
 .header-content .account-context { position: relative; padding: 0; border-left: 0; }
 .header-content .account-context-trigger { padding: 10px 20px; border: 0; background: transparent; color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
 .header-content .account-context-trigger:hover, .header-content .account-context-trigger:focus-visible { color: var(--ds-brand); outline: none; }
@@ -82,9 +104,6 @@ a { text-underline-offset: 3px; }
 .header-content .account-context-separator { height: 1px; margin: var(--ds-space-2) 0; background: var(--ds-border); }
 .auth-pending { min-height: 8rem; display: grid; place-items: center; color: var(--ds-muted); }
 
-/* The supplied dashboard CSS sizes the menu area but expects its optional
- * PerfectScrollbar plugin to provide scrolling. Use native scrolling instead
- * so long menus work on every route and input device. */
 .main-wrapper > .sidebar {
   display: flex;
   flex-direction: column;
@@ -107,4 +126,102 @@ a { text-underline-offset: 3px; }
   --bs-body-font-family: var(--bs-font-sans-serif);
   font-family: var(--bs-body-font-family);
 }
+.main-wrapper .page-breadcrumb .breadcrumb {
+  background: transparent;
+}
+.main-wrapper .page-breadcrumb .breadcrumb-item > a {
+  color: var(--ds-primary);
+  font-weight: var(--ds-weight-medium);
+  text-decoration: none;
+  transition: color var(--ds-transition);
+}
+.main-wrapper .page-breadcrumb .breadcrumb-item > a:hover,
+.main-wrapper .page-breadcrumb .breadcrumb-item > a:focus-visible {
+  color: var(--ds-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.main-wrapper .page-breadcrumb .breadcrumb-item.active {
+  color: var(--ds-ink);
+  font-weight: var(--ds-weight-medium);
+}
+.main-wrapper .page-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--ds-muted);
+}
 .main-wrapper .apexcharts-tooltip * { font-family: var(--font-roboto), Arial, sans-serif !important; }
+.main-wrapper .admin-footer {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  box-shadow: 0 -4px 18px rgb(31 45 61 / 4%);
+}
+.main-wrapper .admin-footer-brand { display: flex; align-items: center; gap: .85rem; }
+.main-wrapper .admin-footer-mark {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--ds-primary-soft);
+  color: var(--ds-primary);
+}
+.main-wrapper .admin-footer-brand strong { display: block; color: var(--ds-ink); font-size: .95rem; }
+.main-wrapper .admin-footer-brand span:last-child { display: block; margin-top: .15rem; color: var(--ds-muted); font-size: .78rem; }
+.main-wrapper .admin-footer-copyright { margin: 0; color: var(--ds-muted); font-size: .82rem; text-align: right; }
+@media (max-width: 575.98px) {
+  .main-wrapper .admin-footer { align-items: flex-start; flex-direction: column; padding: 1.25rem; }
+  .main-wrapper .admin-footer-copyright { text-align: left; }
+}
+.main-wrapper .navbar .navbar-content .navbar-nav .nav-item.dropdown .admin-account-menu {
+  top: calc(100% + 7px);
+  right: -20px;
+  left: auto;
+  z-index: 1000;
+}
+.main-wrapper .navbar .admin-account-menu > .admin-account-actions {
+  position: static;
+  top: auto;
+  left: auto;
+  display: block;
+  visibility: visible;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+}
+.main-wrapper .navbar .admin-account-menu > .admin-account-actions > li {
+  display: block;
+  border: 0;
+}
+.main-wrapper .navbar .admin-account-menu > .admin-account-actions > li > :is(a, button) {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 0;
+  color: var(--ds-ink);
+  font: inherit;
+  font-size: .92rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.main-wrapper .navbar .admin-account-menu > .admin-account-actions > li:hover > :is(a, button),
+.main-wrapper .navbar .admin-account-menu > .admin-account-actions > li:focus-within > :is(a, button) {
+  padding: 0;
+  color: var(--ds-primary);
+}
+@media (max-width: 767px) {
+  .main-wrapper .navbar .navbar-content .navbar-nav .nav-item.dropdown .admin-account-menu {
+    right: 20px;
+  }
+}

@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect -- Confirmation is restored from sessionStorage after hydration. */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";

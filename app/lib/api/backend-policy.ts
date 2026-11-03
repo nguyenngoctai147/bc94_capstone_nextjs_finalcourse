@@ -1,4 +1,3 @@
-// Only documented endpoints; no arbitrary URL relay.
 const rules: [RegExp, readonly string[]][] = [
   [/^auth\/(signin|signup)$/, ["POST"]],
   [/^(phong-thue|vi-tri|dat-phong|binh-luan)$/, ["GET", "POST"]],

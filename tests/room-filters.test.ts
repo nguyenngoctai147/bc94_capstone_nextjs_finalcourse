@@ -18,7 +18,7 @@ test("room filters combine bedrooms, price and all selected amenities", () => {
     makeRoom({ id: 3, giaTien: 80, phongNgu: 3 }),
   ];
   const result = filterRooms(rooms, {
-    filters: { bedrooms: "2", maxPrice: 60, amenities: ["wifi", "hoBoi"] },
+    filters: { bedrooms: "2", maxPrice: 60, amenities: ["wifi", "hoBoi"], minRating: null },
     sortOrder: "recommended", bookings: [],
   });
   assert.deepEqual(result.map((room) => room.id), [1]);
@@ -55,4 +55,16 @@ test("related rooms prefer the same location and fill empty slots without duplic
   const related = selectRelatedRooms(currentRoom, nearbyRooms, fallbackRooms);
 
   assert.deepEqual(related.map((room) => room.id), [2, 3, 4]);
+});
+
+test("room filters apply a selected minimum rating when rating data is available", () => {
+  const rooms = [makeRoom({ id: 1 }), makeRoom({ id: 2 })];
+  const result = filterRooms(rooms, {
+    filters: { ...initialRoomFilters, minRating: 4 },
+    sortOrder: "recommended",
+    bookings: [],
+    ratingsByRoom: new Map([[1, 4.5], [2, 3.9]]),
+  });
+
+  assert.deepEqual(result.map((room) => room.id), [1]);
 });

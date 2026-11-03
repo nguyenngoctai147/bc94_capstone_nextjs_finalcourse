@@ -19,9 +19,13 @@ export type ResourceState<T> = {
   >;
 };
 
-// Thunk chỉ cần biết token hiện tại; không phụ thuộc vòng vào root reducer.
 export type ApiThunkConfig = {
-  state: { auth: { token: string | null } };
+  state: {
+    auth: {
+      token: string | null;
+      user: { role: string } | null;
+    };
+  };
   rejectValue: ApiError;
 };
 
@@ -49,7 +53,6 @@ export function createResourceState<T>(): ResourceState<T> {
   };
 }
 
-// Các hàm nhỏ dùng lại cho từng addCase; thunk và reducer vẫn viết rõ trong feature.
 export function startRequest(request: RequestState, requestId: string) {
   request.status = "loading";
   request.error = null;

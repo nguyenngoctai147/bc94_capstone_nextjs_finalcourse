@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import postcss from "postcss";
-import tailwindcss from "tailwindcss";
+import tailwindcss, { type Config } from "tailwindcss";
 import config from "../tailwind.config.js";
 
 test("Tailwind utilities use the tw- prefix without emitting Preflight", async () => {
@@ -9,7 +9,7 @@ test("Tailwind utilities use the tw- prefix without emitting Preflight", async (
     tailwindcss({
       ...config,
       content: [{ raw: '<div class="tw-flex tw-flex-col tw-justify-center"></div>' }],
-    }),
+    } as unknown as Config),
   ]).process("@tailwind utilities;", { from: undefined })).css;
 
   assert.match(css, /\.tw-flex\s*\{\s*display: flex/);

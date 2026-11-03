@@ -3,6 +3,7 @@ import Link from "next/link";
 import logo from "../../../public/assets/images/logo.png";
 import { routes } from "@/config/routes";
 import { siteInfo } from "@/config/site";
+import { BookingLink } from "@/components/auth/BookingLink";
 
 const quickLinks = [
   ["Trang chủ", routes.home], ["Về chúng tôi", routes.about],
@@ -30,7 +31,7 @@ export function HotuxFooter() {
               </div>
               <div className="col-lg-3 col-md-6 quick-links">
                 <h2 className="h4">Chuyến đi của bạn</h2>
-                <ul>{stayLinks.map(([label, href]) => <li key={href}><Link href={href}>{label}</Link></li>)}</ul>
+                <ul>{stayLinks.map(([label, href]) => <li key={href}>{label === "Đặt phòng" ? <BookingLink href={href}>{label}</BookingLink> : <Link href={href}>{label}</Link>}</li>)}</ul>
               </div>
               <div className="col-lg-3 col-md-6 footer-contact">
                 <h2 className="h4">Liên hệ</h2>

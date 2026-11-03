@@ -5,9 +5,10 @@ import { useMemo, useState } from "react";
 import { ApiImage } from "@/components/ui/ApiImage";
 import { routes } from "@/config/routes";
 import { roomAmenities } from "@/features/rooms/room-amenities";
+import { RoomAmenityIcon } from "@/features/rooms/components/RoomAmenityIcon";
 import type { Room } from "@/features/rooms/rooms.types";
 import { checkoutAfter, nights, today, type Search } from "../flow";
-import styles from "./Reservation.module.css";
+import styles from "@/css/features/reservations/reservation.module.css";
 
 export function ReservationProgress({ active }: { active: 1 | 2 | 3 | 4 }) {
   const steps = [
@@ -28,7 +29,7 @@ export function ReservationProgress({ active }: { active: 1 | 2 | 3 | 4 }) {
 export function RoomAmenityList({ room, title = "Tiện nghi đi kèm" }: { room: Room; title?: string }) {
   const amenities = roomAmenities.filter(({ key }) => room[key] === true);
   if (amenities.length === 0) return null;
-  return <div className="extra-services mar-top-40"><h3 className="h4 mar-bottom-30">{title}</h3><ul>{amenities.map(({ key, label, icon }) => <li key={key}><i className={`fa ${icon}`} aria-hidden="true" /> {label}</li>)}</ul></div>;
+  return <div className="extra-services mar-top-40"><h3 className="h4 mar-bottom-30">{title}</h3><ul>{amenities.map(({ key, label }) => <li key={key}><RoomAmenityIcon amenity={key} /> {label}</li>)}</ul></div>;
 }
 
 export function ReservationRoomHero({ room }: { room: Room }) {

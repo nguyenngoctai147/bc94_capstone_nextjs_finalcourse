@@ -1,18 +1,16 @@
-import Link from "next/link";
-import { routes } from "@/config/routes";
 import { Icon } from "./AdminIcon";
 
 export function AdminFooter() {
   return (
-    <footer className="footer d-flex flex-column flex-md-row align-items-center justify-content-between px-4 py-3 border-top small">
-      <p className="text-muted mb-1 mb-md-0">
-        Copyright © 2022 <Link href={routes.home}>Hotux</Link>.
-      </p>
-      <p className="text-muted">
-        Powered By{" "}
-        <Icon className="mb-1 text-primary ms-1 icon-sm" name="heart" /> Bizberg
-        Themes
-      </p>
+    <footer className="footer admin-footer">
+      <div className="admin-footer-brand">
+        <span className="admin-footer-mark"><Icon name="box" size={18} /></span>
+        <div>
+          <strong>Hotux Admin</strong>
+          <span>Quản lý lưu trú thuận tiện và hiệu quả</span>
+        </div>
+      </div>
+      <p className="admin-footer-copyright">© {new Date().getFullYear()} Hotux. All rights reserved.</p>
     </footer>
   );
 }

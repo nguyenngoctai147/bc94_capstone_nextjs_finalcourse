@@ -6,10 +6,10 @@ import { toPage, unwrapResponse } from "../app/lib/api/response";
 import { usersService } from "../app/features/users/users.service";
 import { roomsService } from "../app/features/rooms/rooms.service";
 import { makeStore } from "../app/store";
-import { fetchRooms, fetchRoomDetail, patchRoom, fetchRoomsByLocation } from "../app/features/rooms/rooms.slice";
-import { fetchLocations } from "../app/features/locations/locations.slice";
-import { login } from "../app/features/auth/auth.slice";
-import { fetchBookings, createBooking, deleteBooking } from "../app/features/bookings/bookings.slice";
+import { createRoom, fetchRooms, fetchRoomDetail, patchRoom, fetchRoomsByLocation, updateRoom } from "../app/features/rooms/rooms.slice";
+import { createLocation, fetchLocations, updateLocation } from "../app/features/locations/locations.slice";
+import { hydrateSession, login } from "../app/features/auth/auth.slice";
+import { fetchBookings, createBooking, deleteBooking, updateBooking } from "../app/features/bookings/bookings.slice";
 import { logout } from "../app/features/auth/auth.slice";
 import type { Room } from "../app/features/rooms/rooms.types";
 import type { Location } from "../app/features/locations/locations.types";
@@ -40,6 +40,160 @@ test("explicit booking thunks invalidate cached lists and handle partial write r
   assert.equal(store.getState().bookings.requests.remove.status, "succeeded");
   assert.deepEqual(store.getState().bookings.items, []);
   assert.deepEqual(calls.map((request) => [request.method, request.url]), [["post", "/dat-phong"], ["delete", "/dat-phong/19"]]);
+});
+test("only an admin can update a booking with the complete Swagger PUT payload", async () => {
+  const payload: Booking = {
+    id: 91,
+    maPhong: 3,
+    maNguoiDung: 7,
+    ngayDen: "2099-01-10T00:00:00",
+    ngayDi: "2099-01-12T00:00:00",
+    soLuongKhach: 2,
+  };
+  const calls: InternalAxiosRequestConfig[] = [];
+  http.defaults.adapter = async (config) => {
+    calls.push(config);
+    return response(config, payload);
+  };
+
+  const customerStore = makeStore();
+  customerStore.dispatch(hydrateSession({
+    token: "customer-token",
+    user: {
+      id: 7, name: "Khách", email: "guest@example.test", phone: null,
+      birthday: "", gender: false, role: "USER",
+    },
+  }));
+  const rejected = await customerStore.dispatch(
+    updateBooking({ id: payload.id, data: payload }),
+  );
+  assert.equal(rejected.meta.requestStatus, "rejected");
+  assert.equal(customerStore.getState().bookings.requests.update.error?.status, 403);
+  assert.equal(calls.length, 0);
+
+  const adminStore = makeStore();
+  adminStore.dispatch(hydrateSession({
+    token: "admin-token",
+    user: {
+      id: 1, name: "Quản trị", email: "admin@example.test", phone: null,
+      birthday: "", gender: false, role: "ADMIN",
+    },
+  }));
+  const booking = await adminStore.dispatch(
+    updateBooking({ id: payload.id, data: payload }),
+  ).unwrap();
+  const request = calls[0];
+  assert.equal(request?.method, "put");
+  assert.equal(request?.url, "/dat-phong/91");
+  assert.equal(request?.headers.get("token"), "admin-token");
+  assert.deepEqual(JSON.parse(String(request?.data)), payload);
+  assert.deepEqual(booking, payload);
+  assert.equal(adminStore.getState().bookings.invalidated, true);
+});
+test("create room thunk posts the Swagger payload and invalidates the catalogue", async () => {
+  const store = makeStore();
+  const payload = {
+    tenPhong: "Deluxe",
+    khach: 2,
+    phongNgu: 1,
+    giuong: 1,
+    phongTam: 1,
+    moTa: "Phòng thử nghiệm",
+    giaTien: 100,
+    maViTri: 1,
+    hinhAnh: "",
+    mayGiat: false,
+    banLa: false,
+    tivi: true,
+    dieuHoa: true,
+    wifi: true,
+    bep: false,
+    doXe: false,
+    hoBoi: false,
+    banUi: false,
+  };
+  let request: InternalAxiosRequestConfig | undefined;
+  http.defaults.adapter = async (config) => {
+    request = config;
+    return response(config, { id: 101, ...payload });
+  };
+
+  const room = await store.dispatch(createRoom(payload)).unwrap();
+  assert.equal(request?.method, "post");
+  assert.equal(request?.url, "/phong-thue");
+  assert.deepEqual(JSON.parse(String(request?.data)), payload);
+  assert.equal(room.id, 101);
+  assert.equal(store.getState().rooms.requests.create.status, "succeeded");
+  assert.equal(store.getState().rooms.invalidated, true);
+});
+test("create location thunk posts the Swagger payload and invalidates the location list", async () => {
+  const store = makeStore();
+  const payload = {
+    tenViTri: "Cái Răng",
+    tinhThanh: "Cần Thơ",
+    quocGia: "Việt Nam",
+    hinhAnh: "https://airbnbnew.cybersoft.edu.vn/images/vt2.jpg",
+  };
+  let request: InternalAxiosRequestConfig | undefined;
+  http.defaults.adapter = async (config) => {
+    request = config;
+    return response(config, { id: 202, ...payload });
+  };
+
+  const location = await store.dispatch(createLocation(payload)).unwrap();
+  assert.equal(request?.method, "post");
+  assert.equal(request?.url, "/vi-tri");
+  assert.deepEqual(JSON.parse(String(request?.data)), payload);
+  assert.equal(location.id, 202);
+  assert.equal(store.getState().locations.requests.create.status, "succeeded");
+  assert.equal(store.getState().locations.invalidated, true);
+});
+test("update location thunk sends the complete Swagger PUT payload to its id", async () => {
+  const store = makeStore();
+  const payload: Location = {
+    id: 202,
+    tenViTri: "Cái Răng mới",
+    tinhThanh: "Cần Thơ",
+    quocGia: "Việt Nam",
+    hinhAnh: "https://airbnbnew.cybersoft.edu.vn/images/vt2.jpg",
+  };
+  let request: InternalAxiosRequestConfig | undefined;
+  http.defaults.adapter = async (config) => {
+    request = config;
+    return response(config, payload);
+  };
+
+  const location = await store.dispatch(
+    updateLocation({ id: payload.id, data: payload }),
+  ).unwrap();
+  assert.equal(request?.method, "put");
+  assert.equal(request?.url, "/vi-tri/202");
+  assert.deepEqual(JSON.parse(String(request?.data)), payload);
+  assert.deepEqual(location, payload);
+  assert.equal(store.getState().locations.requests.update.status, "succeeded");
+  assert.equal(store.getState().locations.invalidated, true);
+});
+test("update room thunk sends the complete Swagger PUT payload to its id", async () => {
+  const store = makeStore();
+  const payload: Room = {
+    id: 101, tenPhong: "Deluxe mới", khach: 3, phongNgu: 1, giuong: 2,
+    phongTam: 1, moTa: "Thông tin đã cập nhật", giaTien: 140, maViTri: 1,
+    hinhAnh: "", mayGiat: false, banLa: false, tivi: true, dieuHoa: true,
+    wifi: true, bep: false, doXe: false, hoBoi: false, banUi: false,
+  };
+  let request: InternalAxiosRequestConfig | undefined;
+  http.defaults.adapter = async (config) => {
+    request = config;
+    return response(config, payload);
+  };
+
+  const room = await store.dispatch(updateRoom({ id: payload.id, data: payload })).unwrap();
+  assert.equal(request?.method, "put");
+  assert.equal(request?.url, "/phong-thue/101");
+  assert.deepEqual(JSON.parse(String(request?.data)), payload);
+  assert.deepEqual(room, payload);
+  assert.equal(store.getState().rooms.requests.update.status, "succeeded");
+  assert.equal(store.getState().rooms.invalidated, true);
 });
 test("unwrap envelopes, plain data, paginated lists and application errors", () => {
   assert.equal(unwrapResponse({ statusCode: 200, content: 42 }), 42);

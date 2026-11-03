@@ -34,7 +34,6 @@ export function AdminAccountPage() {
   const { user, token } = useAppSelector((state) => state.auth);
   if (!user || !token) return null;
 
-  // Component con nhận dữ liệu bằng props và tạo form mới khi đổi tài khoản.
   return <ProfileForm key={user.id} user={user} token={token} />;
 }
 
@@ -135,5 +134,4 @@ function ProfileForm({ user, token }: { user: User; token: string }) {
   );
 }
 
-/** @deprecated Dùng AdminAccountPage cho trang tài khoản đang đăng nhập. */
 export const CompanyProfilePage = AdminAccountPage;

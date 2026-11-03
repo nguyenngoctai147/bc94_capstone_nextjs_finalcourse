@@ -5,14 +5,33 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
+  {
+    files: ["app/layout.tsx", "app/(admin)/admin/layout.tsx"],
+    rules: {
+      "@next/next/no-css-tags": "off",
+    },
+  },
+  {
+    files: ["app/features/home/components/HomeBanner.tsx"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
+  {
+    files: [
+      "app/features/reservations/components/BookingPage.tsx",
+      "app/features/reservations/components/ConfirmationPage.tsx",
+      "app/features/reservations/components/SelectRoomPage.tsx",
+    ],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Vendor/legacy template files are preserved verbatim under public and are not application source.
     "public/assets/legacy/**",
     "public/assets/dashboard/vendors/**",
   ]),

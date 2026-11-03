@@ -11,7 +11,6 @@ import {
 import { usersService } from "./users.service";
 import type { User, CreateUser, UpdateUser } from "./users.types";
 
-// 1. Async thunk: gọi service và trả dữ liệu hoặc lỗi về Redux.
 export const fetchUsers = createAsyncThunk<Page<User>, QueryParams | void, ApiThunkConfig>(
   "users/list",
   async (params, { getState, signal, rejectWithValue }) => {
@@ -84,10 +83,8 @@ export const deleteUser = createAsyncThunk<number, number, ApiThunkConfig>(
   },
 );
 
-// 2. State: mỗi thao tác có loading/error riêng để không ảnh hưởng lẫn nhau.
 const initialState = createResourceState<User>();
 
-// 3. Slice: xử lý pending, fulfilled và rejected giống mẫu ListMovie.
 const usersSlice = createSlice({
   name: "users",
   initialState,

@@ -4,8 +4,6 @@ import { toApiError } from "@/lib/api/errors";
 import { unwrapResponse } from "@/lib/api/response";
 import type { ApiEnvelope, RequestOptions } from "@/lib/api/types";
 
-// Một Axios instance dùng chung, tương tự services/api.js của bài React.
-// Trình duyệt gọi proxy Next.js; tokenCybersoft chỉ được thêm ở server.
 export const http = axios.create({
   baseURL: NEXT_BACKEND_PROXY_ENDPOINT,
   timeout: 20000,
@@ -28,7 +26,6 @@ async function request<T>(
     data,
     signal: options.signal,
     params: options.params,
-    // Thunk truyền token hiện tại vào từng request, không đọc localStorage khi import file.
     headers: options.token ? { token: options.token } : undefined,
   });
 

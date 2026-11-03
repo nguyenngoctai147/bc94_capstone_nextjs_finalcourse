@@ -1,5 +1,5 @@
 import Image from "next/image";
-import styles from "./GalleryH.module.css";
+import styles from "@/css/features/home/gallery.module.css";
 
 export default function GalleryH() {
   return (

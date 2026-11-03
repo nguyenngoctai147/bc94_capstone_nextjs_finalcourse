@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect -- Hydrate reservation state from sessionStorage on mount. */
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";

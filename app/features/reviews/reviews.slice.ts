@@ -11,7 +11,6 @@ import {
 import { reviewsService } from "./reviews.service";
 import type { Review, CreateReview, UpdateReview } from "./reviews.types";
 
-// 1. Async thunk: gọi service và trả dữ liệu hoặc lỗi về Redux.
 export const fetchReviews = createAsyncThunk<Page<Review>, QueryParams | void, ApiThunkConfig>(
   "reviews/list",
   async (params, { getState, signal, rejectWithValue }) => {
@@ -84,10 +83,8 @@ export const deleteReview = createAsyncThunk<number, number, ApiThunkConfig>(
   },
 );
 
-// 2. State: mỗi thao tác có loading/error riêng để không ảnh hưởng lẫn nhau.
 const initialState = createResourceState<Review>();
 
-// 3. Slice: xử lý pending, fulfilled và rejected giống mẫu ListMovie.
 const reviewsSlice = createSlice({
   name: "reviews",
   initialState,

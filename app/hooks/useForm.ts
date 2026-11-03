@@ -3,6 +3,7 @@
 import {
   useRef,
   useState,
+  useCallback,
   type ChangeEvent,
   type FocusEvent,
   type FormEvent,
@@ -19,27 +20,28 @@ export function useForm<T extends Record<string, string>>(
   initialValues: T,
   schema: ValidationSchema<T>,
 ) {
-  // State của form: dữ liệu nhập, lỗi validation và trạng thái gửi.
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<FormErrors<T>>({});
   const [submitting, setSubmitting] = useState(false);
   const submitLock = useRef(false);
 
   const handleChange = (event: ChangeEvent<FormControl>) => {
-    const { name, value } = event.currentTarget;
+    const { name } = event.currentTarget;
     if (!(name in values)) return;
+
+    const value = event.currentTarget instanceof HTMLInputElement && event.currentTarget.type === "checkbox"
+      ? String(event.currentTarget.checked)
+      : event.currentTarget.value;
 
     const nextValues = { ...values, [name]: value };
     setValues(nextValues);
 
-    // Kiểm tra lại khi sửa lỗi, kể cả rule phụ thuộc field khác như confirmPassword.
     if (Object.keys(errors).length > 0) {
       setErrors(validate(nextValues, schema));
     }
   };
 
   const handleBlur = (event: FocusEvent<FormControl>) => {
-    // Reset xóa cả dữ liệu và lỗi; không thêm lỗi blur làm dịch chuyển nút.
     if (
       event.relatedTarget instanceof HTMLButtonElement &&
       event.relatedTarget.type === "reset"
@@ -88,10 +90,15 @@ export function useForm<T extends Record<string, string>>(
     };
   };
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setValues(initialValues);
     setErrors({});
-  };
+  }, [initialValues]);
+
+  const resetTo = useCallback((nextValues: T) => {
+    setValues(nextValues);
+    setErrors({});
+  }, []);
 
   return {
     values,
@@ -101,5 +108,6 @@ export function useForm<T extends Record<string, string>>(
     handleBlur,
     handleSubmit,
     reset,
+    resetTo,
   };
 }

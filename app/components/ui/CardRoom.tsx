@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { BookingLink } from "@/components/auth/BookingLink";
 import { routes } from "@/config/routes";
 import { roomAmenities } from "@/features/rooms/room-amenities";
+import { RoomAmenityIcon } from "@/features/rooms/components/RoomAmenityIcon";
 import type { Room } from "@/features/rooms/rooms.types";
 import { withStaySearch, type Search } from "@/features/reservations/flow";
 import { ApiImage } from "./ApiImage";
@@ -48,12 +50,12 @@ function RoomServices({ room, className = "" }: { room: Room; className?: string
         </li>
         {featuredAmenity ? (
           <li>
-            <i className={`fa ${featuredAmenity.icon}`} aria-hidden="true" />{" "}
+            <RoomAmenityIcon amenity={featuredAmenity.key} />{" "}
             {featuredAmenity.label}
           </li>
         ) : (
           <li>
-            <i className="fa fa-bath" aria-hidden="true" /> {room.phongTam} phòng
+            <i className="fa fa-tint" aria-hidden="true" /> {room.phongTam} phòng
             tắm
           </li>
         )}
@@ -124,9 +126,9 @@ export default function CardRoom({
           <Link href={detailHref} className="btn btn-black mar-right-10">
             Xem chi tiết
           </Link>
-          <Link href={bookingHref} className="btn btn-orange">
+          <BookingLink href={bookingHref} className="btn btn-orange">
             Đặt ngay
-          </Link>
+          </BookingLink>
         </div>
       </div>
     </article>

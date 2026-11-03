@@ -11,7 +11,6 @@ import {
 import { roomsService } from "./rooms.service";
 import type { Room, CreateRoom, UpdateRoom } from "./rooms.types";
 
-// 1. Async thunk: gọi service và trả dữ liệu hoặc lỗi về Redux.
 export const fetchRooms = createAsyncThunk<Page<Room>, QueryParams | void, ApiThunkConfig>(
   "rooms/list",
   async (params, { getState, signal, rejectWithValue }) => {
@@ -96,10 +95,8 @@ export const fetchRoomsByLocation = createAsyncThunk<Room[], number, ApiThunkCon
   },
 );
 
-// 2. State: mỗi thao tác có loading/error riêng để không ảnh hưởng lẫn nhau.
 const initialState = createResourceState<Room>();
 
-// 3. Slice: xử lý pending, fulfilled và rejected giống mẫu ListMovie.
 const roomsSlice = createSlice({
   name: "rooms",
   initialState,

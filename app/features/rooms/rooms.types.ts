@@ -5,4 +5,4 @@ export type Room = {
   bep: boolean; doXe: boolean; hoBoi: boolean; banUi: boolean;
 };
 export type CreateRoom = Omit<Room, "id">;
-export type UpdateRoom = CreateRoom;
+export type UpdateRoom = Room;

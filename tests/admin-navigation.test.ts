@@ -31,6 +31,15 @@ test("admin active links respect path segments and the dashboard matches only it
   assert.equal(routeIsActive("/admin", adminRoutes.dashboard), true);
   assert.equal(routeIsActive("/admin/users", adminRoutes.dashboard), false);
   assert.equal(routeIsActive("/admin/users/detail", adminRoutes.users), true);
+  assert.equal(routeIsActive("/admin/rooms/add", adminRoutes.rooms), true);
+  assert.equal(adminRoutes.roomEdit(7), "/admin/rooms/7");
+  assert.equal(routeIsActive("/admin/rooms/7", adminRoutes.rooms), true);
+  assert.equal(adminRoutes.bookingEdit(91), "/admin/bookings/91");
+  assert.equal(routeIsActive(adminRoutes.bookingEdit(91), adminRoutes.bookings), true);
+  assert.equal(adminRoutes.locationAdd, "/admin/locations/add");
+  assert.equal(routeIsActive(adminRoutes.locationAdd, adminRoutes.locations), true);
+  assert.equal(adminRoutes.locationEdit(9), "/admin/locations/9");
+  assert.equal(routeIsActive(adminRoutes.locationEdit(9), adminRoutes.locations), true);
   assert.equal(routeIsActive("/admin/users-other", adminRoutes.users), false);
   assert.equal(routeIsActive("/admin/users"), false);
 });

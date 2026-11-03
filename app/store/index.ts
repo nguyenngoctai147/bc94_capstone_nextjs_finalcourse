@@ -7,7 +7,6 @@ import locationsReducer from "@/features/locations/locations.slice";
 import usersReducer from "@/features/users/users.slice";
 import reviewsReducer from "@/features/reviews/reviews.slice";
 
-// Đăng ký reducer của từng feature, giống store/index.js trong bài React.
 const combinedReducer = combineReducers({
   auth: authReducer,
   rooms: roomsReducer,
@@ -23,10 +22,6 @@ export type RootState = ReturnType<typeof combinedReducer>;
 function rootReducer(state: RootState | undefined, action: UnknownAction) {
   if (!state || !logout.match(action)) return combinedReducer(state, action);
 
-  // Rooms and locations are public catalogue data. Keeping them during logout
-  // avoids both needless refetching and replacing React children while legacy
-  // Slick/NiceSelect widgets still own their transformed DOM. Private/auth
-  // state is rebuilt from the reducers' initial state below.
   const resetState = combinedReducer(undefined, action);
   return {
     ...resetState,
@@ -35,11 +30,9 @@ function rootReducer(state: RootState | undefined, action: UnknownAction) {
     locations: state.locations,
   };
 }
-// Next.js tạo store theo Provider, tránh dùng chung dữ liệu giữa các lần render server.
 export const makeStore = () => {
   return configureStore({
     reducer: rootReducer,
-    // Metadata của action đăng nhập có mật khẩu; không ghi vào Redux DevTools.
     devTools: false,
   });
 };

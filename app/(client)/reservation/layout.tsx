@@ -1,4 +1,5 @@
 import { PageTemplate } from "@/templates/PageTemplate";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export default function ReservationLayout({
   children,
@@ -7,7 +8,7 @@ export default function ReservationLayout({
 }) {
   return (
     <PageTemplate title="Đặt phòng" content="bare">
-      {children}
+      <RequireAuth>{children}</RequireAuth>
     </PageTemplate>
   );
 }

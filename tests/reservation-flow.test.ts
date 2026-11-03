@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { available, checkoutAfter, nights, overlaps, searchFromParams, validDate, withStaySearch } from "../app/features/reservations/flow";
+import { available, checkoutAfter, nights, overlaps, searchFromParams, searchValidationError, validDate, withStaySearch } from "../app/features/reservations/flow";
 import type { Booking } from "../app/features/bookings/bookings.types";
 import type { Room } from "../app/features/rooms/rooms.types";
 const room={id:7,khach:3} as Room;
@@ -33,4 +33,11 @@ test("incomplete, impossible and reversed URL dates cannot start a room search",
   assert.equal(searchFromParams({ ...base, checkOut: undefined }), null);
   assert.equal(searchFromParams({ ...base, guests: "0" }), null);
   assert.equal(searchFromParams({ ...base, maViTri: ["1", "2"] }), null);
+});
+test("homepage search reports the exact invalid field", () => {
+  const valid = { locationId: 1, checkIn: "2099-01-01", checkOut: "2099-01-03", guests: 2 };
+  assert.equal(searchValidationError({ ...valid, locationId: 0 }, { requireLocation: true }), "Vui lòng chọn địa điểm.");
+  assert.equal(searchValidationError({ ...valid, checkIn: "" }, { requireLocation: true }), "Vui lòng chọn ngày nhận phòng.");
+  assert.equal(searchValidationError({ ...valid, checkOut: valid.checkIn }, { requireLocation: true }), "Ngày trả phòng phải sau ngày nhận phòng.");
+  assert.equal(searchValidationError(valid, { requireLocation: true }), null);
 });

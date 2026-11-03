@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect -- Reservation draft is browser-owned state restored after hydration. */
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -11,7 +10,7 @@ import { toApiError } from "@/lib/api/errors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { available, flowKeys, nights, readSession, type Draft, validSearch } from "../flow";
 import { ReservationProgress, ReservationRoomHero, ReservationSummary, RoomAmenityList } from "./ReservationUi";
-import styles from "./Reservation.module.css";
+import styles from "@/css/features/reservations/reservation.module.css";
 
 export function BookingPage() {
   const router = useRouter();

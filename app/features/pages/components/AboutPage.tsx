@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { routes } from "@/config/routes";
 import { siteInfo } from "@/config/site";
-import styles from "./HotuxPages.module.css";
+import styles from "@/css/features/pages/hotux-pages.module.css";
 
 const highlights = [
   ["fa-tree", "Không gian gần thiên nhiên"],

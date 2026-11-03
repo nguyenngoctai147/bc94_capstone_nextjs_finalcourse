@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BookingLink } from "@/components/auth/BookingLink";
 import { ApiImage } from "@/components/ui/ApiImage";
 import { routes } from "@/config/routes";
-import type { Search } from "@/features/reservations/flow";
+import { withStaySearch, type Search } from "@/features/reservations/flow";
 import type { RoomFiltersValue, SortOrder } from "../room-list.utils";
 import type { Room } from "../rooms.types";
 import { RoomFilters } from "./RoomFilters";
-import styles from "./RoomList.module.css";
+import styles from "@/css/features/rooms/room-list.module.css";
 
 export type RoomViewMode = "list" | "grid";
 
@@ -130,9 +131,9 @@ type RoomCatalogueCardProps = {
 function RoomAction({ action }: { action: RoomPrimaryAction }) {
   if (action.href) {
     return (
-      <Link className="btn btn-orange" href={action.href}>
+      <BookingLink className="btn btn-orange" href={action.href}>
         {action.label}
-      </Link>
+      </BookingLink>
     );
   }
 
@@ -171,7 +172,10 @@ export function RoomCatalogueCard(props: RoomCatalogueCardProps) {
   const detailHref = search
     ? `${routes.rooms.detail(room.id)}?checkIn=${search.checkIn}&checkOut=${search.checkOut}&guests=${search.guests}`
     : routes.rooms.detail(room.id);
-  const action = primaryAction ?? { label: "Đặt ngay", href: detailHref };
+  const action = primaryAction ?? {
+    label: "Đặt ngay",
+    href: withStaySearch(routes.reservation.forRoom(room.id), search),
+  };
   const image = (
     <ApiImage
       src={room.hinhAnh}

@@ -18,7 +18,26 @@ export function validDate(value: string) {
     const time = Date.parse(`${value}T00:00:00Z`);
     return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value;
 }
-export function validSearch(s: Search) { return validDate(s.checkIn) && validDate(s.checkOut) && s.checkIn >= today() && s.checkOut > s.checkIn && Number.isSafeInteger(s.guests) && s.guests > 0 && (s.roomId === undefined || (Number.isSafeInteger(s.roomId) && s.roomId > 0)) && (s.locationId === undefined || (Number.isSafeInteger(s.locationId) && s.locationId > 0)); }
+export function searchValidationError(s: Search, options: { requireLocation?: boolean } = {}) {
+    if (options.requireLocation && (!Number.isSafeInteger(s.locationId) || Number(s.locationId) < 1))
+        return "Vui lòng chọn địa điểm.";
+    if (!validDate(s.checkIn))
+        return "Vui lòng chọn ngày nhận phòng.";
+    if (s.checkIn < today())
+        return "Ngày nhận phòng phải từ hôm nay trở đi.";
+    if (!validDate(s.checkOut))
+        return "Vui lòng chọn ngày trả phòng.";
+    if (s.checkOut <= s.checkIn)
+        return "Ngày trả phòng phải sau ngày nhận phòng.";
+    if (!Number.isSafeInteger(s.guests) || s.guests < 1)
+        return "Vui lòng chọn ít nhất 1 khách.";
+    if (s.roomId !== undefined && (!Number.isSafeInteger(s.roomId) || s.roomId < 1))
+        return "Phòng đã chọn không hợp lệ.";
+    if (s.locationId !== undefined && (!Number.isSafeInteger(s.locationId) || s.locationId < 1))
+        return "Địa điểm đã chọn không hợp lệ.";
+    return null;
+}
+export function validSearch(s: Search) { return searchValidationError(s) === null; }
 export function nights(s: Pick<Search, "checkIn" | "checkOut">) { return Math.round((Date.parse(`${s.checkOut}T00:00:00Z`) - Date.parse(`${s.checkIn}T00:00:00Z`)) / 86400000); }
 export function checkoutAfter(checkIn: string, count: number) {
     if (!validDate(checkIn) || !Number.isInteger(count) || count < 1)

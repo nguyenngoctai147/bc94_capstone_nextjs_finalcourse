@@ -7,4 +7,4 @@ export type Booking = {
   maNguoiDung: number;
 };
 export type CreateBooking = Omit<Booking, "id">;
-export type UpdateBooking = CreateBooking;
+export type UpdateBooking = Booking;

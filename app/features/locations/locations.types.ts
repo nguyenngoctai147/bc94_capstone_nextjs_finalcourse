@@ -6,4 +6,4 @@ export type Location = {
   hinhAnh: string;
 };
 export type CreateLocation = Omit<Location, "id">;
-export type UpdateLocation = CreateLocation;
+export type UpdateLocation = Location;

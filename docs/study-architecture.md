@@ -27,7 +27,10 @@ app/features/rooms/
     RoomList.tsx               component cha: Redux, state, effects, handlers
     RoomFilters.tsx            component con: props, callback, state mở/đóng
     RoomDetail.tsx             tải và hiển thị phòng theo id
+    CreateRoomPage.tsx         form quản trị tạo phòng theo schema API
 ```
+
+CSS không nằm rải trong từng folder component. Source CSS của ứng dụng được chia tại `app/css/base`, `app/css/features` và `app/css/examples`. Component vẫn import file `.module.css` của feature qua alias để giữ phạm vi class và để Next.js chỉ tải CSS cần cho route. CSS nguyên bản của template nằm trong `public/assets` vì các file đó còn phụ thuộc đường dẫn tương đối tới ảnh, font và plugin.
 
 Các file `<feature>.thunks.ts` riêng và factory tự sinh thunk/slice đã được bỏ. Mở một file `.slice.ts` là có thể xem request, state và ba nhánh xử lý của Redux. `store/request-state.ts` chỉ chứa các type, giá trị ban đầu và hàm nhỏ dùng chung để tránh lặp việc đặt trạng thái request.
 
@@ -106,8 +109,9 @@ Khi tăng chức năng, giữ state UI cục bộ và state API dùng chung tron
 
 ## Kiểm chứng sau refactor
 
-- 44/44 tests đạt, bao gồm stale request, abort, lỗi API, reset store khi logout, bộ lọc kết hợp và sort không sửa mảng Redux.
-- Typecheck và production build mặc định với Turbopack đạt. Lint không có lỗi; còn 4 cảnh báo font/stylesheet vendor trong layout admin.
+- 50/50 tests đạt, bao gồm stale request, abort, lỗi API, reset store khi logout, bộ lọc kết hợp, phòng liên quan, payload thêm phòng và sort không sửa mảng Redux.
+- Typecheck, lint và production build mặc định với Turbopack đều đạt.
+- Production server trả HTTP 200 cho trang chủ, danh sách/chi tiết phòng, đặt phòng, đăng nhập và dashboard.
 - Browser: lọc 2 phòng ngủ + Wi-Fi trả 10 kết quả tại thời điểm kiểm tra, giá tăng đúng; mở/reset bộ lọc trên mobile 390px hoạt động và không tràn ngang.
 - Form minh họa `/ui`: kiểm tra required, email, onChange/onBlur, focus field lỗi đầu tiên, submit hợp lệ và reset. Form này không gọi backend.
 - Chưa thực hiện thao tác ghi lên backend thật trong đợt kiểm tra này.

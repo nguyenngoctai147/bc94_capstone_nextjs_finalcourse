@@ -14,18 +14,17 @@ export function AdminPageHeader({
 }: {
   title: string;
   description?: string;
-  breadcrumbs: readonly AdminBreadcrumb[];
+  breadcrumbs?: readonly AdminBreadcrumb[];
   action?: ReactNode;
 }) {
+  const items = breadcrumbs ?? [];
+
   return (
     <>
-      <nav
-        className="page-breadcrumb d-flex align-items-center justify-content-between gap-3"
-        aria-label="Breadcrumb"
-      >
-        <ol className="breadcrumb mb-0">
-          {breadcrumbs.map((item, index) => {
-            const current = index === breadcrumbs.length - 1;
+      {(items.length > 0 || action) && <nav className="page-breadcrumb d-flex align-items-center justify-content-between gap-3" aria-label="Breadcrumb">
+        {items.length > 0 && <ol className="breadcrumb mb-0">
+          {items.map((item, index) => {
+            const current = index === items.length - 1;
             return (
               <li
                 className={`breadcrumb-item ${current ? "active" : ""}`}
@@ -40,9 +39,9 @@ export function AdminPageHeader({
               </li>
             );
           })}
-        </ol>
+        </ol>}
         {action}
-      </nav>
+      </nav>}
       <div className="mb-4">
         <h1 className="h3 mb-1">{title}</h1>
         {description && <p className="text-muted mb-0">{description}</p>}

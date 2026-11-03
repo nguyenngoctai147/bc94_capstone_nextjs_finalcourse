@@ -1,14 +1,11 @@
 const API_IMAGE_ORIGIN = "https://airbnbnew.cybersoft.edu.vn";
 
-/** Only pass sources supported by next.config.ts to next/image. */
 export function resolveApiImageSrc(
   value: string | null | undefined,
 ): string | null {
   const source = value?.trim();
   if (!source) return null;
 
-  // The API sometimes returns a filename such as "room.jpg". That file is not
-  // available at /images/room.jpg, so it must not be treated as a usable image.
   if (/^\/assets\/images\/[\w./()-]+$/i.test(source) && !source.includes(".."))
     return source;
 
@@ -42,7 +39,6 @@ export function resolveApiImageSrc(
     )
       return url.href;
   } catch {
-    // Invalid URLs fall back to the caller's missing-image state.
   }
 
   return null;

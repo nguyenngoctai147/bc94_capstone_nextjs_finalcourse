@@ -11,7 +11,6 @@ import { adminRoutes } from "./admin";
 import { authRoutes } from "./auth";
 import { clientRoutes } from "./client";
 
-/** Backward-compatible facade for feature code. New code can import a domain route group. */
 export const routes = {
   home: clientRoutes.home,
   homePage: clientRoutes.homePage,

@@ -1,4 +1,3 @@
-/** Template contact details; replace these with the business's details before publishing. */
 export const siteInfo = {
   name: "Hotux",
   description: "Khám phá điểm đến, tìm chỗ nghỉ và quản lý chuyến đi của bạn.",

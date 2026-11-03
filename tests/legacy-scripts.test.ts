@@ -126,8 +126,6 @@ test("sliders survive a replacement jQuery and recover when an older session los
     await loadLegacyScripts(legacyScriptBundles.hotuxHome);
     harness.window.jQuery = harness.createJQuery("3.6.0");
     harness.initializeSliders();
-    // Reported stale state: loaded tags, no saved plugin-owning jQuery,
-    // and a global belonging to the dashboard.
     delete harness.window.hotuxJQuery;
     await Promise.all([
       loadLegacyScripts(legacyScriptBundles.hotuxHome),

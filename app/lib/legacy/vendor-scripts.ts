@@ -14,7 +14,6 @@ function getRuntime() {
   });
 }
 
-/** Keep dependency chains ordered even across route changes and Fast Refresh. */
 export function enqueueVendorScripts(task: () => Promise<void>) {
   const runtime = getRuntime();
   const result = runtime.queue.then(task);
@@ -39,7 +38,6 @@ export function loadVendorScript(source: string, reload = false) {
   }
 
   const promise = new Promise<void>((resolve, reject) => {
-    // An untracked tag is not proof that a dynamically inserted script ran.
     const reuse = !reload && state === "loading";
     const script =
       reuse && existing ? existing : document.createElement("script");

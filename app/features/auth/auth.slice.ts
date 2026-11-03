@@ -66,7 +66,6 @@ const authSlice = createSlice({
     });
     builder.addCase(login.fulfilled, (state, action) => {
       if (state.login.requestId !== action.meta.requestId) return;
-      // Whitelist profile fields; never store an accidental password returned by the API.
       const { id, name, email, phone, birthday, gender, role, avatar } =
         action.payload.user;
       state.user = { id, name, email, phone, birthday, gender, role, avatar };

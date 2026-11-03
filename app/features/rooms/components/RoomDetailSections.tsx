@@ -11,9 +11,10 @@ import type { Location } from "@/features/locations/locations.types";
 import type { RoomReview } from "@/features/reviews/reviews.types";
 import { StayDateFields } from "@/features/reservations/components/StayDateFields";
 import { roomAmenities } from "../room-amenities";
+import { RoomAmenityIcon } from "./RoomAmenityIcon";
 import type { Room } from "../rooms.types";
 import { withStaySearch, type Search } from "@/features/reservations/flow";
-import styles from "./RoomDetail.module.css";
+import styles from "@/css/features/rooms/room-detail.module.css";
 
 export type RoomDetailTab =
   | "overview"
@@ -146,7 +147,7 @@ function OverviewPanel({ room }: { room: Room }) {
           {room.phongNgu} phòng ngủ · {room.giuong} giường
         </p>
         <p>
-          <i className="fa fa-bath me-2" aria-hidden="true" />
+          <i className="fa fa-tint me-2" aria-hidden="true" />
           {room.phongTam} phòng tắm
         </p>
         <p>
@@ -156,9 +157,9 @@ function OverviewPanel({ room }: { room: Room }) {
       </div>
       {amenities.length > 0 ? (
         <ul className={`amenities ${styles.amenities}`}>
-          {amenities.map(({ key, label, icon }) => (
+          {amenities.map(({ key, label }) => (
             <li key={key}>
-              <i className={`fa ${icon}`} aria-hidden="true" /> {label}
+              <RoomAmenityIcon amenity={key} /> {label}
             </li>
           ))}
         </ul>

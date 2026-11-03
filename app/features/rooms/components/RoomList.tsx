@@ -7,6 +7,8 @@ import { routes } from "@/config/routes";
 import { fetchLocationDetail } from "@/features/locations/locations.slice";
 import { bookingsService } from "@/features/bookings/bookings.service";
 import type { Booking } from "@/features/bookings/bookings.types";
+import { reviewsService } from "@/features/reviews/reviews.service";
+import type { Review } from "@/features/reviews/reviews.types";
 import { nights, type Search } from "@/features/reservations/flow";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchRooms, fetchRoomsByLocation } from "../rooms.slice";
@@ -31,6 +33,8 @@ export function RoomList({ locationId, search }: RoomListProps) {
   const [page, setPage] = useState(1);
   const [reloadCount, setReloadCount] = useState(0);
   const [availability, setAvailability] = useState<{ status: "loading" | "succeeded" | "failed"; items: Booking[] }>({ status: search ? "loading" : "succeeded", items: [] });
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingsLoaded, setRatingsLoaded] = useState(false);
 
   useEffect(() => {
     const roomsTask = locationId === undefined ? dispatch(fetchRooms()) : dispatch(fetchRoomsByLocation(locationId));
@@ -53,18 +57,46 @@ export function RoomList({ locationId, search }: RoomListProps) {
     return () => controller.abort();
   }, [search, token, reloadCount]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void reviewsService.list({ signal: controller.signal })
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setReviews(result.data);
+          setRatingsLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setReviews([]);
+          setRatingsLoaded(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
   const request = locationId === undefined ? catalogue.requests.list : locationResult;
   const isCurrent = locationId === undefined || locationResult.locationId === locationId;
   const isLoading = !isCurrent || request.status === "idle" || request.status === "loading" || (request.status !== "failed" && Boolean(search) && availability.status === "loading");
   const sourceRooms = request.status !== "succeeded" || !isCurrent ? EMPTY_ROOMS : locationId === undefined ? catalogue.items : locationResult.items;
   const highestPrice = sourceRooms.reduce((highest, room) => Math.max(highest, room.giaTien), 0);
   const place = location?.id === locationId ? location : null;
-  const hasFilters = filters.bedrooms !== "all" || filters.amenities.length > 0 || filters.maxPrice !== null;
+  const hasFilters = filters.bedrooms !== "all" || filters.amenities.length > 0 || filters.maxPrice !== null || filters.minRating !== null;
   const hasAvailabilityError = Boolean(search) && availability.status === "failed";
+  const ratingsByRoom = useMemo(() => {
+    const totals = new Map<number, { total: number; count: number }>();
+    reviews.forEach(({ maPhong, saoBinhLuan }) => {
+      const current = totals.get(maPhong) ?? { total: 0, count: 0 };
+      totals.set(maPhong, { total: current.total + saoBinhLuan, count: current.count + 1 });
+    });
+    return new Map([...totals].map(([roomId, { total, count }]) => [roomId, total / count]));
+  }, [reviews]);
   const rooms = useMemo(() => {
     if (search && availability.status !== "succeeded") return [];
-    return filterRooms(sourceRooms, { filters, sortOrder, locationId, search, bookings: availability.items });
-  }, [sourceRooms, filters, sortOrder, locationId, search, availability]);
+    return filterRooms(sourceRooms, { filters, sortOrder, locationId, search, bookings: availability.items, ratingsByRoom: ratingsLoaded ? ratingsByRoom : undefined });
+  }, [sourceRooms, filters, sortOrder, locationId, search, availability, ratingsByRoom, ratingsLoaded]);
   const currentPage = Math.min(page, Math.max(1, Math.ceil(rooms.length / PAGE_SIZE)));
   const offset = (currentPage - 1) * PAGE_SIZE;
   const visibleRooms = rooms.slice(offset, offset + PAGE_SIZE);

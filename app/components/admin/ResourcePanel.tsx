@@ -57,6 +57,8 @@ const resourceViews: Record<AdminResource, ResourceView> = {
     toolbarTitle: "Danh sách phòng",
     searchPlaceholder: "Tìm theo mã hoặc tên phòng",
     filterLabel: "Vị trí",
+    addHref: routes.admin.roomAdd,
+    addLabel: "Thêm phòng",
     columns: [
       { key: "id", label: "Mã" },
       { key: "room", label: "Phòng" },
@@ -102,6 +104,8 @@ const resourceViews: Record<AdminResource, ResourceView> = {
     toolbarTitle: "Danh sách vị trí",
     searchPlaceholder: "Tìm theo mã, vị trí hoặc tỉnh thành",
     filterLabel: "Quốc gia",
+    addHref: routes.admin.locationAdd,
+    addLabel: "Thêm vị trí",
     columns: [
       { key: "id", label: "Mã" },
       { key: "location", label: "Vị trí" },
@@ -202,6 +206,7 @@ export function ResourcePanel({ resource }: { resource: AdminResource }) {
           return {
             id: room.id,
             label: `phòng ${room.tenPhong}`,
+            editHref: routes.admin.roomEdit(room.id),
             searchText: `${room.id} ${room.tenPhong} ${locationLabel}`,
             filterValue: String(room.maViTri),
             filterLabel: location?.tenViTri ?? `Vị trí #${room.maViTri}`,
@@ -231,6 +236,7 @@ export function ResourcePanel({ resource }: { resource: AdminResource }) {
           return {
             id: booking.id,
             label: `đặt phòng #${booking.id}`,
+            editHref: routes.admin.bookingEdit(booking.id),
             searchText: `${booking.id} ${bookingLabel} ${period}`,
             filterValue: String(booking.maPhong),
             filterLabel: room?.tenPhong ?? `Phòng #${booking.maPhong}`,
@@ -278,6 +284,7 @@ export function ResourcePanel({ resource }: { resource: AdminResource }) {
         return resources.locations.items.map((location) => ({
           id: location.id,
           label: `vị trí ${location.tenViTri}`,
+          editHref: routes.admin.locationEdit(location.id),
           searchText: `${location.id} ${location.tenViTri} ${location.tinhThanh} ${location.quocGia}`,
           filterValue: location.quocGia,
           filterLabel: location.quocGia,

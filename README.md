@@ -46,6 +46,7 @@ Thiếu cấu hình không làm build thất bại. Khi gọi API, giao diện h
 | `/login`, `/register` | AuthTemplate, form có validation |
 | `/admin` | AdminTemplate, tổng quan từ dữ liệu API, yêu cầu ADMIN |
 | `/admin/rooms`, `/admin/bookings`, `/admin/locations`, `/admin/users`, `/admin/reviews` | Danh sách API, tìm trong danh sách, phân trang và làm mới; yêu cầu ADMIN |
+| `/admin/rooms/add` | Form Bootstrap thêm phòng, chọn vị trí và tiện nghi; yêu cầu ADMIN |
 | `/admin/slider`, `/admin/bookings/add`, `/admin/users/detail` | Trang minh họa có thông báo rõ; chưa lưu lên backend |
 | `/ui` | Xem và thử component Bootstrap, form mẫu không gửi API |
 | `/api/backend/[...path]` | Proxy server tới backend CyberSoft |

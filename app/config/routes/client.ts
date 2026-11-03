@@ -15,7 +15,6 @@ import {
 
 export const clientRoutes = {
   home: HOME_PAGE,
-  /** The named home page is kept for links that should point directly to /trang-chu. */
   homePage: HOME_NAMED_PAGE,
   rooms: {
     list: ROOMS_PAGE,

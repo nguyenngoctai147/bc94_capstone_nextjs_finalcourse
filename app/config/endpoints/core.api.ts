@@ -5,7 +5,6 @@ import { reviewEndpoints } from "./reviews";
 import { roomEndpoints } from "./rooms";
 import { userEndpoints } from "./users";
 
-// Backend paths, relative to API_BASE_URL. Keep Swagger names in one registry.
 export const CORE_LOGIN_ENDPOINT = authEndpoints.login;
 export const CORE_SIGNUP_ENDPOINT = authEndpoints.register;
 

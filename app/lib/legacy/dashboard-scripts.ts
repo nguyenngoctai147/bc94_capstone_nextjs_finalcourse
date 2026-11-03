@@ -31,14 +31,10 @@ export function loadDashboardScripts() {
           throw new Error("Không thể khởi tạo jQuery của Dashboard");
         dashboardWindow.hotuxDashboardJQuery = jQuery;
       }
-      // Restore immediately after Core executes, before waiting on other assets:
-      // animations from an already mounted public route may still be running.
-      // dashboard-light.js uses the saved Dashboard instance in its own closure.
       dashboardWindow.jQuery = previousJQuery ?? jQuery;
       dashboardWindow.$ = previousDollar ?? jQuery;
       for (const source of sources) await loadVendorScript(source);
     } finally {
-      // Core contains its own jQuery. Do not leave it replacing Hotux's globals.
       dashboardWindow.jQuery = previousJQuery ?? jQuery;
       dashboardWindow.$ = previousDollar ?? jQuery;
     }

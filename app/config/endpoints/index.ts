@@ -12,7 +12,6 @@ export { resourceEndpoints } from "./resources";
 export { roomEndpoints } from "./rooms";
 export { userEndpoints } from "./users";
 
-/** Backward-compatible endpoint facade used by feature services. */
 export const endpoints = {
   auth: authEndpoints,
   ...resourceEndpoints,

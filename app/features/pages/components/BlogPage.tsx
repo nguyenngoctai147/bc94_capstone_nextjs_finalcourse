@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { routes } from "@/config/routes";
-import styles from "./HotuxPages.module.css";
+import styles from "@/css/features/pages/hotux-pages.module.css";
 
 const posts = [
   { image: "news1.jpg", title: "Chọn chỗ nghỉ phù hợp cho chuyến đi mùa hè", category: "Kinh nghiệm", excerpt: "Bắt đầu từ số khách, số phòng ngủ và những tiện nghi mà cả nhóm thật sự cần." },

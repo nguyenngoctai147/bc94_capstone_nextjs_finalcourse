@@ -2,7 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { siteInfo } from "@/config/site";
-import styles from "./HotuxPages.module.css";
+import styles from "@/css/features/pages/hotux-pages.module.css";
 
 type ContactValues = { firstName: string; lastName: string; email: string; phone: string; message: string };
 type ContactErrors = Partial<Record<keyof ContactValues, string>>;

@@ -1,16 +1,18 @@
 "use client";
 
+import type { ChangeEvent, FormEvent } from "react";
 import { checkoutAfter, nights, today, validDate, type Search } from "../flow";
 
 type StayDates = Pick<Search, "checkIn" | "checkOut">;
 
-export function StayDateFields({ idPrefix, value, onChange, showLabels = true, showNights = true, legacyPicker = false }: {
+export function StayDateFields({ idPrefix, value, onChange, showLabels = true, showNights = true, legacyPicker = false, showIcons = false }: {
   idPrefix: string;
   value: StayDates;
   onChange: (value: StayDates) => void;
   showLabels?: boolean;
   showNights?: boolean;
   legacyPicker?: boolean;
+  showIcons?: boolean;
 }) {
   const count = nights(value);
   const nightCount = Number.isFinite(count) && count > 0 ? count : "";
@@ -20,24 +22,40 @@ export function StayDateFields({ idPrefix, value, onChange, showLabels = true, s
   const handleCheckIn = (checkIn: string) => {
     onChange({ checkIn, checkOut: validDate(checkIn) ? checkoutAfter(checkIn, Number(nightCount) || 1) : "" });
   };
+  const checkInControl = legacyPicker
+    ? { defaultValue: value.checkIn }
+    : {
+        value: value.checkIn,
+        onInput: (event: FormEvent<HTMLInputElement>) =>
+          handleCheckIn(event.currentTarget.value),
+        onChange: (event: ChangeEvent<HTMLInputElement>) =>
+          handleCheckIn(event.currentTarget.value),
+      };
+  const checkOutControl = legacyPicker
+    ? { defaultValue: value.checkOut }
+    : {
+        value: value.checkOut,
+        onInput: (event: FormEvent<HTMLInputElement>) =>
+          onChange({ ...value, checkOut: event.currentTarget.value }),
+        onChange: (event: ChangeEvent<HTMLInputElement>) =>
+          onChange({ ...value, checkOut: event.currentTarget.value }),
+      };
 
   return <>
     <div className="table-item">
-      <div className="form-group">
+      <div className={`form-group${showIcons ? " stay-date-field" : ""}`}>
         {showLabels && <label htmlFor={checkInId}>Nhận phòng</label>}
+        {showIcons && <i className="fa fa-calendar home-search-icon" aria-hidden="true" />}
         <input id={checkInId} name="checkIn" className="form-control" type={inputType}
-          {...(!legacyPicker ? { min: today() } : {})} value={value.checkIn} placeholder="Ngày nhận phòng" aria-label="Ngày nhận phòng" required
-          onInput={(event) => handleCheckIn(event.currentTarget.value)}
-          onChange={(event) => handleCheckIn(event.currentTarget.value)} />
+          {...(!legacyPicker ? { min: today() } : { readOnly: true, autoComplete: "off" })} {...checkInControl} placeholder="Ngày nhận phòng" aria-label="Ngày nhận phòng" required />
       </div>
     </div>
     <div className="table-item">
-      <div className="form-group">
+      <div className={`form-group${showIcons ? " stay-date-field" : ""}`}>
         {showLabels && <label htmlFor={checkOutId}>Trả phòng</label>}
+        {showIcons && <i className="fa fa-calendar-o home-search-icon" aria-hidden="true" />}
         <input id={checkOutId} name="checkOut" className="form-control" type={inputType}
-          {...(!legacyPicker ? { min: checkoutAfter(value.checkIn || today(), 1) } : {})} value={value.checkOut} placeholder="Ngày trả phòng" aria-label="Ngày trả phòng" required
-          onInput={(event) => onChange({ ...value, checkOut: event.currentTarget.value })}
-          onChange={(event) => onChange({ ...value, checkOut: event.currentTarget.value })} />
+          {...(!legacyPicker ? { min: checkoutAfter(value.checkIn || today(), 1) } : { readOnly: true, autoComplete: "off" })} {...checkOutControl} placeholder="Ngày trả phòng" aria-label="Ngày trả phòng" required />
       </div>
     </div>
     {showNights && <div className="table-item stay-nights">

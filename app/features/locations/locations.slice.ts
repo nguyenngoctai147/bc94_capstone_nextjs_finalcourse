@@ -11,7 +11,6 @@ import {
 import { locationsService } from "./locations.service";
 import type { Location, CreateLocation, UpdateLocation } from "./locations.types";
 
-// 1. Async thunk: gọi service và trả dữ liệu hoặc lỗi về Redux.
 export const fetchLocations = createAsyncThunk<Page<Location>, QueryParams | void, ApiThunkConfig>(
   "locations/list",
   async (params, { getState, signal, rejectWithValue }) => {
@@ -84,10 +83,8 @@ export const deleteLocation = createAsyncThunk<number, number, ApiThunkConfig>(
   },
 );
 
-// 2. State: mỗi thao tác có loading/error riêng để không ảnh hưởng lẫn nhau.
 const initialState = createResourceState<Location>();
 
-// 3. Slice: xử lý pending, fulfilled và rejected giống mẫu ListMovie.
 const locationsSlice = createSlice({
   name: "locations",
   initialState,

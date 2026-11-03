@@ -8,6 +8,7 @@ import { ResourcePanel } from "../app/components/admin/ResourcePanel";
 import { Pagination } from "../app/components/ui/Pagination";
 import { MyBookings } from "../app/features/bookings/components/MyBookings";
 import { hydrateSession } from "../app/features/auth/auth.slice";
+import { BookingLink, getBookingLinkHref } from "../app/components/auth/BookingLink";
 import { makeStore } from "../app/store";
 import { fetchBookings } from "../app/features/bookings/bookings.slice";
 import type { Room } from "../app/features/rooms/rooms.types";
@@ -19,16 +20,22 @@ const room: Room = {
   wifi: false, bep: false, doXe: false, hoBoi: false,
 };
 
+const renderRoomCard = (variant: "grid" | "list", rating?: number) => {
+  const store = makeStore();
+  store.dispatch(hydrateSession({ user: { id: 8, name: "Khách", email: "guest@example.com", phone: "", birthday: "", gender: false, role: "USER" }, token: "guest-token" }));
+  return renderToStaticMarkup(createElement(Provider, { store } as Parameters<typeof Provider>[0], createElement(CardRoom, { room, variant, rating,
+    search: { checkIn: "2030-10-20", checkOut: "2030-10-23", guests: 3, locationId: 8 },
+  })));
+};
+
 test("both room card layouts use the real room and keep dates through detail and booking links", () => {
   for (const variant of ["grid", "list"] as const) {
-    const markup = renderToStaticMarkup(createElement(CardRoom, { room, variant,
-      search: { checkIn: "2030-10-20", checkOut: "2030-10-23", guests: 3, locationId: 8 },
-    }));
+    const markup = renderRoomCard(variant);
     assert.match(markup, /Phòng bên biển/);
     assert.match(markup, /\$28/);
     assert.match(markup, /Chưa có ảnh phòng/);
     assert.match(markup, /href="\/rooms\/73\?checkIn=2030-10-20&amp;checkOut=2030-10-23&amp;guests=3&amp;maViTri=8"/);
-    assert.match(markup, /href="\/reservation\/availability\?maPhong=73&amp;checkIn=2030-10-20&amp;checkOut=2030-10-23&amp;guests=3&amp;maViTri=8"/);
+    assert.match(markup, /href="\/login\?next=%2Freservation%2Favailability%3FmaPhong%3D73%26checkIn%3D2030-10-20%26checkOut%3D2030-10-23%26guests%3D3%26maViTri%3D8"/);
     assert.doesNotMatch(markup, /Wi-Fi|Điều hòa|Lorem|fa fa-star checked/);
     assert.match(markup, /Chưa có đánh giá/);
     assert.equal((markup.match(/fa fa-star/g) ?? []).length, 5);
@@ -39,7 +46,7 @@ test("both room card layouts use the real room and keep dates through detail and
 });
 
 test("room card follows the static rating structure when rating data is provided", () => {
-  const markup = renderToStaticMarkup(createElement(CardRoom, { room, rating: 4 }));
+  const markup = renderRoomCard("grid", 4);
   assert.match(markup, /class="room-item [^"]*"/);
   assert.match(markup, /class="room-image [^"]*"/);
   assert.match(markup, /class="room-content [^"]*"/);
@@ -48,6 +55,19 @@ test("room card follows the static rating structure when rating data is provided
   assert.match(markup, /Đánh giá 4 trên 5/);
   assert.equal((markup.match(/fa fa-star checked/g) ?? []).length, 4);
   assert.equal((markup.match(/fa fa-star/g) ?? []).length, 5);
+});
+
+test("booking link sends unauthenticated guests to login with the original destination", () => {
+  const store = makeStore();
+  const markup = renderToStaticMarkup(createElement(Provider, { store } as Parameters<typeof Provider>[0], createElement(BookingLink, { href: "/reservation/availability?maPhong=73" }, "Đặt ngay")));
+  assert.match(markup, /href="\/login\?next=%2Freservation%2Favailability%3FmaPhong%3D73"/);
+});
+
+test("booking link uses the booking destination after the authenticated client is ready", () => {
+  assert.equal(
+    getBookingLinkHref("/reservation/availability?maPhong=73", true),
+    "/reservation/availability?maPhong=73",
+  );
 });
 
 test("admin booking list renders backend records, empty results and failures without sample rows", () => {
@@ -93,5 +113,7 @@ test("MyBookings does not show another user's records cached by the admin list",
   })), totalRow: 2, pageIndex: 1, pageSize: 10 }, "cached", undefined));
   const markup = renderToStaticMarkup(createElement(Provider, { store } as Parameters<typeof Provider>[0], createElement(MyBookings)));
   assert.match(markup, /Đặt phòng #12/);
+  assert.match(markup, /Hủy đặt phòng/);
+  assert.equal((markup.match(/Hủy đặt phòng/g) ?? []).length, 1);
   assert.doesNotMatch(markup, /Đặt phòng #99/);
 });

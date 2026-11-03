@@ -18,6 +18,7 @@ import { logout } from "@/features/auth/auth.slice";
 import { useClientReady } from "@/hooks/useClientReady";
 import type { User } from "@/features/users/users.types";
 import { siteInfo } from "@/config/site";
+import { BookingLink } from "@/components/auth/BookingLink";
 
 const Icon = ({ name }: { name: string }) => (
   <i className={`fa ${name}`} aria-hidden="true" />
@@ -204,12 +205,21 @@ export function HotuxHeader() {
                           <i className="fa fa-angle-down" aria-hidden="true" />
                         </a>
                       ) : (
-                        <Link
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
+                        item.href === clientRoutes.reservation.availability ? (
+                          <BookingLink
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {item.label}
+                          </BookingLink>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                        )
                       )}
                       {item.children && (
                         <ul
@@ -235,9 +245,9 @@ export function HotuxHeader() {
                 })}
               </ul>
               <div className="nav-btn">
-                <Link href={clientRoutes.reservation.availability} className="btn btn-orange">
+                <BookingLink href={clientRoutes.reservation.availability} className="btn btn-orange">
                   Đặt phòng
-                </Link>
+                </BookingLink>
               </div>
             </div>
           </nav>

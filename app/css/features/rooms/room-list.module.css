@@ -25,22 +25,31 @@
 }
 
 .catalogue :global(.room-filters) { min-width: 0; }
-.catalogue :global(.room-filters h3) { margin: 0 0 25px; }
-.catalogue :global(.room-filters .list-sidebar-item) { padding-bottom: 20px; }
-.catalogue :global(.room-filters .form-check) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0;
-}
-.catalogue :global(.room-filters .form-check-input) {
-  position: static;
-  float: none;
-  flex-shrink: 0;
-  margin: 0;
-}
-.catalogue :global(.room-filters .form-check-label) { margin: 0; cursor: pointer; }
+.catalogue :global(.room-filters .list-sidebar-item) { margin-bottom: 34px; padding-bottom: 0; }
+.catalogue :global(.room-filters .list-sidebar-item > h4) { margin-bottom: 20px; font-size: 20px; }
+.catalogue :global(.room-filters .pretty) { display: block; min-height: 20px; margin-bottom: 15px; }
+.catalogue :global(.room-filters .pretty .state label) { color: #666; font-size: 15px; line-height: 20px; cursor: pointer; }
+.catalogue :global(.room-filters .pretty input:focus-visible ~ .state label::before) { outline: 2px solid var(--ds-primary); outline-offset: 2px; }
 .catalogue :global(.room-filters .info-1) { border-bottom: 0; }
+.ratingStars { display: inline-flex; gap: 4px; color: #fe4e37; line-height: 1; letter-spacing: 0; text-indent: 0; }
+.ratingStars :global(.fa-star) { flex: 0 0 1em; width: 1em; text-indent: 0; }
+.priceSlider { position: relative; padding: 3px 0 0; }
+.priceStartThumb {
+  position: absolute; z-index: 1; top: -2px; left: 0; width: 14px; height: 14px;
+  border: 1px solid #ccc; border-radius: 50%; background: white; pointer-events: none;
+}
+.priceSlider input[type="range"] {
+  width: 100%; height: 4px; margin: 0; padding: 0; appearance: none; border-radius: 999px;
+  background: linear-gradient(to right, #fe4e37 0 var(--price-progress), #d7d7d7 var(--price-progress) 100%);
+  cursor: pointer;
+}
+.priceSlider input[type="range"]::-webkit-slider-thumb {
+  width: 14px; height: 14px; appearance: none; border: 1px solid #ccc; border-radius: 50%; background: white;
+}
+.priceSlider input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 50%; background: white; }
+.priceSlider input[type="range"]:disabled { cursor: not-allowed; opacity: .55; }
+.priceValues { display: flex; justify-content: space-between; margin-top: 10px; color: #fe4e37; font-size: 13px; font-weight: 700; }
+.priceValues output { margin: 0; }
 .catalogue :global(.room-grid) { min-height: 280px; }
 .catalogue :global(.location-room-image) {
   position: relative;

@@ -1,13 +1,13 @@
 "use client";
-/* eslint-disable @next/next/no-img-element -- preserve the supplied Hotux HTML asset markup. */
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import Form from "next/form";
+import { BookingLink } from "@/components/auth/BookingLink";
 import { routes } from "@/config/routes";
 import { fetchLocations } from "@/features/locations/locations.slice";
 import { StayDateFields } from "@/features/reservations/components/StayDateFields";
-import { validSearch } from "@/features/reservations/flow";
+import { searchValidationError } from "@/features/reservations/flow";
 import {
   initializeHotuxHome,
   legacyScriptBundles,
@@ -27,15 +27,15 @@ export function HomeBanner() {
   function validateSubmit(event: FormEvent<HTMLFormElement>) {
     const data = new FormData(event.currentTarget);
     const search = {
-      ...stay,
+      checkIn: String(data.get("checkIn") ?? ""),
+      checkOut: String(data.get("checkOut") ?? ""),
       guests: Number(data.get("guests")),
       locationId: Number(data.get("maViTri")),
     };
-    if (!validSearch(search)) {
+    const validationError = searchValidationError(search, { requireLocation: true });
+    if (validationError) {
       event.preventDefault();
-      setError(
-        "Chọn địa điểm, ngày nhận từ hôm nay, ngày trả sau ngày nhận và ít nhất 1 khách.",
-      );
+      setError(validationError);
     } else {
       setError("");
     }
@@ -47,7 +47,12 @@ export function HomeBanner() {
 
     void loadLegacyScripts(legacyScriptBundles.hotuxHome)
       .then(() => {
-        if (!cancelled) cleanup = initializeHotuxHome(document);
+        if (!cancelled) {
+          cleanup = initializeHotuxHome(document, (dates) => {
+            setStay(dates);
+            setError("");
+          });
+        }
       })
       .catch((error: unknown) => {
         if (!cancelled)
@@ -100,14 +105,14 @@ export function HomeBanner() {
                           <i className="fa fa-book" aria-hidden="true" /> Khám
                           phá chỗ nghỉ
                         </Link>
-                        <Link
+                        <BookingLink
                           href={routes.reservation.availability}
                           data-animation="animated fadeInUp"
                           className="slider-btn btn-wt"
                         >
                           <i className="fa fa-book" aria-hidden="true" /> Đặt
                           phòng ngay
-                        </Link>
+                        </BookingLink>
                       </div>
                     </div>
                   );
@@ -128,6 +133,7 @@ export function HomeBanner() {
             >
               <div className="table-item stay-location">
                 <div className="form-group form-icon">
+                  <i className="fa fa-map-marker home-search-icon" aria-hidden="true" />
                   <select
                     id="home-location"
                     name="maViTri"
@@ -160,6 +166,7 @@ export function HomeBanner() {
                 showLabels={false}
                 showNights={false}
                 legacyPicker
+                showIcons
                 onChange={(value) => {
                   setStay(value);
                   setError("");
@@ -167,6 +174,7 @@ export function HomeBanner() {
               />
               <div className="table-item stay-guests">
                 <div className="form-group form-icon">
+                  <i className="fa fa-user home-search-icon" aria-hidden="true" />
                   <select
                     id="home-guests"
                     name="guests"

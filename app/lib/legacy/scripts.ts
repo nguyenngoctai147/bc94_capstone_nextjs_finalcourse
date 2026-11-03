@@ -41,13 +41,19 @@ export const legacyScriptBundles = {
 type LegacyScriptSource =
   (typeof legacyScriptBundles)[keyof typeof legacyScriptBundles][number];
 
+type HotuxDatePickerEvent = { date1?: Date };
+type HotuxDatePickerHandler = (
+  event: HotuxDatePickerEvent,
+  payload?: HotuxDatePickerEvent,
+) => void;
+
 type HotuxJQueryCollection = {
   length: number;
   hasClass(className: string): boolean;
   slick(options: Record<string, unknown> | string): void;
   niceSelect(): void;
   dateRangePicker(options: Record<string, unknown>): void;
-  on(eventName: string, handler: (event: { date1?: Date }) => void): void;
+  on(eventName: string, handler: HotuxDatePickerHandler): void;
   off(eventName: string): void;
   data(key: string): unknown;
 };
@@ -97,6 +103,18 @@ type HotuxSwiperConstructor = new (
   options: Record<string, unknown>,
 ) => HotuxSwiperInstance;
 
+type HotuxStayDates = {
+  checkIn: string;
+  checkOut: string;
+};
+
+const toDateInputValue = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 export function loadLegacyScripts(bundle: readonly LegacyScriptSource[]) {
   return enqueueVendorScripts(async () => {
     const hotuxWindow = window as HotuxWindow;
@@ -104,8 +122,6 @@ export function loadLegacyScripts(bundle: readonly LegacyScriptSource[]) {
     for (const source of bundle) {
       if (source === "/assets/legacy/js/jquery-3.3.1.min.js") {
         if (!jQuery?.fn) {
-          // Older sessions can retain loaded tags but lose the plugin-owning
-          // jQuery after the dashboard bundle replaces the globals.
           const existing = document.querySelector(`script[src="${source}"]`);
           const stale =
             !!existing &&
@@ -179,7 +195,6 @@ const teamSliderOptions = {
   ],
 };
 
-/** Initialize the static Hotux destination carousel after React renders its slides. */
 export function initializeHotuxTeamSlider(root: ParentNode = document) {
   const $ = getHotuxJQuery();
   const teamSlider = root.querySelector<HTMLElement>(".team-slider");
@@ -195,12 +210,10 @@ export function initializeHotuxTeamSlider(root: ParentNode = document) {
   };
 }
 
-/**
- * Initialize the homepage-only widgets against the current React DOM.
- * Legacy scripts are loaded once, but these instances must be recreated for
- * every client-side visit to the home route.
- */
-export function initializeHotuxHome(root: ParentNode = document) {
+export function initializeHotuxHome(
+  root: ParentNode = document,
+  onStayChange?: (dates: HotuxStayDates) => void,
+) {
   const $ = getHotuxJQuery();
   const Swiper = (window as typeof window & { Swiper?: HotuxSwiperConstructor })
     .Swiper;
@@ -239,15 +252,38 @@ export function initializeHotuxHome(root: ParentNode = document) {
   };
 
   if (checkIn && checkOut) {
+    const handleCheckOutChange: HotuxDatePickerHandler = (event, payload) => {
+      const selectedDate = payload?.date1 ?? event.date1;
+      if (!selectedDate) return;
+      const checkOutValue = toDateInputValue(selectedDate);
+      if (!checkIn.value || checkOutValue <= checkIn.value) {
+        checkOut.value = "";
+        onStayChange?.({ checkIn: checkIn.value, checkOut: "" });
+        return;
+      }
+      checkOut.value = checkOutValue;
+      onStayChange?.({ checkIn: checkIn.value, checkOut: checkOutValue });
+    };
+    const bindCheckOutChange = () => {
+      $(checkOut).off("datepicker-change.home-search");
+      $(checkOut).on("datepicker-change.home-search", handleCheckOutChange);
+    };
+
     initializeDatePicker(checkIn, new Date());
     initializeDatePicker(checkOut, new Date());
-    $(checkIn).on("datepicker-change.home-search", (event) => {
-      if (!event.date1) return;
-      const nextDay = new Date(event.date1);
+    $(checkIn).on("datepicker-change.home-search", (event, payload) => {
+      const selectedDate = payload?.date1 ?? event.date1;
+      if (!selectedDate) return;
+      const checkInValue = toDateInputValue(selectedDate);
+      const nextDay = new Date(selectedDate);
       nextDay.setDate(nextDay.getDate() + 1);
+      checkIn.value = checkInValue;
       checkOut.value = "";
       initializeDatePicker(checkOut, nextDay);
+      bindCheckOutChange();
+      onStayChange?.({ checkIn: checkInValue, checkOut: "" });
     });
+    bindCheckOutChange();
   }
 
   return () => {
@@ -259,7 +295,10 @@ export function initializeHotuxHome(root: ParentNode = document) {
       $(checkIn).off("datepicker-change.home-search");
       getDateRangePicker($(checkIn))?.destroy();
     }
-    if (checkOut) getDateRangePicker($(checkOut))?.destroy();
+    if (checkOut) {
+      $(checkOut).off("datepicker-change.home-search");
+      getDateRangePicker($(checkOut))?.destroy();
+    }
   };
 }
 
@@ -278,7 +317,6 @@ function destroySliders(jQuery: HotuxJQuery, sliders: HTMLElement[]) {
   }
 }
 
-/** Static About widgets must also be recreated on a client-side return visit. */
 export function initializeHotuxAbout(root: ParentNode = document) {
   const $ = getHotuxJQuery();
   if (!$) return () => undefined;
@@ -308,11 +346,6 @@ export function initializeHotuxAbout(root: ParentNode = document) {
   return () => destroySliders($, sliders);
 }
 
-/**
- * The date-range-picker plugin retains a window resize listener. Its instance
- * must be created and destroyed with the React route instead of executing the
- * legacy script just once for the whole document.
- */
 export function initializeHotuxReservation() {
   const $ = getHotuxJQuery();
   if (!$) return;
@@ -346,10 +379,6 @@ export function destroyHotuxReservation() {
   if (calendar.length) getDateRangePicker(calendar)?.destroy();
 }
 
-/**
- * `main.js` executes only the first time it is inserted into the document.
- * These are its detail-page initializers, repeated for client-side navigation.
- */
 export function initializeHotuxRoomDetail(root: ParentNode = document) {
   const $ = getHotuxJQuery();
   if (!$) return () => undefined;

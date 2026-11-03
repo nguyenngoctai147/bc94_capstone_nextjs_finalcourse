@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Alert } from "@/components/ui";
 import { routes } from "@/config/routes";
 import { useForm } from "@/hooks/useForm";
 import { required, email } from "@/lib/validation/rules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { login } from "../auth.slice";
+import { getPostLoginPath } from "../auth-navigation";
 
 export function LoginForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const request = useAppSelector((state) => state.auth.login);
   const form = useForm(
     { email: "", password: "" },
@@ -22,8 +24,12 @@ export function LoginForm() {
     const result = await dispatch(login(values));
     if (!login.fulfilled.match(result)) return;
 
-    const isAdmin = result.payload.user.role.trim().toUpperCase() === "ADMIN";
-    router.push(isAdmin ? routes.admin.dashboard : routes.reservation.availability);
+    router.replace(
+      getPostLoginPath(
+        result.payload.user.role,
+        searchParams.get("next"),
+      ),
+    );
   });
 
   return (

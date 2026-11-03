@@ -11,7 +11,6 @@ import {
 import { bookingsService } from "./bookings.service";
 import type { Booking, CreateBooking, UpdateBooking } from "./bookings.types";
 
-// 1. Async thunk: gọi service và trả dữ liệu hoặc lỗi về Redux.
 export const fetchBookings = createAsyncThunk<Page<Booking>, QueryParams | void, ApiThunkConfig>(
   "bookings/list",
   async (params, { getState, signal, rejectWithValue }) => {
@@ -51,8 +50,15 @@ export const createBooking = createAsyncThunk<Booking, CreateBooking, ApiThunkCo
 export const updateBooking = createAsyncThunk<Booking, { id: number; data: UpdateBooking }, ApiThunkConfig>(
   "bookings/update",
   async ({ id, data }, { getState, signal, rejectWithValue }) => {
+    const auth = getState().auth;
+    if (auth.user?.role.trim().toUpperCase() !== "ADMIN") {
+      return rejectWithValue({
+        status: 403,
+        message: "Chỉ quản trị viên được phép sửa đặt phòng.",
+      });
+    }
     try {
-      const result = await bookingsService.update(id, data, { signal, token: getState().auth.token });
+      const result = await bookingsService.update(id, data, { signal, token: auth.token });
       return result;
     } catch (error) {
       return rejectWithValue(toApiError(error));
@@ -84,10 +90,8 @@ export const deleteBooking = createAsyncThunk<number, number, ApiThunkConfig>(
   },
 );
 
-// 2. State: mỗi thao tác có loading/error riêng để không ảnh hưởng lẫn nhau.
 const initialState = createResourceState<Booking>();
 
-// 3. Slice: xử lý pending, fulfilled và rejected giống mẫu ListMovie.
 const bookingsSlice = createSlice({
   name: "bookings",
   initialState,

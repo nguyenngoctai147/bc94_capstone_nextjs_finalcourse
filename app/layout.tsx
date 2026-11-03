@@ -1,9 +1,8 @@
-/* eslint-disable @next/next/no-css-tags -- legacy CSS intentionally lives in public/assets/css so its relative asset URLs stay valid. */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { StoreProvider } from "@/providers/StoreProvider";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./globals.css";
+import "./css/base/globals.css";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -21,7 +20,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={roboto.variable}>
       <head>
-        {/* Static Hotux theme files are served from public/assets/css. */}
         <link rel="stylesheet" href="/assets/css/default.css" />
         <link rel="stylesheet" href="/assets/css/icons.css" />
         <link rel="stylesheet" href="/assets/fonts/flaticon.css" />

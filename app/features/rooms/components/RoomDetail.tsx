@@ -7,6 +7,7 @@ import { routes } from "@/config/routes";
 import { locationsService } from "@/features/locations/locations.service";
 import type { Location } from "@/features/locations/locations.types";
 import { createReview } from "@/features/reviews/reviews.slice";
+import { getLoginHref } from "@/features/auth/auth-navigation";
 import { reviewsService } from "@/features/reviews/reviews.service";
 import type { RoomReview } from "@/features/reviews/reviews.types";
 import { checkoutAfter, today, validSearch, withStaySearch, type Search } from "@/features/reservations/flow";
@@ -25,7 +26,7 @@ import {
   type ReviewFormValue,
   type RoomDetailTab,
 } from "./RoomDetailSections";
-import styles from "./RoomDetail.module.css";
+import styles from "@/css/features/rooms/room-detail.module.css";
 
 const initialReviewForm: ReviewFormValue = { stars: "5", content: "" };
 type RelatedRoomsState = { roomId: number; items: Room[] } | null;
@@ -34,7 +35,7 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { selected, requests } = useAppSelector((state) => state.rooms);
-  const { user, token } = useAppSelector((state) => state.auth);
+  const { user, token, hydrated } = useAppSelector((state) => state.auth);
   const request = requests.detail;
   const room = request.status === "succeeded" && selected?.id === id ? selected : null;
   const [tab, setTab] = useState<RoomDetailTab>("overview");
@@ -67,7 +68,6 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
           signal: controller.signal,
         });
       } catch {
-        // The full catalogue below remains a safe fallback when this endpoint fails.
       }
 
       const nearbyRelatedRooms = selectRelatedRooms(room, nearbyRooms, []);
@@ -119,11 +119,17 @@ export function RoomDetail({ id, search }: { id: number; search?: Search | null 
 
   const handleReserve = () => {
     const selection: Search = { ...stay, guests, roomId: room.id, locationId: room.maViTri };
+    const bookingHref = withStaySearch(routes.reservation.forRoom(room.id), selection);
+    if (!hydrated) return;
+    if (!user || !token) {
+      router.push(getLoginHref(bookingHref));
+      return;
+    }
     if (!validSearch(selection) || guests > room.khach) {
       setFormError(`Chọn ngày hợp lệ và tối đa ${room.khach} khách.`);
       return;
     }
-    router.push(withStaySearch(routes.reservation.forRoom(room.id), selection));
+    router.push(bookingHref);
   };
 
   const handleReviewSubmit = async (event: FormEvent<HTMLFormElement>) => {

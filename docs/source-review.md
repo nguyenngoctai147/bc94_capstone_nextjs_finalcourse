@@ -12,7 +12,7 @@ Kiến trúc chính phù hợp với ứng dụng hiện tại: route lắp ráp
 - Kiểm tra UI với dữ liệu đọc từ API trên trình duyệt, bao gồm desktop và viewport mobile 390px; không tạo, sửa hoặc xóa dữ liệu backend.
 - Kiểm tra lint, TypeScript, regression tests và production build.
 
-Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry route vẫn là **44**. Đã loại 12 file trùng hoặc không còn được dùng và thêm 4 file TypeScript có trách nhiệm rõ ràng: cấu hình thông tin site, nội dung trang chủ chung, dashboard dữ liệu thật và danh mục tiện nghi. CSS riêng của RoomList nằm cạnh component.
+Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry route vẫn là **44**. Đã loại 12 file trùng hoặc không còn được dùng và thêm 4 file TypeScript có trách nhiệm rõ ràng: cấu hình thông tin site, nội dung trang chủ chung, dashboard dữ liệu thật và danh mục tiện nghi. CSS do ứng dụng quản lý được tập trung trong `app/css` và vẫn dùng CSS Modules theo từng feature.
 
 ## Những vấn đề đã xử lý
 
@@ -47,7 +47,7 @@ app/config/              registry route/endpoint, thông tin site
 app/lib/api/             proxy, policy, adapter và lỗi
 app/services/api.ts      Axios dùng chung
 app/store/               typed hooks và hàm state của request
-app/styles/              tokens và foundations
+app/css/                 base, CSS Module theo feature và trang minh họa
 ```
 
 Không cần thêm tầng repository/use-case hoặc generic factory mới cho các màn hình này. Các file types/service/slice phục vụ những trách nhiệm khác nhau; thunk hiện đặt cùng slice để dễ đọc theo cách học React. Số file ở lớp dữ liệu không phải dấu hiệu dư thừa riêng lẻ.
@@ -56,7 +56,7 @@ Không cần thêm tầng repository/use-case hoặc generic factory mới cho c
 
 ## Phần còn cần nối tiếp
 
-1. `/admin/slider`, `/admin/bookings/add`, `/admin/users/detail` vẫn là trang minh họa; đã có thông báo rõ về phạm vi lưu. Các form CRUD đầy đủ cho phòng/vị trí/người dùng/bình luận cần yêu cầu và validation riêng.
+1. `/admin/slider` và `/admin/users/detail` vẫn là trang minh họa; đã có thông báo rõ về phạm vi lưu. Phòng đã có form thêm mới tại `/admin/rooms/add`; các form cập nhật phòng và CRUD đầy đủ cho vị trí/bình luận vẫn cần validation riêng.
 2. Thông tin liên hệ trong `config/site.ts` vẫn là thông tin mẫu của Hotux. Thay bằng thông tin doanh nghiệp trước khi xuất bản.
 3. CSS vendor public và dashboard vẫn có selector toàn cục. Khi tiếp tục thay theme, nên cô lập dần theo phạm vi; Next.js có thể giữ stylesheet khi điều hướng giữa route. Homepage vẫn cần Swiper/Slick/date picker legacy.
 4. Danh sách phòng hiện tải danh mục để lọc/sắp xếp/phân trang nhất quán ở trình duyệt. Với danh mục lớn, cần backend hỗ trợ các bộ lọc tương ứng trước khi chuyển sang phân trang server.
@@ -65,9 +65,9 @@ Không cần thêm tầng repository/use-case hoặc generic factory mới cho c
 
 ## Kiểm chứng
 
-- 40/40 tests đạt. Regression tests bao phủ URL đặt đúng phòng/giữ ngày và số khách, dữ liệu thật/loading/error/empty của admin, phân trang, active route và dữ liệu đặt phòng theo tài khoản.
+- 50/50 tests đạt. Regression tests bao phủ URL đặt đúng phòng/giữ ngày và số khách, dữ liệu thật/loading/error/empty của admin, phân trang, active route, phòng liên quan, payload thêm phòng và dữ liệu đặt phòng theo tài khoản.
 - Browser: danh mục trả 148 phòng tại thời điểm kiểm tra; lọc 2 phòng ngủ + Wi-Fi còn 10 kết quả, sắp xếp giá tăng đúng. Kết quả tìm Quận 1 với ngày 01–03/11/2026 và 2 khách giữ đúng thông tin qua link chi tiết/đặt phòng. Số liệu này có thể thay đổi theo API.
 - Desktop/mobile: xác nhận nút menu, mở/đóng bộ lọc, không tràn ngang ở viewport 390px và chỉ một main. Trang chủ giữ 6 thẻ phòng nổi bật, một h1 trong các slide gốc; carousel có clone DOM của plugin.
-- Lint: không có lỗi, còn 4 cảnh báo font/stylesheet vendor trong layout admin.
+- Lint và typecheck đều đạt, không có lỗi hoặc cảnh báo.
 - Typecheck và production build Webpack: đạt ở đợt rà soát đầu. Trong đợt chuyển sang cấu trúc học React, `npm run build` mặc định với Turbopack cũng đã đạt; không thay bundler trong package.json. Sau khi gộp/xóa các file thunk, đã khởi động lại dev server để bỏ cache tham chiếu đường dẫn cũ.
 - Chưa kiểm tra thao tác ghi lên backend thật hoặc đăng nhập admin thật. Các danh sách admin được kiểm chứng bằng store fixture và test render; guard được kiểm tra với phiên chưa đăng nhập.

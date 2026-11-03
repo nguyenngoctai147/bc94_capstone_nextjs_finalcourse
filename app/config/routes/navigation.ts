@@ -17,7 +17,6 @@ export const adminNavigation: readonly NavItem[] = [
   { label: "Quản lý bình luận", href: adminRoutes.reviews },
 ];
 
-/** Public menu for the Hotux header. Keep this list flat and focused on the main site pages. */
 export const hotuxNavigation: readonly NavItem[] = [
   { label: "Trang chủ", href: clientRoutes.home, exact: true, aliases: [clientRoutes.homePage] },
   { label: "Về chúng tôi", href: clientRoutes.pages.about },

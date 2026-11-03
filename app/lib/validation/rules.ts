@@ -16,6 +16,15 @@ export const email = (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.t
 export const minLength = (length: number) => (value: string) => !value || value.length >= length ? undefined : `Cần ít nhất ${length} ký tự.`;
 export const phone = (value: string) => !value || /^\+?[\d\s()-]{9,15}$/.test(value) ? undefined : "Số điện thoại không hợp lệ.";
 export const positiveInteger = (value: string) => Number.isInteger(Number(value)) && Number(value) > 0 ? undefined : "Vui lòng nhập số nguyên lớn hơn 0.";
+export const httpUrl = (value: string) => {
+  if (!value.trim()) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? undefined : "URL phải sử dụng HTTP hoặc HTTPS.";
+  } catch {
+    return "URL không hợp lệ.";
+  }
+};
 export const validDate = (value: string) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Ngày không hợp lệ.";
   const date = new Date(`${value}T00:00:00Z`);
