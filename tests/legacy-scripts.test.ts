@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { loadDashboardScripts } from "../app/lib/legacy/dashboard-scripts";
-import { initializeHotuxAbout, initializeHotuxHome, initializeHotuxRoomDetail, initializeHotuxTeamSlider, legacyScriptBundles, loadLegacyScripts } from "../app/lib/legacy/scripts";
-import { loadVendorScript } from "../app/lib/legacy/vendor-scripts";
+import { loadDashboardScripts } from "../app/commons/legacy/dashboard-scripts";
+import { initializeHotuxAbout, initializeHotuxHome, initializeHotuxRoomDetail, initializeHotuxTeamSlider, legacyScriptBundles, loadLegacyScripts } from "../app/commons/legacy/scripts";
+import { loadVendorScript } from "../app/commons/legacy/vendor-scripts";
 
 const jquerySource = legacyScriptBundles.hotuxHome[0];
 const pluginSource = legacyScriptBundles.hotuxHome[2];

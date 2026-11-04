@@ -56,8 +56,6 @@
 .searchInput { width: 100%; }
 .tagButton { margin: 0 5px 7px 0; padding: 7px 12px; border: 1px solid #e8e8e8; background: #fff; color: #555; }
 .tagButtonActive, .tagButton:hover { border-color: #f49342; background: #f49342; color: #fff; }
-.pageButton { display: block; min-width: 40px; min-height: 40px; border: 1px solid #eee; background: #fff; color: #555; }
-.pageButton:hover, .pageButton[aria-current="page"] { border-color: #f49342; background: #f49342; color: #fff; }
 .categoryButton { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 10px 0; border: 0; border-bottom: 1px dashed #e3e3e3; background: transparent; color: #555; text-align: left; }
 .categoryButton:hover { color: #f49342; }
 .aboutMedia,

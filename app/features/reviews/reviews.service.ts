@@ -1,10 +1,10 @@
-import { reviewEndpoints } from "@/config/endpoints";
-import { createCrudService } from "@/lib/api/crud-service";
-import { api } from "@/services/api";
-import type { RequestOptions } from "@/lib/api/types";
-import type { Review, CreateReview, UpdateReview, RoomReview } from "./reviews.types";
+import { nextApi } from "@/route/next.api";
+import { createCrudService } from "@/services/crud";
+import { api } from "@/services/http";
+import type { RequestOptions } from "@/types/api";
+import type { Review, CreateReview, UpdateReview, RoomReview } from "@/store/type/reviews";
 export const reviewsService = {
-  ...createCrudService<Review, CreateReview, UpdateReview>(reviewEndpoints.base, { detail: false }),
+  ...createCrudService<Review, CreateReview, UpdateReview>(nextApi.reviews.base, { detail: false }),
 
-  byRoom: (id: number, options?: RequestOptions) => api.get<RoomReview[]>(reviewEndpoints.byRoom(id), options),
+  byRoom: (id: number, options?: RequestOptions) => api.get<RoomReview[]>(nextApi.reviews.byRoom(id), options),
 };

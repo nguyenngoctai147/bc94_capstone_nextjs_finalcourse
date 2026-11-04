@@ -49,13 +49,14 @@ Thiếu cấu hình không làm build thất bại. Khi gọi API, giao diện h
 | `/admin/rooms/add` | Form Bootstrap thêm phòng, chọn vị trí và tiện nghi; yêu cầu ADMIN |
 | `/admin/slider`, `/admin/bookings/add`, `/admin/users/detail` | Trang minh họa có thông báo rõ; chưa lưu lên backend |
 | `/ui` | Xem và thử component Bootstrap, form mẫu không gửi API |
-| `/api/backend/[...path]` | Proxy server tới backend CyberSoft |
+| `/api/auth/signin`, `/api/auth/signup`, `/api/auth/signout` | Route Handler xác thực |
+| `/api/room`, `/api/booking`, `/api/location`, `/api/user`, `/api/profile`, `/api/reviews` | BFF theo từng tài nguyên, proxy an toàn tới CyberSoft |
 
 ## Cấu trúc
 
 ```text
 app/
-  layout.tsx                 # Bootstrap CSS + StoreProvider
+  layout.tsx                 # RootLayout + AppProviders
   globals.css                # Theme chung
   (client)/                  # Route group không xuất hiện trên URL
     layout.tsx               # passthrough để tách layout theo nhánh
@@ -72,32 +73,54 @@ app/
     blog/layout.tsx, ...      # PageTemplate cho các trang nội dung
   (auth)/                    # AuthTemplate: login, register
   (admin)/admin/             # AdminTemplate và các trang quản lý
-  api/backend/[...path]/     # Route Handler: Axios gọi backend
+  @modal/                    # Parallel route và modal box dùng chung
+  api/                       # Route Handler chia theo auth và tài nguyên
+    auth/                    # signin, signup, signout
+    room/, booking/          # API phòng và đặt phòng
+    location/, user/         # API vị trí và người dùng
+    profile/, reviews/       # API hồ sơ và đánh giá
+    _shared/                 # Helper proxy dùng chung, không tạo URL
   loading.tsx / error.tsx / not-found.tsx
-  components/
+  commons/
+    validation/              # Hàm validation thuần
+    legacy/                  # Bộ nạp script legacy có kiểm soát
+  component/
     ui/                      # Button, Input, Select, Textarea, Card...
     auth/                    # RequireAuth
     navigation/              # HotuxHeader, HotuxFooter, menu tài khoản
     admin/                   # Khung bảng danh sách
     examples/                # Bộ component minh họa
-  config/
-    routes/                  # web.ts, webSeo.ts, domain routes, navigation
-    endpoints/               # core.api.ts, next.api.ts, apiNotToken.ts, tài nguyên
   templates/                 # AdminTemplate, AuthTemplate, ClientTemplate, PageTemplate
+  constants/
+    site.ts                  # Thông tin website dùng chung
+  route/
+    core.api.ts              # Endpoint backend lấy từ Swagger
+    next.api.ts              # Endpoint Route Handler local
+    web.ts                   # Hằng số URL của website
+    apiNotToken.ts           # Endpoint auth không cần token phiên
+    *.ts                     # Route page, SEO và navigation
   features/
     <feature>/
-      *.types.ts             # Model và DTO
       *.service.ts           # Gọi endpoint + Axios
-      *.slice.ts             # createAsyncThunk + createSlice + reducer
       components/            # UI riêng theo nghiệp vụ
-  lib/
-    api/                     # proxy, policy, response, lỗi, CRUD service
-    validation/              # Hàm validation thuần
-  services/api.ts            # Axios dùng chung
-  store/                     # makeStore, typed hooks, request-state helpers
-  providers/                 # StoreProvider theo từng instance, không singleton
-  hooks/                     # useForm
-  styles/                    # Hướng dẫn CSS
+  hooks/                     # useForm và custom React hooks
+  provider/                  # App, Bootstrap và Redux Providers
+  services/
+    http.ts                  # Axios phía client gọi Route Handler nội bộ
+    api.ts                   # Axios server kết nối backend Swagger
+    proxy.ts                 # Proxy dùng chung cho Route Handler
+    crud.ts                  # CRUD service dùng chung
+    api-utils.ts             # Config, lỗi và response API
+  store/
+    reducer/<domain>/        # Reducer theo domain và reducer gốc
+    slice/<domain>/          # createSlice + pending/fulfilled/rejected
+    thunk/<domain>/          # createAsyncThunk gọi domain service
+    type/<domain>/           # Model, DTO và state type
+    index.ts                 # makeStore, không tạo store singleton
+    hooks.ts                 # Typed Redux hooks
+    request-state.ts         # Request-state helpers dùng lại
+  theme/                     # CSS nền tảng và CSS Module theo feature
+  types/                     # Kiểu dữ liệu dùng chung
 public/assets/
   images/                    # URL /assets/images/...
   fonts/
@@ -113,15 +136,16 @@ Giữ `app/` ở thư mục gốc để tiếp nối source khởi tạo. Alias 
 
 `HomePage` là nội dung dùng chung cho `/` và `/trang-chu`, đồng thời tải danh sách phòng/vị trí một lần cho các section con. `/rooms` dùng cùng `RoomList` cho toàn bộ danh mục và truy vấn theo vị trí; bộ lọc, sắp xếp và phân trang áp dụng trên danh sách API đã tải. Không dùng phòng mẫu khi API lỗi hoặc chưa có dữ liệu.
 
-Source áp dụng cách trình bày đã học trong React: thunk và slice cùng module, component cha tải dữ liệu, component con nhận props, state UI dùng useState và form có các hàm handleChange/handleBlur/submit riêng. Xem [hướng dẫn study và thứ tự đọc code](docs/study-architecture.md) để đối chiếu với ListMovie, Movie, FormValidation, api.js và store/index.js.
+Source áp dụng cách trình bày đã học trong React nhưng mở rộng theo domain: thunk, slice, reducer và type nằm ở các nhánh riêng trong `app/store`. Component cha tải dữ liệu, component con nhận props, state UI dùng useState và form có các hàm handleChange/handleBlur/submit riêng. Xem [hướng dẫn study và thứ tự đọc code](docs/study-architecture.md).
 
 ## Luồng dữ liệu
 
 ```text
 Client Component
   → dispatch(thunk)
-  → service → Axios /api/backend
-  → Next.js Route Handler → Axios + tokenCybersoft → CyberSoft
+  → service → Axios /api/<resource>
+  → Route Handler của resource → core.api.ts
+  → proxy server → Axios + tokenCybersoft → CyberSoft
   → unwrap content → thunk fulfilled/rejected → slice → useAppSelector → UI
 ```
 
@@ -134,7 +158,7 @@ Ví dụ form gọi API: `features/bookings/components/BookingForm.tsx`.
 
 ## Component và validation
 
-Import từ `@/components/ui`:
+Import từ `@/component/ui`:
 
 - `Button`: variant, size, loading, disabled; mặc định `type="button"`.
 - `Input`, `Select`, `Textarea`: label, error, thuộc tính HTML; nối label và thông báo lỗi qua ARIA.
@@ -154,7 +178,7 @@ Form đăng ký kiểm tra xác nhận mật khẩu. Form đặt phòng kiểm t
 - Login lưu user/token đã whitelist vào **Redux và localStorage**; provider khôi phục phiên sau hydration và đồng bộ giữa các tab. Chưa có refresh token hoặc cookie session. Redux DevTools tắt mặc định để không ghi credential trong action metadata. Xem `docs/auth-session.md`.
 - `RequireAuth` chỉ là guard giao diện. Backend phải xác thực và phân quyền trên từng endpoint. Proxy chỉ giới hạn path/method, giữ tokenCybersoft ở server và chuyển tiếp header `token`; nó chưa phải hệ thống session/authorization production. Đặc biệt Swagger có các endpoint users/dat-phong không khai báo user token; cần thống nhất bảo vệ backend trước triển khai thật.
 - Swagger mô tả request nhưng không có response schema đầy đủ. Model phản hồi `content`, `user/token`, phân trang là adapter cần xác minh bằng token thật. Snapshot giúp đối chiếu khi backend thay đổi.
-- Giao diện Hotux dùng asset có sẵn trong `public/assets`. Thông tin liên hệ mẫu được tập trung tại `app/config/site.ts`; thay bằng thông tin doanh nghiệp trước khi xuất bản.
+- Giao diện Hotux dùng asset có sẵn trong `public/assets`. Thông tin liên hệ mẫu được tập trung tại `app/constants/site.ts`; thay bằng thông tin doanh nghiệp trước khi xuất bản.
 - Chưa gọi thao tác ghi vào backend thật. Test API dùng adapter/backend giả lập cục bộ.
 
 ## Kiểm tra

@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import { AdminPageHeader } from "@/components/admin";
-import { Alert, Button, Input, Select } from "@/components/ui";
-import { routes } from "@/config/routes";
-import { hydrateSession } from "@/features/auth/auth.slice";
+import { AdminPageHeader } from "@/component/admin";
+import { Alert, Button, Input, Select } from "@/component/ui";
+import { routes } from "@/route";
+import { hydrateSession } from "@/store/slice/auth";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
-import { required, email, phone, validDate, localToday } from "@/lib/validation/rules";
+import { toApiError } from "@/services/api-utils";
+import { required, email, phone, validDate, localToday } from "@/commons/validation/rules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { usersService } from "../users.service";
-import { updateUser } from "../users.slice";
-import type { User } from "../users.types";
+import { updateUser } from "@/store/thunk/user";
+import type { User } from "@/store/type/user";
 
 type ProfileValues = {
   name: string;

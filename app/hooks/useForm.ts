@@ -12,7 +12,7 @@ import {
   validate,
   type FormErrors,
   type ValidationSchema,
-} from "@/lib/validation/rules";
+} from "@/commons/validation/rules";
 
 type FormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 

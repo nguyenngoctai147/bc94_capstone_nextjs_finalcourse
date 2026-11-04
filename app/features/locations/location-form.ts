@@ -1,14 +1,14 @@
-import { resolveApiImageSrc } from "@/lib/api/images";
+import { resolveApiImageSrc } from "@/commons/images";
 import {
   httpUrl,
   required,
   type ValidationSchema,
-} from "@/lib/validation/rules";
+} from "@/commons/validation/rules";
 import type {
   CreateLocation,
   Location,
   UpdateLocation,
-} from "./locations.types";
+} from "@/store/type/location";
 
 export type LocationFormValues = {
   tenViTri: string;

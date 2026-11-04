@@ -1,7 +1,7 @@
-import { httpUrl, positiveInteger, required, type ValidationSchema } from "@/lib/validation/rules";
-import { resolveApiImageSrc } from "@/lib/api/images";
+import { httpUrl, positiveInteger, required, type ValidationSchema } from "@/commons/validation/rules";
+import { resolveApiImageSrc } from "@/commons/images";
 import { roomAmenities, type AmenityKey } from "./room-amenities";
-import type { CreateRoom, Room, UpdateRoom } from "./rooms.types";
+import type { CreateRoom, Room, UpdateRoom } from "@/store/type/room";
 
 type AmenityValues = Record<AmenityKey, string>;
 

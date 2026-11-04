@@ -1,14 +1,14 @@
 "use client";
 
-import CardDestination from "@/components/ui/CardDestination";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { fetchLocations } from "@/features/locations/locations.slice";
+import CardDestination from "@/component/ui/CardDestination";
+import { EmptyState } from "@/component/ui/EmptyState";
+import { LoadingSpinner } from "@/component/ui/LoadingSpinner";
+import { fetchLocations } from "@/store/thunk/location";
 import {
   initializeHotuxTeamSlider,
   legacyScriptBundles,
   loadLegacyScripts,
-} from "@/lib/legacy/scripts";
+} from "@/commons/legacy/scripts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
 

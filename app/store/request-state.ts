@@ -1,33 +1,7 @@
-import type { ApiError } from "@/lib/api/types";
+import type { ApiError } from "@/types/api";
+import type { RequestState, ResourceState } from "@/store/type/request";
 
-export type RequestState = {
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: ApiError | null;
-  requestId?: string;
-};
-
-export type ResourceState<T> = {
-  items: T[];
-  selected: T | null;
-  total: number;
-  pageIndex: number;
-  pageSize: number;
-  invalidated: boolean;
-  requests: Record<
-    "list" | "detail" | "create" | "update" | "patch" | "remove",
-    RequestState
-  >;
-};
-
-export type ApiThunkConfig = {
-  state: {
-    auth: {
-      token: string | null;
-      user: { role: string } | null;
-    };
-  };
-  rejectValue: ApiError;
-};
+export type { ApiThunkConfig, RequestState, ResourceState } from "@/store/type/request";
 
 export const createRequestState = (): RequestState => ({
   status: "idle",

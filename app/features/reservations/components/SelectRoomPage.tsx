@@ -2,15 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState, LoadingSpinner } from "@/components/ui";
-import { routes } from "@/config/routes";
+import { EmptyState, LoadingSpinner } from "@/component/ui";
+import { routes } from "@/route";
 import { bookingsService } from "@/features/bookings/bookings.service";
-import type { Booking } from "@/features/bookings/bookings.types";
+import type { Booking } from "@/store/type/bookings";
 import { RoomCatalogueCards, RoomCatalogueShell, type RoomViewMode } from "@/features/rooms/components/RoomCatalogue";
 import { RoomCataloguePagination } from "@/features/rooms/components/RoomCataloguePagination";
 import { filterRooms, initialRoomFilters, type RoomFiltersValue, type SortOrder } from "@/features/rooms/room-list.utils";
 import { roomsService } from "@/features/rooms/rooms.service";
-import type { Room } from "@/features/rooms/rooms.types";
+import type { Room } from "@/store/type/room";
 import { available, flowKeys, nights, readSession, type Search, validSearch } from "../flow";
 import { ReservationProgress } from "./ReservationUi";
 

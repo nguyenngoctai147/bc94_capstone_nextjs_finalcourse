@@ -1,5 +1,5 @@
-import type { Booking } from "@/features/bookings/bookings.types";
-import type { Room } from "@/features/rooms/rooms.types";
+import type { Booking } from "@/store/type/bookings";
+import type { Room } from "@/store/type/room";
 export type Search = {
     checkIn: string;
     checkOut: string;
@@ -38,6 +38,15 @@ export function searchValidationError(s: Search, options: { requireLocation?: bo
     return null;
 }
 export function validSearch(s: Search) { return searchValidationError(s) === null; }
+export function createBookingDraft(room: Room, search: Search): Draft | null {
+    const draft: Draft = {
+        ...search,
+        roomId: room.id,
+        locationId: room.maViTri,
+        room,
+    };
+    return validSearch(draft) && draft.guests <= room.khach ? draft : null;
+}
 export function nights(s: Pick<Search, "checkIn" | "checkOut">) { return Math.round((Date.parse(`${s.checkOut}T00:00:00Z`) - Date.parse(`${s.checkIn}T00:00:00Z`)) / 86400000); }
 export function checkoutAfter(checkIn: string, count: number) {
     if (!validDate(checkIn) || !Number.isInteger(count) || count < 1)
@@ -79,6 +88,16 @@ export function withStaySearch(href: string, search?: Search | null) {
 }
 export function overlaps(s: Search, b: Booking) { return s.checkIn < b.ngayDi.slice(0, 10) && s.checkOut > b.ngayDen.slice(0, 10); }
 export function available(room: Room, s: Search, bookings: Booking[]) { return (s.locationId === undefined || room.maViTri === s.locationId) && (s.roomId === undefined || room.id === s.roomId) && room.khach >= s.guests && !bookings.some(b => b.maPhong === room.id && overlaps(s, b)); }
+export function countAvailableRooms(rooms: Room[], search: Search, bookings: Booking[]) {
+    return rooms.filter((room) => available(room, search, bookings)).length;
+}
+export function isBookedDate(date: string, bookings: Booking[]) {
+    return bookings.some((booking) => {
+        const checkIn = booking.ngayDen.slice(0, 10);
+        const checkOut = booking.ngayDi.slice(0, 10);
+        return date >= checkIn && date < checkOut;
+    });
+}
 export function readSession<T>(key: string): T | null { try {
     const raw = sessionStorage.getItem(key);
     return raw ? JSON.parse(raw) as T : null;

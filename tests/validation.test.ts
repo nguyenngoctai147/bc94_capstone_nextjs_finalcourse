@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { email, required, validate, validDate } from "../app/lib/validation/rules";
+import { email, required, validate, validDate } from "../app/commons/validation/rules";
 import { bookingSchema } from "../app/features/bookings/booking.validation";
 test("validation catches blank fields, malformed emails and impossible calendar dates", () => {
   assert.equal(Object.keys(validate({ email: "" }, { email: [required(), email] })).length, 1);

@@ -4,9 +4,9 @@ import {
   searchFromParams,
   type SearchParams,
 } from "@/features/reservations/flow";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { EmptyState } from "@/component/ui/EmptyState";
 import Link from "next/link";
-import { routes } from "@/config/routes";
+import { routes } from "@/route";
 import { PageTemplate } from "@/templates/PageTemplate";
 
 export default async function Page({

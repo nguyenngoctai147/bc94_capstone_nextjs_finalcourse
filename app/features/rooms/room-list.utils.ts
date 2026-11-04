@@ -1,7 +1,7 @@
-import type { Booking } from "@/features/bookings/bookings.types";
+import type { Booking } from "@/store/type/bookings";
 import { available, type Search } from "@/features/reservations/flow";
 import type { AmenityKey } from "./room-amenities";
-import type { Room } from "./rooms.types";
+import type { Room } from "@/store/type/room";
 
 export type SortOrder = "recommended" | "price-low" | "price-high" | "capacity";
 export type RoomFiltersValue = {

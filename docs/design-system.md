@@ -2,10 +2,10 @@
 
 ## Cấu trúc và nguồn thiết lập
 
-- `app/css/base/design-tokens.css`: nguồn duy nhất cho giá trị màu, font, cỡ chữ, spacing, width, radius, shadow và focus.
-- `app/css/base/design-foundations.css`: quy tắc sử dụng token, bridge cho Hotux và các component dùng chung. Scope `.ds-site` dành cho website; `.ds-foundation` cho nội dung độc lập. Không reset plugin hoặc dashboard.
-- `app/components/ui/Typography.tsx`: phân cấp chữ và căn chỉnh, độc lập với thẻ HTML.
-- `app/components/ui/Layout.tsx`: Container, Stack, Cluster; không cần lặp lại padding/gap thủ công.
+- `app/theme/base/design-tokens.css`: nguồn duy nhất cho giá trị màu, font, cỡ chữ, spacing, width, radius, shadow và focus.
+- `app/theme/base/design-foundations.css`: quy tắc sử dụng token, bridge cho Hotux và các component dùng chung. Scope `.ds-site` dành cho website; `.ds-foundation` cho nội dung độc lập. Không reset plugin hoặc dashboard.
+- `app/component/ui/Typography.tsx`: phân cấp chữ và căn chỉnh, độc lập với thẻ HTML.
+- `app/component/ui/Layout.tsx`: Container, Stack, Cluster; không cần lặp lại padding/gap thủ công.
 - `tailwind.config.js`: semantic utilities đọc cùng CSS variables; tiếp tục dùng prefix `tw-`, không bật Preflight.
 - `/ui`: trang mẫu Typography, Màu sắc, Spacing, Chiều rộng và Components. CSS Modules cô lập bố cục của trang mẫu khỏi theme legacy.
 
@@ -22,7 +22,7 @@ Content tối đa 1200px **bao gồm gutter**; wide 1440px; form 520px; reading 
 ## Cách căn chỉnh
 
 ```tsx
-import { Container, Stack, Cluster, Typography, Button } from "@/components/ui";
+import { Container, Stack, Cluster, Typography, Button } from "@/component/ui";
 
 <Container width="reading">
   <Stack gap={6}>
@@ -42,10 +42,10 @@ CSS: `className="ds-grid"` cho grid auto-fit; `ds-section` cho section spacing. 
 
 ## Thay đổi tổng thể và giới hạn
 
-1. Sửa token theo vai trò trong `app/css/base/design-tokens.css`, không sửa trực tiếp file vendor.
+1. Sửa token theo vai trò trong `app/theme/base/design-tokens.css`, không sửa trực tiếp file vendor.
 2. Xem `/ui`, kiểm tra desktop/mobile, trạng thái lỗi và focus bàn phím.
 3. Kiểm tra trang chủ, Check Availability và trang dùng component được thay đổi. Chạy typecheck, test và build trước khi bàn giao.
 
-Đã tích hợp vào ClientTemplate/PageTemplate (width, heading, main và skip link), AuthTemplate, Button/Input/Select/Textarea/Card/Alert, các section thông thường và grid phòng ở trang chủ. Nút `.btn-orange` và outline của website đọc cùng token. RoomList dùng CSS Module tại `app/css/features/rooms` để cô lập bộ lọc và thẻ list; mobile có nút mở menu/bộ lọc. `app/css/base/globals.css` chỉ giữ bridge cần thiết cho navigation và sidebar admin, đã bỏ bộ CSS dashboard cũ không còn được render. Dashboard giữ CSS/bố cục vendor riêng; component dùng chung nhận token qua marker `ds-*`. Các lớp số sẵn có của Bootstrap/Tailwind (ví dụ `p-4`, `tw-gap-4`) vẫn giữ giá trị gốc; dùng utility semantic hoặc Stack nếu muốn chúng thay đổi theo token.
+Đã tích hợp vào ClientTemplate/PageTemplate (width, heading, main và skip link), AuthTemplate, Button/Input/Select/Textarea/Card/Alert, các section thông thường và grid phòng ở trang chủ. Nút `.btn-orange` và outline của website đọc cùng token. RoomList dùng CSS Module tại `app/theme/features/rooms` để cô lập bộ lọc và thẻ list; mobile có nút mở menu/bộ lọc. `app/theme/base/globals.css` chỉ giữ bridge cần thiết cho navigation và sidebar admin, đã bỏ bộ CSS dashboard cũ không còn được render. Dashboard giữ CSS/bố cục vendor riêng; component dùng chung nhận token qua marker `ds-*`. Các lớp số sẵn có của Bootstrap/Tailwind (ví dụ `p-4`, `tw-gap-4`) vẫn giữ giá trị gốc; dùng utility semantic hoặc Stack nếu muốn chúng thay đổi theo token.
 
 Không tải thêm font hoặc thêm thư viện. Token không tự thay đổi màu chữ trên ảnh/banner; những vùng đó tiếp tục dùng tương phản riêng của Hotux.

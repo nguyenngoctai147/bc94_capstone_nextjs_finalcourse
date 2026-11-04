@@ -1,12 +1,12 @@
-import { bookingEndpoints } from "@/config/endpoints";
-import { createCrudService } from "@/lib/api/crud-service";
-import { api } from "@/services/api";
-import { toPage } from "@/lib/api/response";
-import type { RequestOptions } from "@/lib/api/types";
-import type { Booking, CreateBooking, UpdateBooking } from "./bookings.types";
+import { nextApi } from "@/route/next.api";
+import { createCrudService } from "@/services/crud";
+import { api } from "@/services/http";
+import { toPage } from "@/services/api-utils";
+import type { RequestOptions } from "@/types/api";
+import type { Booking, CreateBooking, UpdateBooking } from "@/store/type/bookings";
 export const bookingsService = {
   ...createCrudService<Booking, CreateBooking, UpdateBooking>(
-    bookingEndpoints.base,
+    nextApi.booking.base,
   ),
 
   list: async (options?: RequestOptions) => {
@@ -17,11 +17,11 @@ export const bookingsService = {
         : undefined;
     return toPage(
       await api.get<Booking[]>(
-        id ? bookingEndpoints.byUser(id) : bookingEndpoints.base,
+        id ? nextApi.booking.byUser(id) : nextApi.booking.base,
         options,
       ),
     );
   },
   byUser: (id: number, options?: RequestOptions) =>
-    api.get<Booking[]>(bookingEndpoints.byUser(id), options),
+    api.get<Booking[]>(nextApi.booking.byUser(id), options),
 };

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { routes } from "@/config/routes";
+import { routes } from "@/route";
 import { PageTemplate } from "@/templates/PageTemplate";
 export default function NotFound() {
   return <PageTemplate title="404" breadcrumb="Not Found">

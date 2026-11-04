@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert, Button, Input, LoadingSpinner, Select, Textarea } from "@/components/ui";
-import { routes } from "@/config/routes";
-import { fetchLocations } from "@/features/locations/locations.slice";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert, Button, Input, LoadingSpinner, Select, Textarea } from "@/component/ui";
+import { routes } from "@/route";
+import { fetchLocations } from "@/store/thunk/location";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
+import { toApiError } from "@/services/api-utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import styles from "@/css/features/rooms/room-admin.module.css";
+import styles from "@/theme/features/rooms/room-admin.module.css";
 import { roomAmenities } from "../room-amenities";
 import { RoomAmenityIcon } from "./RoomAmenityIcon";
 import { initialRoomFormValues, roomFormSchema, toCreateRoom, toRoomFormValues, toUpdateRoom } from "../room-form";
-import { createRoom, fetchRoomDetail, updateRoom } from "../rooms.slice";
+import { createRoom, fetchRoomDetail, updateRoom } from "@/store/thunk/room";
 
 const numberFields = [
   { name: "khach", label: "Số khách tối đa" },

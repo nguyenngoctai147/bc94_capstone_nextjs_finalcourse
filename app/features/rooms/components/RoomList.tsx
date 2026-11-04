@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { EmptyState, LoadingSpinner } from "@/components/ui";
-import { routes } from "@/config/routes";
-import { fetchLocationDetail } from "@/features/locations/locations.slice";
+import { EmptyState, LoadingSpinner } from "@/component/ui";
+import { routes } from "@/route";
+import { fetchLocationDetail } from "@/store/thunk/location";
 import { bookingsService } from "@/features/bookings/bookings.service";
-import type { Booking } from "@/features/bookings/bookings.types";
+import type { Booking } from "@/store/type/bookings";
 import { reviewsService } from "@/features/reviews/reviews.service";
-import type { Review } from "@/features/reviews/reviews.types";
+import type { Review } from "@/store/type/reviews";
 import { nights, type Search } from "@/features/reservations/flow";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchRooms, fetchRoomsByLocation } from "../rooms.slice";
+import { fetchRooms, fetchRoomsByLocation } from "@/store/thunk/room";
 import { filterRooms, initialRoomFilters, type RoomFiltersValue, type SortOrder } from "../room-list.utils";
-import type { Room } from "../rooms.types";
+import type { Room } from "@/store/type/room";
 import { RoomCatalogueCards, RoomCatalogueShell, type RoomViewMode } from "./RoomCatalogue";
 import { RoomCataloguePagination } from "./RoomCataloguePagination";
 

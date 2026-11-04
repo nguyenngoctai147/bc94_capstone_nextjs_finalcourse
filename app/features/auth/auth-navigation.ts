@@ -1,4 +1,4 @@
-import { routes } from "@/config/routes";
+import { routes } from "@/route";
 
 export const getSafeReturnPath = (value: string | null, fallback: string) =>
   value?.startsWith("/") && !value.startsWith("//") ? value : fallback;

@@ -12,9 +12,9 @@ import {
   Select,
   Textarea,
   Typography,
-} from "@/components/ui";
+} from "@/component/ui";
 import { useForm } from "@/hooks/useForm";
-import { required, email, minLength } from "@/lib/validation/rules";
+import { required, email, minLength } from "@/commons/validation/rules";
 import { DesignSystemGuide } from "./DesignSystemGuide";
 
 export function ComponentShowcase() {

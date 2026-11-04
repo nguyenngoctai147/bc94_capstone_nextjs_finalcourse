@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import CardRoom from "@/components/ui/CardRoom";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { fetchRooms } from "@/features/rooms/rooms.slice";
+import CardRoom from "@/component/ui/CardRoom";
+import { EmptyState } from "@/component/ui/EmptyState";
+import { LoadingSpinner } from "@/component/ui/LoadingSpinner";
+import { fetchRooms } from "@/store/thunk/room";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 const HOME_ROOM_LIMIT = 6;

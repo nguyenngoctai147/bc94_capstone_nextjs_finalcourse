@@ -1,4 +1,4 @@
-import styles from "@/css/features/dashboard/dashboard.module.css";
+import styles from "@/theme/features/dashboard/dashboard.module.css";
 
 const CHART_COLOR = "#fe4e37";
 const GRID_COLOR = "#dfe8f5";

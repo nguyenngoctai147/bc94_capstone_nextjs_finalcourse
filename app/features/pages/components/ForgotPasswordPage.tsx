@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { routes } from "@/config/routes";
-import { siteInfo } from "@/config/site";
-import styles from "@/css/features/pages/hotux-pages.module.css";
+import { routes } from "@/route";
+import { siteInfo } from "@/constants/site";
+import styles from "@/theme/features/pages/hotux-pages.module.css";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

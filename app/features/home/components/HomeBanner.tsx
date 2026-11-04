@@ -3,16 +3,16 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import Form from "next/form";
-import { BookingLink } from "@/components/auth/BookingLink";
-import { routes } from "@/config/routes";
-import { fetchLocations } from "@/features/locations/locations.slice";
+import { BookingLink } from "@/component/auth/BookingLink";
+import { routes } from "@/route";
+import { fetchLocations } from "@/store/thunk/location";
 import { StayDateFields } from "@/features/reservations/components/StayDateFields";
 import { searchValidationError } from "@/features/reservations/flow";
 import {
   initializeHotuxHome,
   legacyScriptBundles,
   loadLegacyScripts,
-} from "@/lib/legacy/scripts";
+} from "@/commons/legacy/scripts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export function HomeBanner() {

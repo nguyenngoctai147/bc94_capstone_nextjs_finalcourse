@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { filterRooms, initialRoomFilters, selectRelatedRooms } from "../app/features/rooms/room-list.utils";
-import type { Room } from "../app/features/rooms/rooms.types";
-import type { Booking } from "../app/features/bookings/bookings.types";
+import type { Room } from "../app/store/type/room";
+import type { Booking } from "../app/store/type/bookings";
 
 const makeRoom = (values: Partial<Room>): Room => ({
   id: 1, tenPhong: "Phòng thử nghiệm", khach: 4, phongNgu: 2, giuong: 2, phongTam: 1,

@@ -226,6 +226,104 @@
   margin-bottom: 14px;
 }
 
+.availabilityPanel {
+  margin: 8px 0 20px;
+  padding: 18px;
+  border: 1px solid #e8ebed;
+  background: #fff;
+}
+
+.availabilityHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.availabilityHeading h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.availabilityHeading p {
+  margin: 0;
+  color: #68747d;
+  font-size: 13px;
+}
+
+.availabilityHeading > i {
+  color: #fe4e37;
+  font-size: 21px;
+}
+
+.availabilityLoading,
+.availabilityFailure p {
+  margin: 18px 0 0;
+  color: #68747d;
+}
+
+.availabilityFailure {
+  margin-top: 18px;
+}
+
+.availabilityFailure p {
+  margin: 0 0 12px;
+  color: #b74343;
+}
+
+.availabilityLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  color: #68747d;
+  font-size: 12px;
+}
+
+.availabilityLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendAvailable,
+.legendBooked {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.legendAvailable {
+  border: 1px solid #cfd7dc;
+  background: #fff;
+}
+
+.legendBooked {
+  background: #ffe2e2;
+  border: 1px solid #d25a5a;
+}
+
+.availabilityCalendar {
+  margin-top: 14px;
+}
+
+.availabilityMessage {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.availabilityAvailable {
+  color: #198754;
+}
+
+.availabilityUnavailable {
+  color: #c34848;
+}
+
 .sidebarRoomImage {
   display: block;
   width: 100%;

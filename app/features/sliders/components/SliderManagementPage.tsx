@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent, type MouseEvent } from "react";
-import { Icon } from "@/components/admin";
-import { routes } from "@/config/routes";
+import { Icon } from "@/component/admin";
+import { Pagination } from "@/component/ui/Pagination";
+import { routes } from "@/route";
 
 type Slider = {
   id: string;
@@ -114,11 +115,7 @@ export function SliderManagementPage() {
       </div>
     </div>
 
-    <div className="row"><div className="dataTables_paginate"><ul className="pagination">
-      <li className={`paginate_button page-item ${activePage === 1 ? "disabled" : ""}`}><a href="#previous" className="page-link" onClick={(event) => { event.preventDefault(); setActivePage((page) => Math.max(1, page - 1)); }}>Previous</a></li>
-      {[1, 2, 3].map((page) => <li className={`paginate_button page-item ${activePage === page ? "active" : ""}`} key={page}><a href={`#page-${page}`} className="page-link" onClick={(event) => { event.preventDefault(); setActivePage(page); }}>{page}</a></li>)}
-      <li className={`paginate_button page-item ${activePage === 3 ? "disabled" : ""}`}><a href="#next" className="page-link" onClick={(event) => { event.preventDefault(); setActivePage((page) => Math.min(3, page + 1)); }}>Next</a></li>
-    </ul></div></div>
+    <Pagination page={activePage} pageSize={1} total={3} onChange={setActivePage} ariaLabel="Phân trang slider" />
 
     <SliderModal id="viewslider" title="" slider={selectedSlider} open={modal === "view"} onClose={closeModal}>{null}</SliderModal>
     <SliderModal id="addslider" title="Add Slider" open={modal === "add"} onClose={closeModal}>

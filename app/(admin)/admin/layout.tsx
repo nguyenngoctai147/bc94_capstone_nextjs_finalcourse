@@ -1,5 +1,5 @@
 import { AdminTemplate } from "@/templates/AdminTemplate";
-import { RequireAuth } from "@/components/auth/RequireAuth";
+import { RequireAuth } from "@/component/auth/RequireAuth";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>

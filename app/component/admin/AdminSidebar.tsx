@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { routes } from "@/config/routes";
+import { routes } from "@/route";
 import { Icon } from "./AdminIcon";
 import { menuItems, routeIsActive } from "./admin-navigation";
 

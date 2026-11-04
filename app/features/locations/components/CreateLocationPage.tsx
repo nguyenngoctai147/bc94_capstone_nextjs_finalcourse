@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert, Button, Input, LoadingSpinner } from "@/components/ui";
-import { routes } from "@/config/routes";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert, Button, Input, LoadingSpinner } from "@/component/ui";
+import { routes } from "@/route";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
+import { toApiError } from "@/services/api-utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   initialLocationFormValues,
@@ -20,7 +20,7 @@ import {
   createLocation,
   fetchLocationDetail,
   updateLocation,
-} from "../locations.slice";
+} from "@/store/thunk/location";
 
 export function CreateLocationPage() {
   return <LocationEditorPage />;

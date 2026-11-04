@@ -1,4 +1,4 @@
-import { Alert } from "@/components/ui";
+import { Alert } from "@/component/ui";
 import { SliderManagementPage } from "@/features/sliders/components/SliderManagementPage";
 
 export default function Page() {

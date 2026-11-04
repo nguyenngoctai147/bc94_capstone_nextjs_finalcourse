@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
-import { fetchRooms } from "@/features/rooms/rooms.slice";
-import { fetchLocations } from "@/features/locations/locations.slice";
-import { fetchReviews } from "@/features/reviews/reviews.slice";
+import { fetchRooms } from "@/store/thunk/room";
+import { fetchLocations } from "@/store/thunk/location";
+import { fetchReviews } from "@/store/thunk/reviews";
 import DanhSachViTri from "./DanhSachViTri";
 import DatPhong from "./DatPhong";
 import GalleryH from "./GalleryH";

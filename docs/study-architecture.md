@@ -7,20 +7,17 @@ Source đã áp dụng mẫu của ListMovie, Movie, FormValidation, services/ap
 | Bài React | File tương ứng trong source |
 | --- | --- |
 | `ListMovie/index.jsx`: dispatch trong useEffect, selector và renderListMovie | `app/features/rooms/components/RoomList.tsx` và các section trong `features/home/components/` |
-| `Movie.jsx`: component nhận movie qua props | `app/components/ui/CardRoom.tsx`, nhận room, search và variant |
-| `ListMovie/slice.js`: createAsyncThunk + createSlice cùng file | `app/features/rooms/rooms.slice.ts`; các feature locations/bookings/users/reviews có cùng cách trình bày |
+| `Movie.jsx`: component nhận movie qua props | `app/component/ui/CardRoom.tsx`, nhận room, search và variant |
+| `ListMovie/slice.js`: createAsyncThunk + createSlice | `app/store/thunk/room/index.ts` và `app/store/slice/room/index.ts`; các domain khác có cùng cấu trúc |
 | `FormValidation/index.jsx`: state dữ liệu/lỗi, onChange/onBlur/onSubmit | `app/hooks/useForm.ts` và `features/auth/components/LoginForm.tsx`, `RegisterForm.tsx` |
-| `services/api.js`: Axios dùng chung | `app/services/api.ts` |
-| `store/index.js`: configureStore và các reducer | `app/store/index.ts`, được gắn vào React bằng `app/providers/StoreProvider.tsx` |
+| `services/api.js`: Axios dùng chung | `app/services/http.ts` phía client và `app/services/api.ts` phía backend server |
+| `store/index.js`: configureStore và các reducer | `app/store/index.ts`, được gắn vào React bằng `app/provider/ReduxProviders/index.tsx` |
 
-## Cấu trúc một feature
+## Cấu trúc feature và Redux
 
 ```text
 app/features/rooms/
-  rooms.types.ts               model và dữ liệu gửi API
   rooms.service.ts             endpoint và request của phòng
-  rooms.slice.ts               thunk, initialState, createSlice và reducer
-  location-rooms.slice.ts       trạng thái riêng của phòng theo vị trí
   room-list.utils.ts           hàm filter/sort thuần
   room-amenities.ts             danh mục tiện nghi dùng chung
   components/
@@ -28,11 +25,19 @@ app/features/rooms/
     RoomFilters.tsx            component con: props, callback, state mở/đóng
     RoomDetail.tsx             tải và hiển thị phòng theo id
     CreateRoomPage.tsx         form quản trị tạo phòng theo schema API
+
+app/store/
+  type/room/index.ts           model, DTO và state type
+  thunk/room/index.ts          các createAsyncThunk của phòng
+  slice/room/index.ts          roomsSlice và locationRoomsSlice
+  reducer/room/index.ts        reducer của domain phòng
+  reducer/index.ts             combineReducers và reset khi logout
+  index.ts                     configureStore bằng makeStore
 ```
 
-CSS không nằm rải trong từng folder component. Source CSS của ứng dụng được chia tại `app/css/base`, `app/css/features` và `app/css/examples`. Component vẫn import file `.module.css` của feature qua alias để giữ phạm vi class và để Next.js chỉ tải CSS cần cho route. CSS nguyên bản của template nằm trong `public/assets` vì các file đó còn phụ thuộc đường dẫn tương đối tới ảnh, font và plugin.
+CSS không nằm rải trong từng folder component. Source CSS của ứng dụng được chia tại `app/theme/base`, `app/theme/features` và `app/theme/examples`. Component vẫn import file `.module.css` của feature qua alias để giữ phạm vi class và để Next.js chỉ tải CSS cần cho route. CSS nguyên bản của template nằm trong `public/assets` vì các file đó còn phụ thuộc đường dẫn tương đối tới ảnh, font và plugin.
 
-Các file `<feature>.thunks.ts` riêng và factory tự sinh thunk/slice đã được bỏ. Mở một file `.slice.ts` là có thể xem request, state và ba nhánh xử lý của Redux. `store/request-state.ts` chỉ chứa các type, giá trị ban đầu và hàm nhỏ dùng chung để tránh lặp việc đặt trạng thái request.
+Mỗi domain có cùng bốn nhánh `type → thunk → slice → reducer`, tương tự cách chia reducer/saga trong source tham khảo nhưng dùng Redux Toolkit Thunk. `store/request-state.ts` chứa các giá trị ban đầu và hàm nhỏ dùng chung; type request nằm tại `store/type/request.ts`.
 
 ## Thứ tự đọc một component
 
@@ -69,7 +74,7 @@ CardRoom chỉ trình bày một phòng. Dữ liệu tải từ API không nằm
 
 ## Redux Toolkit và thunk
 
-Trong rooms.slice.ts, `fetchRooms` gọi roomsService.list trong try/catch. `rejectWithValue(toApiError(error))` trả lỗi dạng dữ liệu thuần thay vì đưa toàn bộ AxiosError vào Redux. extraReducers viết rõ addCase cho pending, fulfilled và rejected.
+Trong `store/thunk/room/index.ts`, `fetchRooms` gọi `roomsService.list` trong try/catch. `rejectWithValue(toApiError(error))` trả lỗi dạng dữ liệu thuần. `store/slice/room/index.ts` viết rõ addCase cho pending, fulfilled và rejected.
 
 State bài ListMovie có loading/data/error cho một request. Project này có danh sách, chi tiết và thao tác ghi cùng lúc, nên tách `requests.list`, `requests.detail`, `requests.create`, ...:
 
@@ -95,7 +100,7 @@ Trang `/ui` có form minh họa để thử validation và reset mà không gử
 
 ## Axios và phần riêng của Next.js
 
-Axios được tạo một lần trong services/api.ts. Domain service gọi api.get/post/put/delete và xử lý endpoint riêng. api trả phần content đã chuẩn hóa; component/thunk không phải tự đọc result.data.content ở mọi nơi.
+Axios phía ứng dụng được tạo trong `services/http.ts`; domain service gọi `api.get/post/put/delete` tới Route Handler nội bộ. `services/api.ts` chỉ chạy phía server, lấy base URL Swagger và token cấu hình từ môi trường. Response phía client được chuẩn hóa để component/thunk không phải tự đọc `result.data.content` ở mọi nơi.
 
 Token phiên được thunk lấy từ getState tại thời điểm request; không giữ một token cũ được đọc lúc import file. tokenCybersoft của cấu hình được proxy server thêm từ môi trường. Code mẫu API đã học được tham khảo cách tổ chức, không chép token vào source client.
 
@@ -103,7 +108,7 @@ Route vẫn do thư mục app quyết định; dùng next/link thay react-router
 
 ## Mở rộng dần
 
-Với module mới, bắt đầu từ model → service list → thunk fetch → slice → component cha/con → route. Thêm form và thunk create/update khi UI có nhu cầu. Dùng rooms/locations làm mẫu, request-state/useForm/UI primitives làm phần dùng lại.
+Với module mới, bắt đầu từ `store/type/<domain>` → feature service → `store/thunk/<domain>` → `store/slice/<domain>` → `store/reducer/<domain>` → component cha/con → route. Sau đó đăng ký reducer trong `store/reducer/index.ts`.
 
 Khi tăng chức năng, giữ state UI cục bộ và state API dùng chung trong Redux; tách một component khi nó có trách nhiệm riêng hoặc được dùng nhiều nơi. Validation và trạng thái lỗi được bổ sung cùng chức năng. Các phần server/session/API policy hiện có tiếp tục làm nền cho luồng React này.
 

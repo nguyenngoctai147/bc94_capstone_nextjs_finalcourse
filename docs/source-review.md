@@ -1,6 +1,6 @@
 # Rà soát source và giao diện — 14/10/2026
 
-Đây là báo cáo giai đoạn rà soát ban đầu. Source sau đó được tổ chức tiếp theo các mẫu React đã học: thunk/slice gộp trong feature và Axios đặt ở services/api.ts. Cấu trúc hiện tại và thứ tự đọc code được trình bày tại [hướng dẫn study](study-architecture.md).
+Đây là báo cáo giai đoạn rà soát ban đầu. Source sau đó được tổ chức theo domain trong Redux; Axios phía ứng dụng và phía backend server được tách riêng. Cấu trúc hiện tại và thứ tự đọc code được trình bày tại [hướng dẫn study](study-architecture.md).
 
 Kiến trúc chính phù hợp với ứng dụng hiện tại: route lắp ráp nội dung, feature giữ nghiệp vụ, service gọi API, thunk/slice quản lý trạng thái và UI dùng chung. Phần dư thừa tập trung ở giao diện mẫu, các luồng danh sách bị nhân đôi và CSS cũ.
 
@@ -12,7 +12,7 @@ Kiến trúc chính phù hợp với ứng dụng hiện tại: route lắp ráp
 - Kiểm tra UI với dữ liệu đọc từ API trên trình duyệt, bao gồm desktop và viewport mobile 390px; không tạo, sửa hoặc xóa dữ liệu backend.
 - Kiểm tra lint, TypeScript, regression tests và production build.
 
-Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry route vẫn là **44**. Đã loại 12 file trùng hoặc không còn được dùng và thêm 4 file TypeScript có trách nhiệm rõ ràng: cấu hình thông tin site, nội dung trang chủ chung, dashboard dữ liệu thật và danh mục tiện nghi. CSS do ứng dụng quản lý được tập trung trong `app/css` và vẫn dùng CSS Modules theo từng feature.
+Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry route vẫn là **44**. Đã loại 12 file trùng hoặc không còn được dùng và thêm 4 file TypeScript có trách nhiệm rõ ràng: cấu hình thông tin site, nội dung trang chủ chung, dashboard dữ liệu thật và danh mục tiện nghi. CSS do ứng dụng quản lý được tập trung trong `app/theme` và vẫn dùng CSS Modules theo từng feature.
 
 ## Những vấn đề đã xử lý
 
@@ -33,31 +33,37 @@ Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry 
 | Guard ADMIN lặp lại ở từng page | Kiểm tra một lần tại layout admin; các route bên dưới tiếp tục được bảo vệ |
 | State danh sách đặt phòng dùng chung dễ hiển thị bản ghi ngoài tài khoản ở MyBookings | Lọc theo userId ngay khi render; kết quả xác nhận cũng ẩn khi đăng xuất/đổi tài khoản |
 | CSS cho `.admin-shell`, metric/chart/card của một dashboard cũ không có markup sử dụng | Loại CSS cũ; giữ bridge navigation/sidebar cần thiết và design tokens |
-| README/tài liệu ghi phiên chỉ ở bộ nhớ, không khớp implementation localStorage | Cập nhật theo StoreProvider và auth.session hiện tại |
+| README/tài liệu ghi phiên chỉ ở bộ nhớ, không khớp implementation localStorage | Cập nhật theo ReduxProviders và auth.session hiện tại |
 
 ## Cấu trúc tiếp tục sử dụng
 
 ```text
-app/(client|auth|admin)/   route và layout theo phạm vi
+app/(client|auth|admin)/  route và layout theo phạm vi
+app/@modal/              parallel route và modal box dùng chung
 app/templates/           khung trang dùng chung
 app/features/            component và nghiệp vụ theo feature
-app/components/ui/       primitive và thẻ dùng chung
-app/components/admin/    shell và bảng tài nguyên admin
-app/config/              registry route/endpoint, thông tin site
-app/lib/api/             proxy, policy, adapter và lỗi
-app/services/api.ts      Axios dùng chung
+app/component/ui/        primitive và thẻ dùng chung
+app/component/admin/     shell và bảng tài nguyên admin
+app/constants/           endpoint và thông tin site
+app/route/               registry URL và navigation
+app/services/http.ts     Axios phía client gọi Route Handler nội bộ
+app/services/api.ts      Axios server kết nối backend Swagger
+app/services/proxy.ts    proxy và policy cho Route Handler
+app/services/crud.ts     CRUD dùng chung
+app/services/api-utils.ts config, response và lỗi API
 app/store/               typed hooks và hàm state của request
-app/css/                 base, CSS Module theo feature và trang minh họa
+app/theme/               base, CSS Module theo feature và trang minh họa
+app/types/               kiểu dữ liệu dùng chung
 ```
 
-Không cần thêm tầng repository/use-case hoặc generic factory mới cho các màn hình này. Các file types/service/slice phục vụ những trách nhiệm khác nhau; thunk hiện đặt cùng slice để dễ đọc theo cách học React. Số file ở lớp dữ liệu không phải dấu hiệu dư thừa riêng lẻ.
+Không cần thêm tầng repository/use-case cho các màn hình này. Type, thunk, slice, reducer và domain service có trách nhiệm riêng; số file ở lớp dữ liệu không phải dấu hiệu dư thừa riêng lẻ.
 
-`BookingForm` là biểu mẫu tham khảo chưa gắn vào route; `booking.validation.ts` vẫn được kiểm thử. `lib/legacy/dashboard-scripts.ts` được giữ cho khả năng tương thích và các test quản lý bundle, nhưng không tải trong dashboard hiện tại. Các facade route/endpoint hiện có được giữ để duy trì API import.
+`BookingForm` là biểu mẫu tham khảo chưa gắn vào route; `booking.validation.ts` vẫn được kiểm thử. `commons/legacy/dashboard-scripts.ts` được giữ cho khả năng tương thích và các test quản lý bundle, nhưng không tải trong dashboard hiện tại. Các facade route/endpoint hiện có được giữ để duy trì API import.
 
 ## Phần còn cần nối tiếp
 
 1. `/admin/slider` và `/admin/users/detail` vẫn là trang minh họa; đã có thông báo rõ về phạm vi lưu. Phòng đã có form thêm mới tại `/admin/rooms/add`; các form cập nhật phòng và CRUD đầy đủ cho vị trí/bình luận vẫn cần validation riêng.
-2. Thông tin liên hệ trong `config/site.ts` vẫn là thông tin mẫu của Hotux. Thay bằng thông tin doanh nghiệp trước khi xuất bản.
+2. Thông tin liên hệ trong `constants/site.ts` vẫn là thông tin mẫu của Hotux. Thay bằng thông tin doanh nghiệp trước khi xuất bản.
 3. CSS vendor public và dashboard vẫn có selector toàn cục. Khi tiếp tục thay theme, nên cô lập dần theo phạm vi; Next.js có thể giữ stylesheet khi điều hướng giữa route. Homepage vẫn cần Swiper/Slick/date picker legacy.
 4. Danh sách phòng hiện tải danh mục để lọc/sắp xếp/phân trang nhất quán ở trình duyệt. Với danh mục lớn, cần backend hỗ trợ các bộ lọc tương ứng trước khi chuyển sang phân trang server.
 5. Font có cả `public/assets/font/` và `fonts/`, nhưng `icons.css` tham chiếu trực tiếp `../font/`. Chưa xóa asset vendor vì cần kiểm tra toàn bộ URL CSS và plugin trước; video/font SVG cũng chiếm phần lớn dung lượng asset.

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { StoreProvider } from "@/providers/StoreProvider";
+import AppProviders from "@/provider/AppProviders";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./css/base/globals.css";
+import "./theme/base/globals.css";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -16,18 +16,14 @@ export const metadata: Metadata = {
   description: "Nền tảng đặt phòng và quản lý lưu trú.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children, modal }: LayoutProps<"/">) {
   return (
     <html lang="vi" data-scroll-behavior="smooth" className={roboto.variable}>
-      <head>
-        <link rel="stylesheet" href="/assets/css/default.css" />
-        <link rel="stylesheet" href="/assets/css/icons.css" />
-        <link rel="stylesheet" href="/assets/fonts/flaticon.css" />
-        <link rel="stylesheet" href="/assets/css/plugin.css" />
-        <link rel="stylesheet" href="/assets/css/style.css" />
-      </head>
-      <body>
-        <StoreProvider>{children}</StoreProvider>
+      <body suppressHydrationWarning>
+        <AppProviders>
+          {children}
+          {modal}
+        </AppProviders>
       </body>
     </html>
   );

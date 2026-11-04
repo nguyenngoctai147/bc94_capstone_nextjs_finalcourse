@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { routes } from "@/config/routes";
-import type { Booking } from "@/features/bookings/bookings.types";
-import type { Room } from "@/features/rooms/rooms.types";
+import { routes } from "@/route";
+import type { Booking } from "@/store/type/bookings";
+import type { Room } from "@/store/type/room";
 import { useAppSelector } from "@/store/hooks";
 import { flowKeys, readSession } from "../flow";
 import { ReservationProgress, ReservationRoomHero, ReservationSummary, RoomAmenityList } from "./ReservationUi";

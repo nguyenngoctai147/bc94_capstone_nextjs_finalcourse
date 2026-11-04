@@ -7,8 +7,8 @@ import {
   toCreateBooking,
   toUpdateBooking,
 } from "../app/features/bookings/booking-admin-form";
-import type { Room } from "../app/features/rooms/rooms.types";
-import { validate } from "../app/lib/validation/rules";
+import type { Room } from "../app/store/type/room";
+import { validate } from "../app/commons/validation/rules";
 
 const room = { id: 3, khach: 4 } as Room;
 

@@ -7,18 +7,20 @@ import darkLogo from "../../../public/assets/images/logo-black.png";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
+  adminRoutes,
   authRoutes,
   clientRoutes,
   hotuxNavigation,
   isRouteActive,
   type NavItem,
-} from "@/config/routes";
+} from "@/route";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/features/auth/auth.slice";
+import { logout } from "@/store/slice/auth";
 import { useClientReady } from "@/hooks/useClientReady";
-import type { User } from "@/features/users/users.types";
-import { siteInfo } from "@/config/site";
-import { BookingLink } from "@/components/auth/BookingLink";
+import type { User } from "@/store/type/user";
+import { siteInfo } from "@/constants/site";
+import { BookingLink } from "@/component/auth/BookingLink";
+import { isAdminRole } from "@/features/auth/auth-navigation";
 
 const Icon = ({ name }: { name: string }) => (
   <i className={`fa ${name}`} aria-hidden="true" />
@@ -59,6 +61,17 @@ function AuthenticatedAccountMenu({ user }: { user: User }) {
         <ul className="account-context-menu" role="menu" aria-label="Tài khoản">
           <li role="none"><Link href={clientRoutes.account} role="menuitem" onClick={() => setOpen(false)}><Icon name="fa-user" /> Tài khoản</Link></li>
           <li role="none"><Link href={clientRoutes.bookings} role="menuitem" onClick={() => setOpen(false)}><Icon name="fa-calendar" /> Đặt phòng của tôi</Link></li>
+          {isAdminRole(user.role) && (
+            <li role="none">
+              <Link
+                href={adminRoutes.dashboard}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+              >
+                <Icon name="fa-dashboard" /> Quản trị bảng điều khiển
+              </Link>
+            </li>
+          )}
           <li className="account-context-separator" role="separator" />
           <li role="none">
             <button type="button" role="menuitem" onClick={() => dispatch(logout())}>

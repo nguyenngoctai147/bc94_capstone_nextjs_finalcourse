@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Alert, Button, Input } from "@/components/ui";
+import { Alert, Button, Input } from "@/component/ui";
 import { useForm } from "@/hooks/useForm";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { routes } from "@/config/routes";
-import type { Room } from "@/features/rooms/rooms.types";
-import { createBooking } from "../bookings.slice";
+import { routes } from "@/route";
+import type { Room } from "@/store/type/room";
+import { createBooking } from "@/store/thunk/bookings";
 import { bookingSchema } from "../booking.validation";
 import { bookingsService } from "../bookings.service";
 import { available } from "@/features/reservations/flow";

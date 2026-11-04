@@ -148,9 +148,6 @@
   line-height: 1;
 }
 
-.catalogue :global(.pagination .page-link) { cursor: pointer; }
-.catalogue :global(.pagination .disabled .page-link) { cursor: not-allowed; }
-
 @media (max-width: 991px) {
   .catalogue :global(.sidebar) { order: -1; }
   .catalogue .filterToggle { display: block; width: 100%; margin-bottom: 15px; }

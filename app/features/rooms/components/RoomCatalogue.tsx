@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BookingLink } from "@/components/auth/BookingLink";
-import { ApiImage } from "@/components/ui/ApiImage";
-import { routes } from "@/config/routes";
+import { BookingLink } from "@/component/auth/BookingLink";
+import { ApiImage } from "@/component/ui/ApiImage";
+import { routes } from "@/route";
 import { withStaySearch, type Search } from "@/features/reservations/flow";
 import type { RoomFiltersValue, SortOrder } from "../room-list.utils";
-import type { Room } from "../rooms.types";
+import type { Room } from "@/store/type/room";
 import { RoomFilters } from "./RoomFilters";
-import styles from "@/css/features/rooms/room-list.module.css";
+import styles from "@/theme/features/rooms/room-list.module.css";
 
 export type RoomViewMode = "list" | "grid";
 

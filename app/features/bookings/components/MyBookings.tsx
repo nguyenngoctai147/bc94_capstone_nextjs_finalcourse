@@ -7,11 +7,11 @@ import {
   ConfirmDialog,
   EmptyState,
   LoadingSpinner,
-} from "@/components/ui";
-import { toApiError } from "@/lib/api/errors";
+} from "@/component/ui";
+import { toApiError } from "@/services/api-utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import type { Booking } from "../bookings.types";
-import { deleteBooking, fetchBookings } from "../bookings.slice";
+import type { Booking } from "@/store/type/bookings";
+import { deleteBooking, fetchBookings } from "@/store/thunk/bookings";
 
 export function MyBookings() {
   const dispatch = useAppDispatch();

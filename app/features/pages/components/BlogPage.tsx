@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { routes } from "@/config/routes";
-import styles from "@/css/features/pages/hotux-pages.module.css";
+import { Pagination } from "@/component/ui/Pagination";
+import { routes } from "@/route";
+import styles from "@/theme/features/pages/hotux-pages.module.css";
 
 const posts = [
   { image: "news1.jpg", title: "Chọn chỗ nghỉ phù hợp cho chuyến đi mùa hè", category: "Kinh nghiệm", excerpt: "Bắt đầu từ số khách, số phòng ngủ và những tiện nghi mà cả nhóm thật sự cần." },
@@ -50,9 +51,7 @@ export default function BlogPage() {
               </article></div>)}
             </div></div>
             {visiblePosts.length === 0 && <div className="alert alert-light border">Không tìm thấy bài viết phù hợp.</div>}
-            {pageCount > 1 && <nav className="pagination-content text-center" aria-label="Phân trang cẩm nang"><ul className="pagination">
-              {Array.from({ length: pageCount }, (_, index) => index + 1).map((number) => <li className={number === currentPage ? "active" : ""} key={number}><button type="button" className={styles.pageButton} onClick={() => setPage(number)} aria-current={number === currentPage ? "page" : undefined}>{number}</button></li>)}
-            </ul></nav>}
+            {pageCount > 1 && <Pagination page={currentPage} pageSize={PAGE_SIZE} total={filteredPosts.length} onChange={setPage} ariaLabel="Phân trang cẩm nang" />}
           </div>
 
           <aside className="col-lg-4">

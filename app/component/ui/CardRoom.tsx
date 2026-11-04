@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { BookingLink } from "@/components/auth/BookingLink";
-import { routes } from "@/config/routes";
+import { BookingLink } from "@/component/auth/BookingLink";
+import { routes } from "@/route";
 import { roomAmenities } from "@/features/rooms/room-amenities";
 import { RoomAmenityIcon } from "@/features/rooms/components/RoomAmenityIcon";
-import type { Room } from "@/features/rooms/rooms.types";
+import type { Room } from "@/store/type/room";
 import { withStaySearch, type Search } from "@/features/reservations/flow";
 import { ApiImage } from "./ApiImage";
 

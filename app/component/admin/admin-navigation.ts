@@ -1,4 +1,4 @@
-import { adminNavigation, isRouteActive, routes } from "@/config/routes";
+import { adminNavigation, isRouteActive, routes } from "@/route";
 import type { IconName } from "./AdminIcon";
 
 export type MenuItem = {

@@ -1,18 +1,18 @@
-import { roomEndpoints } from "@/config/endpoints";
-import { createCrudService } from "@/lib/api/crud-service";
-import { api } from "@/services/api";
-import { toPage } from "@/lib/api/response";
-import type { Page, PageQuery, RequestOptions } from "@/lib/api/types";
-import type { Room, CreateRoom, UpdateRoom } from "./rooms.types";
+import { nextApi } from "@/route/next.api";
+import { createCrudService } from "@/services/crud";
+import { api } from "@/services/http";
+import { toPage } from "@/services/api-utils";
+import type { Page, PageQuery, RequestOptions } from "@/types/api";
+import type { Room, CreateRoom, UpdateRoom } from "@/store/type/room";
 export const roomsService = {
-  ...createCrudService<Room, CreateRoom, UpdateRoom>(roomEndpoints.base),
+  ...createCrudService<Room, CreateRoom, UpdateRoom>(nextApi.room.base),
 
   list: async (options?: RequestOptions) => toPage(await api.get<Room[] | Page<Room>>(
-    options?.params && Object.keys(options.params).length ? roomEndpoints.search : roomEndpoints.base, options)),
-  search: (params: PageQuery, options?: RequestOptions) => api.get<Page<Room>>(roomEndpoints.search, { ...options, params }),
+    options?.params && Object.keys(options.params).length ? nextApi.room.search : nextApi.room.base, options)),
+  search: (params: PageQuery, options?: RequestOptions) => api.get<Page<Room>>(nextApi.room.search, { ...options, params }),
 
   byLocation: async (maViTri: number, options?: RequestOptions) => {
-    const rooms = await api.get<Room[]>(roomEndpoints.byLocation, {
+    const rooms = await api.get<Room[]>(nextApi.room.byLocation, {
       ...options,
       params: { maViTri },
     });
@@ -22,6 +22,6 @@ export const roomsService = {
   },
   uploadImage: (id: number, file: File, options?: RequestOptions) => {
     const data = new FormData(); data.append("formFile", file);
-    return api.post<unknown>(roomEndpoints.uploadImage, data, { ...options, params: { maPhong: id } });
+    return api.post<unknown>(nextApi.room.uploadImage, data, { ...options, params: { maPhong: id } });
   },
 };

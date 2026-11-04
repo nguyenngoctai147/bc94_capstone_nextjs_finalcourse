@@ -3,15 +3,15 @@ import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Provider } from "react-redux";
-import CardRoom from "../app/components/ui/CardRoom";
-import { ResourcePanel } from "../app/components/admin/ResourcePanel";
-import { Pagination } from "../app/components/ui/Pagination";
+import CardRoom from "../app/component/ui/CardRoom";
+import { ResourcePanel } from "../app/component/admin/ResourcePanel";
+import { Pagination } from "../app/component/ui/Pagination";
 import { MyBookings } from "../app/features/bookings/components/MyBookings";
-import { hydrateSession } from "../app/features/auth/auth.slice";
-import { BookingLink, getBookingLinkHref } from "../app/components/auth/BookingLink";
+import { hydrateSession } from "../app/store/slice/auth";
+import { BookingLink, getBookingLinkHref } from "../app/component/auth/BookingLink";
 import { makeStore } from "../app/store";
-import { fetchBookings } from "../app/features/bookings/bookings.slice";
-import type { Room } from "../app/features/rooms/rooms.types";
+import { fetchBookings } from "../app/store/thunk/bookings";
+import type { Room } from "../app/store/type/room";
 
 const room: Room = {
   id: 73, tenPhong: "Phòng bên biển", khach: 4, phongNgu: 2, giuong: 2, phongTam: 1,
@@ -98,7 +98,7 @@ test("admin booking list renders backend records, empty results and failures wit
 test("pagination clamps shrinking result sets and never submits its surrounding form", () => {
   const markup = renderToStaticMarkup(createElement(Pagination, { page: 8, pageSize: 5, total: 2, onChange: () => undefined }));
   assert.match(markup, /Trang 1 \/ 1/);
-  assert.equal((markup.match(/type="button"/g) ?? []).length, 2);
+  assert.equal((markup.match(/type="button"/g) ?? []).length, 3);
   assert.equal((markup.match(/disabled=""/g) ?? []).length, 2);
 });
 

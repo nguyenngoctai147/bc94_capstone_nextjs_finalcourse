@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { routes } from "@/config/routes";
-import type { Location } from "@/features/locations/locations.types";
+import { routes } from "@/route";
+import type { Location } from "@/store/type/location";
 import { ApiImage } from "./ApiImage";
 
 export default function CardDestination({ location }: { location: Location }) {

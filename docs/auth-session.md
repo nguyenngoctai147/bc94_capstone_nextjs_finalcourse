@@ -1,6 +1,6 @@
 # Phiên đăng nhập phía trình duyệt
 
-Sau khi đăng nhập thành công, `StoreProvider` lưu phiên vào localStorage key `hotux.auth.session.v1`. Giá trị chỉ gồm `version`, `token` và hồ sơ người dùng đã whitelist. Mật khẩu và trạng thái request Redux không được lưu.
+Sau khi đăng nhập thành công, `ReduxProviders` lưu phiên vào localStorage key `hotux.auth.session.v1`. Giá trị chỉ gồm `version`, `token` và hồ sơ người dùng đã whitelist. Mật khẩu và trạng thái request Redux không được lưu.
 
 Khi ứng dụng tải lại, provider xác thực JSON rồi dispatch `hydrateSession`. Những dữ liệu thiếu, sai version hoặc lỗi JSON bị xóa khỏi trạng thái trong bộ nhớ. `useClientReady` giữ lần render đầu của các vùng phụ thuộc phiên giống hệt HTML từ server; `HotuxHeader` và `RequireAuth` chỉ dùng phiên đã lưu sau khi hydration hoàn tất. Cách này tránh lỗi hydration ngay cả khi Fast Refresh giữ Redux store cũ trong development.
 

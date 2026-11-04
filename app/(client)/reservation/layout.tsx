@@ -1,5 +1,5 @@
 import { PageTemplate } from "@/templates/PageTemplate";
-import { RequireAuth } from "@/components/auth/RequireAuth";
+import { RequireAuth } from "@/component/auth/RequireAuth";
 
 export default function ReservationLayout({
   children,

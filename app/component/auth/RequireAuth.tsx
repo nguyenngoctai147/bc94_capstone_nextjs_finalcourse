@@ -3,7 +3,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useAppSelector } from "@/store/hooks";
-import { routes } from "@/config/routes";
+import { routes } from "@/route";
 import { useClientReady } from "@/hooks/useClientReady";
 import { getLoginHref, isAdminRole } from "@/features/auth/auth-navigation";
 export function RequireAuth({

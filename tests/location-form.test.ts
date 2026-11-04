@@ -7,7 +7,7 @@ import {
   toLocationFormValues,
   toUpdateLocation,
 } from "../app/features/locations/location-form";
-import { validate } from "../app/lib/validation/rules";
+import { validate } from "../app/commons/validation/rules";
 
 test("location form validates the required API fields and supported image URL", () => {
   const missing = validate(initialLocationFormValues, locationFormSchema);

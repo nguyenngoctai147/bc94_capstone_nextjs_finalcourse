@@ -3,8 +3,8 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
 import { roomAmenities, type AmenityKey } from "../room-amenities";
 import type { RoomFiltersValue } from "../room-list.utils";
-import { siteInfo } from "@/config/site";
-import styles from "@/css/features/rooms/room-list.module.css";
+import { siteInfo } from "@/constants/site";
+import styles from "@/theme/features/rooms/room-list.module.css";
 import { RoomAmenityIcon } from "./RoomAmenityIcon";
 
 export type RoomFiltersProps = {

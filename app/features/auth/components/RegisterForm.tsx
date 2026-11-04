@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Alert, Button, Input, Select } from "@/components/ui";
+import { Alert, Button, Input, Select } from "@/component/ui";
 import { useForm } from "@/hooks/useForm";
 import {
   email,
@@ -10,10 +10,10 @@ import {
   required,
   validDate,
   localToday,
-} from "@/lib/validation/rules";
-import { routes } from "@/config/routes";
+} from "@/commons/validation/rules";
+import { routes } from "@/route";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { register } from "../auth.slice";
+import { register } from "@/store/thunk/auth";
 
 export function RegisterForm() {
   const dispatch = useAppDispatch();

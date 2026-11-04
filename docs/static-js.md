@@ -27,13 +27,13 @@ Toàn bộ 15 file JS gốc được lưu nguyên bản trong `public/assets/leg
 
 ## Quản lý và nạp bundle legacy
 
-Danh sách và bộ nạp dùng chung nằm tại [`app/lib/legacy/scripts.ts`](../app/lib/legacy/scripts.ts). Mỗi section chỉ import bundle tương ứng:
+Danh sách và bộ nạp dùng chung nằm tại [`app/commons/legacy/scripts.ts`](../app/commons/legacy/scripts.ts). Mỗi section chỉ import bundle tương ứng:
 
 ```tsx
 "use client";
 
 import { useEffect } from "react";
-import { legacyScriptBundles, loadLegacyScripts } from "@/lib/legacy/scripts";
+import { legacyScriptBundles, loadLegacyScripts } from "@/commons/legacy/scripts";
 
 export function LegacyHomeScripts() {
   useEffect(() => {
@@ -53,4 +53,4 @@ Thứ tự trong bundle giữ nguyên thư viện nền → plugin → file cust
 4. `chart.js`/`map.js` → widget admin lazy-load theo route.
 5. `dashboard.js`, `main.js`, `plugin.js` → không chuyển nguyên file; tách từng hành vi đang thực sự xuất hiện trong HTML.
 
-Các file hiện được lưu nguyên bản để không mất source. Code ứng dụng mới nằm trong `app/components`, `app/features`, `app/templates` và `app/store`.
+Các file hiện được lưu nguyên bản để không mất source. Code ứng dụng mới nằm trong `app/component`, `app/features`, `app/templates` và `app/store`.

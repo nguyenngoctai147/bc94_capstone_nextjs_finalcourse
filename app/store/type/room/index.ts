@@ -1,0 +1,34 @@
+import type { ApiError } from "@/types/api";
+
+export type Room = {
+  id: number;
+  tenPhong: string;
+  khach: number;
+  phongNgu: number;
+  giuong: number;
+  phongTam: number;
+  moTa: string;
+  giaTien: number;
+  maViTri: number;
+  hinhAnh: string;
+  mayGiat: boolean;
+  banLa: boolean;
+  tivi: boolean;
+  dieuHoa: boolean;
+  wifi: boolean;
+  bep: boolean;
+  doXe: boolean;
+  hoBoi: boolean;
+  banUi: boolean;
+};
+
+export type CreateRoom = Omit<Room, "id">;
+export type UpdateRoom = Room;
+
+export type LocationRoomsState = {
+  locationId: number | null;
+  items: Room[];
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: ApiError | null;
+  requestId?: string;
+};

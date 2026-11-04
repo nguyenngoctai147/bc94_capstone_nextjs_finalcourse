@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert, Button, Input, Select } from "@/components/ui";
-import { routes } from "@/config/routes";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert, Button, Input, Select } from "@/component/ui";
+import { routes } from "@/route";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
-import { email, localToday, minLength, phone, required, validDate } from "@/lib/validation/rules";
+import { toApiError } from "@/services/api-utils";
+import { email, localToday, minLength, phone, required, validDate } from "@/commons/validation/rules";
 import { useAppDispatch } from "@/store/hooks";
-import { createUser } from "../users.slice";
+import { createUser } from "@/store/thunk/user";
 
 type CreateUserValues = {
   name: string;

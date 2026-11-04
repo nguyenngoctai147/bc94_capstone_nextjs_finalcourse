@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, type ReactNode } from "react";
-import { Button } from "./Button";
+import { Button } from "@/component/ui/Button";
 
 export function ConfirmDialog({
   open,

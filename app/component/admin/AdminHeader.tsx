@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { routes } from "@/config/routes";
-import { ApiImage } from "@/components/ui/ApiImage";
-import { logout } from "@/features/auth/auth.slice";
+import { routes } from "@/route";
+import { ApiImage } from "@/component/ui/ApiImage";
+import { logout } from "@/store/slice/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Icon } from "./AdminIcon";
 

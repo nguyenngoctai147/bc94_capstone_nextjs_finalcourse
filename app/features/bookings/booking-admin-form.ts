@@ -1,12 +1,12 @@
-import type { Room } from "@/features/rooms/rooms.types";
+import type { Room } from "@/store/type/room";
 import {
   localToday,
   positiveInteger,
   required,
   validDate,
   type ValidationSchema,
-} from "@/lib/validation/rules";
-import type { Booking, CreateBooking, UpdateBooking } from "./bookings.types";
+} from "@/commons/validation/rules";
+import type { Booking, CreateBooking, UpdateBooking } from "@/store/type/bookings";
 
 export type AdminBookingFormValues = {
   maPhong: string;

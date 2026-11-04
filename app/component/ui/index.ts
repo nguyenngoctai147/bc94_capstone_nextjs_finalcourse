@@ -6,7 +6,7 @@ export { Card } from "./Card";
 export { Alert } from "./Alert";
 export { LoadingSpinner } from "./LoadingSpinner";
 export { EmptyState } from "./EmptyState";
-export { ConfirmDialog } from "./ConfirmDialog";
+export { ConfirmDialog } from "../../@modal/components/ConfirmDialog";
 export { Pagination } from "./Pagination";
 export { Typography } from "./Typography";
 export { Container, Stack, Cluster } from "./Layout";

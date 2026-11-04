@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, type ComponentProps, type ReactNode } from "react";
-import { resolveApiImageSrc } from "@/lib/api/images";
+import { resolveApiImageSrc } from "@/commons/images";
 
 type ApiImageProps = Omit<ComponentProps<typeof Image>, "src" | "onError"> & {
   src: string | null | undefined;

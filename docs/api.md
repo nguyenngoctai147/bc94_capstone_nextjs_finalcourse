@@ -41,16 +41,14 @@ Với rooms/locations/users, gọi thunk.list có query sẽ chọn endpoint ph�
 
 ## Registry endpoint
 
-Đường dẫn API được quản lý trong `app/config/endpoints/`, tách theo lớp và tài nguyên:
+Đường dẫn được quản lý tập trung trong `app/route/` và chia thành ba lớp:
 
-- `core.api.ts`: các hằng số `CORE_*` và `coreApi`, là registry backend theo Swagger.
-- `next.api.ts`: `NEXT_BACKEND_PROXY_ENDPOINT` và helper tạo URL browser tới route handler nội bộ.
-- `apiNotToken.ts`: danh sách endpoint auth không cần token phiên người dùng.
-- `auth.ts`: `authEndpoints.login`, `authEndpoints.register`.
-- `rooms.ts`, `locations.ts`, `users.ts`, `bookings.ts`, `reviews.ts`: base path và endpoint đặc biệt của từng tài nguyên.
-- `index.ts`: export các nhóm endpoint và facade `endpoints` tương thích.
+- `core.api.ts`: hằng số `CORE_*` và `coreApi`, phản ánh endpoint backend trong Swagger.
+- `next.api.ts`: hằng số `NEXT_*` và `nextApi`, phản ánh Route Handler local mà browser được phép gọi.
+- `web.ts`: URL page của website, chỉ dùng cho điều hướng và liên kết.
+- `apiNotToken.ts`: danh sách endpoint backend không cần token phiên người dùng.
 
-Service của feature import group tương ứng, vì vậy khi Swagger thêm endpoint chỉ cần cập nhật module tài nguyên và policy proxy liên quan.
+Service của feature chỉ import `nextApi`. Route Handler trong `app/api` import `coreApi` hoặc `CORE_*`, nhờ đó component không biết URL backend thật và `tokenCybersoft` không đi vào client bundle.
 
 ## Gọi qua store
 
@@ -83,13 +81,13 @@ const page = await roomsService.search(
 await roomsService.uploadImage(roomId, file, { token: userToken });
 ```
 
-Service phía browser dùng base `/api/backend`; không gọi service browser này trực tiếp trong Server Component. Nếu cần SSR data fetching, thêm service server riêng với cấu hình server và quyền phù hợp. Không export env bí mật từ module dùng chung cho client.
+Service phía browser gọi các endpoint local `/api/<resource>` từ `next.api.ts`; không gọi service browser này trực tiếp trong Server Component. Nếu cần SSR data fetching, thêm service server riêng với cấu hình server và quyền phù hợp. Không export env bí mật từ module dùng chung cho client.
 
-Lớp HTTP `api.get/post/put/patch/delete<T>` có sẵn query, signal, token; adapter unwrap `{statusCode, content}`. DELETE 204 không buộc phải có JSON. Lỗi thống nhất `{status, message}`, có sẵn kiểu errors để mở rộng field errors theo backend.
+Lớp HTTP phía client tại `services/http.ts` cung cấp `api.get/post/put/patch/delete<T>`, query, signal và token; adapter unwrap `{statusCode, content}`. Lớp server tại `services/api.ts` là Axios instance cấu hình `API_BASE_URL` và tự thêm `tokenCybersoft`; Axios có sẵn GET, POST, PUT, PATCH, DELETE. `proxy.ts` giữ policy và chuyển tiếp request. DELETE 204 không buộc phải có JSON.
 
 ## Proxy và token
 
-Browser → /api/backend/phong-thue → API_BASE_URL + /phong-thue.
+Browser → `/api/room` → Route Handler room → `coreApi.room.base` → `API_BASE_URL + /phong-thue`.
 
 - **tokenCybersoft**: lấy từ CYBERSOFT_TOKEN trên server, không nằm trong client bundle.
 - **token**: token đăng nhập người dùng được thunk lấy từ Redux và gửi qua header đúng tên Swagger.

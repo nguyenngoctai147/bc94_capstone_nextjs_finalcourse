@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { shallowEqual } from "react-redux";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert, Button, Input, LoadingSpinner, Select } from "@/components/ui";
-import { routes } from "@/config/routes";
-import { fetchRooms } from "@/features/rooms/rooms.slice";
-import { fetchUsers } from "@/features/users/users.slice";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert, Button, Input, LoadingSpinner, Select } from "@/component/ui";
+import { routes } from "@/route";
+import { fetchRooms } from "@/store/thunk/room";
+import { fetchUsers } from "@/store/thunk/user";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
-import { localToday } from "@/lib/validation/rules";
+import { toApiError } from "@/services/api-utils";
+import { localToday } from "@/commons/validation/rules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { available } from "@/features/reservations/flow";
 import {
@@ -26,7 +26,7 @@ import {
   fetchBookingDetail,
   fetchBookings,
   updateBooking,
-} from "../bookings.slice";
+} from "@/store/thunk/bookings";
 
 export function AddBookingRoomPage() {
   return <BookingEditorPage />;

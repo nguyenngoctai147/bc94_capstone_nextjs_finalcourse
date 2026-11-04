@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { routes } from "@/config/routes";
-import { createBooking } from "@/features/bookings/bookings.slice";
+import { routes } from "@/route";
+import { createBooking } from "@/store/thunk/bookings";
 import { bookingsService } from "@/features/bookings/bookings.service";
-import { toApiError } from "@/lib/api/errors";
+import { toApiError } from "@/services/api-utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { available, flowKeys, nights, readSession, type Draft, validSearch } from "../flow";
 import { ReservationProgress, ReservationRoomHero, ReservationSummary, RoomAmenityList } from "./ReservationUi";
-import styles from "@/css/features/reservations/reservation.module.css";
+import styles from "@/theme/features/reservations/reservation.module.css";
 
 export function BookingPage() {
   const router = useRouter();

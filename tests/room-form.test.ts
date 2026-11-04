@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { initialRoomFormValues, roomFormSchema, toCreateRoom, toRoomFormValues, toUpdateRoom } from "../app/features/rooms/room-form";
-import { validate } from "../app/lib/validation/rules";
+import { validate } from "../app/commons/validation/rules";
 
 test("room form validates required API fields and image URLs", () => {
   const missing = validate({ ...initialRoomFormValues, khach: "0", hinhAnh: "invalid" }, roomFormSchema);

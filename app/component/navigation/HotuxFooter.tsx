@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../../public/assets/images/logo.png";
-import { routes } from "@/config/routes";
-import { siteInfo } from "@/config/site";
-import { BookingLink } from "@/components/auth/BookingLink";
+import { routes } from "@/route";
+import { siteInfo } from "@/constants/site";
+import { BookingLink } from "@/component/auth/BookingLink";
 
 const quickLinks = [
   ["Trang chủ", routes.home], ["Về chúng tôi", routes.about],

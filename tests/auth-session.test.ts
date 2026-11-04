@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { AUTH_STORAGE_KEY, parseStoredSession, toStoredSession, writeStoredSession } from "../app/features/auth/auth.session";
-import { hydrateSession, logout } from "../app/features/auth/auth.slice";
+import { hydrateSession, logout } from "../app/store/slice/auth";
 import { makeStore } from "../app/store";
 
 test("persisted auth session excludes password and invalid stored data is ignored", () => {

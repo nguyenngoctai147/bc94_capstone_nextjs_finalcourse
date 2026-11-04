@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert, Button, Input, LoadingSpinner, Select } from "@/components/ui";
-import { ApiImage } from "@/components/ui/ApiImage";
-import { routes } from "@/config/routes";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert, Button, Input, LoadingSpinner, Select } from "@/component/ui";
+import { ApiImage } from "@/component/ui/ApiImage";
+import { routes } from "@/route";
 import { useForm } from "@/hooks/useForm";
-import { toApiError } from "@/lib/api/errors";
-import { email, localToday, phone, required, validDate } from "@/lib/validation/rules";
+import { toApiError } from "@/services/api-utils";
+import { email, localToday, phone, required, validDate } from "@/commons/validation/rules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchUserDetail, updateUser } from "../users.slice";
-import type { User } from "../users.types";
+import { fetchUserDetail, updateUser } from "@/store/thunk/user";
+import type { User } from "@/store/type/user";
 
 type UserDetailValues = {
   name: string;

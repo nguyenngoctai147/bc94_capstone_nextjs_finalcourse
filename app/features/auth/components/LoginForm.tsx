@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input, Alert } from "@/components/ui";
-import { routes } from "@/config/routes";
+import { Button, Input, Alert } from "@/component/ui";
+import { routes } from "@/route";
 import { useForm } from "@/hooks/useForm";
-import { required, email } from "@/lib/validation/rules";
+import { required, email } from "@/commons/validation/rules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { login } from "../auth.slice";
+import { login } from "@/store/thunk/auth";
 import { getPostLoginPath } from "../auth-navigation";
 
 export function LoginForm() {

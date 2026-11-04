@@ -1,46 +1,20 @@
 import axios from "axios";
-import { NEXT_BACKEND_PROXY_ENDPOINT } from "@/config/endpoints";
-import { toApiError } from "@/lib/api/errors";
-import { unwrapResponse } from "@/lib/api/response";
-import type { ApiEnvelope, RequestOptions } from "@/lib/api/types";
+import { getBackendConfig } from "@/services/api-utils";
 
-export const http = axios.create({
-  baseURL: NEXT_BACKEND_PROXY_ENDPOINT,
-  timeout: 20000,
+const api = axios.create({
+  responseType: "arraybuffer",
+  maxRedirects: 0,
+  maxBodyLength: 10 * 1024 * 1024,
+  maxContentLength: 20 * 1024 * 1024,
+  validateStatus: () => true,
 });
 
-http.interceptors.response.use(
-  (response) => response,
-  (error: unknown) => Promise.reject(toApiError(error)),
-);
+api.interceptors.request.use((config) => {
+  const { baseURL, tokenCybersoft, timeout } = getBackendConfig();
+  config.baseURL = baseURL;
+  config.timeout = timeout;
+  config.headers.set("tokenCybersoft", tokenCybersoft);
+  return config;
+});
 
-async function request<T>(
-  method: string,
-  url: string,
-  data: unknown,
-  options: RequestOptions = {},
-): Promise<T> {
-  const response = await http.request<T | ApiEnvelope<T>>({
-    method,
-    url,
-    data,
-    signal: options.signal,
-    params: options.params,
-    headers: options.token ? { token: options.token } : undefined,
-  });
-
-  return unwrapResponse(response.data);
-}
-
-export const api = {
-  get: <T>(url: string, options?: RequestOptions) =>
-    request<T>("GET", url, undefined, options),
-  post: <T>(url: string, data?: unknown, options?: RequestOptions) =>
-    request<T>("POST", url, data, options),
-  put: <T>(url: string, data: unknown, options?: RequestOptions) =>
-    request<T>("PUT", url, data, options),
-  patch: <T>(url: string, data: unknown, options?: RequestOptions) =>
-    request<T>("PATCH", url, data, options),
-  delete: <T = void>(url: string, options?: RequestOptions) =>
-    request<T>("DELETE", url, undefined, options),
-};
+export default api;

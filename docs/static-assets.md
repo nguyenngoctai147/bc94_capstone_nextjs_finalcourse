@@ -5,10 +5,11 @@ Thư mục tĩnh trong ảnh của bạn (`css`, `font`, `images`, `js`, `dashbo
 ```text
 project/
 ├─ app/
-│  ├─ css/                        # base, feature modules và CSS trang minh họa
-│  ├─ components/                 # component dùng chung hiện tại
+│  ├─ theme/                      # base, feature modules và CSS trang minh họa
+│  ├─ component/                  # component dùng chung hiện tại
 │  ├─ features/                   # component/service theo nghiệp vụ
-│  ├─ config/                     # routes/endpoints
+│  ├─ constants/                  # endpoints và thông tin site
+│  ├─ route/                      # registry URL/menu
 │  └─ templates/                  # layout UI
 ├─ public/
 │  └─ assets/
@@ -20,19 +21,19 @@ project/
 
 ## CSS
 
-CSS dùng chung đặt ở `app/css/base` và được import từ `app/layout.tsx` qua `globals.css`. CSS riêng được phân theo nghiệp vụ tại `app/css/features`; component import CSS Module bằng alias `@/css/features/...`.
+CSS dùng chung đặt ở `app/theme/base` và được import từ `app/layout.tsx` qua `globals.css`. CSS riêng được phân theo nghiệp vụ tại `app/theme/features`; component import CSS Module bằng alias `@/theme/features/...`.
 
 ```tsx
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./css/base/globals.css";
+import "./theme/base/globals.css";
 ```
 
 Với các file trong thư mục HTML cũ:
 
 - `bootstrap.min.css`: không chép lại; project đã dùng package Bootstrap 5.2.3.
-- `style.css`, `default.css`, `plugin.css`: giữ nguyên trong `public/assets` khi còn dùng URL tương đối; override của ứng dụng đặt trong `app/css/base` hoặc `app/css/features`.
+- `style.css`, `default.css`, `plugin.css`: giữ nguyên trong `public/assets` khi còn dùng URL tương đối; override của ứng dụng đặt trong `app/theme/base` hoặc `app/theme/features`.
 - `flight.css`, `icons.css`: giữ phần selector cần dùng; kiểm tra trùng tên với Bootstrap trước khi import.
-- Chỉ root/admin layout nạp CSS vendor bằng `<link>`; page và component dùng CSS Module từ `app/css`.
+- Chỉ root/admin layout nạp CSS vendor bằng `<link>`; page và component dùng CSS Module từ `app/theme`.
 
 ### Phân loại đúng bộ CSS trong ảnh
 
@@ -41,8 +42,8 @@ Không cần lấy cả sáu file vào mọi trang. Với project hiện tại, 
 | File | Nên làm gì |
 | --- | --- |
 | `bootstrap.min.css` | **Bỏ qua** vì Bootstrap đã cài bằng npm và đang import trong `app/layout.tsx`. Chỉ dùng file này nếu gỡ package Bootstrap, không dùng cả hai bản cùng lúc. |
-| `default.css` | Giữ trong `public/assets/css` khi còn dùng cùng template; phần ghi đè mới đặt trong `app/css/base`. |
-| `style.css` | Giữ giao diện vendor trong `public/assets/css`; phần riêng của nghiệp vụ đặt tại `app/css/features/<feature>`. |
+| `default.css` | Giữ trong `public/assets/css` khi còn dùng cùng template; phần ghi đè mới đặt trong `app/theme/base`. |
+| `style.css` | Giữ giao diện vendor trong `public/assets/css`; phần riêng của nghiệp vụ đặt tại `app/theme/features/<feature>`. |
 | `icons.css` | Chỉ lấy nếu giao diện thật sự dùng các class icon của bộ cũ. Nếu có `@font-face`, sửa URL font thành `/assets/fonts/...`. |
 | `plugin.css` | Chỉ lấy khi bạn dùng đúng plugin mà file này định dạng (slider, gallery, datepicker...). Không import toàn cục ngay từ đầu. |
 | `flight.css` | Chỉ lấy cho màn hình/module có class `flight`; không phải CSS bắt buộc của Airbnb. |
@@ -55,7 +56,7 @@ Template gốc dùng cả `/assets/font` và `/assets/fonts`; project giữ hai 
 
 Bộ Flaticon đã được nạp bằng `/assets/fonts/flaticon.css`. File `_flaticon.scss` được giữ lại cùng bộ font để tra cứu/mở rộng mapping icon, nhưng không import trực tiếp vì project chưa bật Sass; file `.scss` không cần thiết cho trình duyệt khi `flaticon.css` đã có sẵn.
 
-Thứ tự hiện tại là Bootstrap → CSS vendor Hotux → `app/css/base/globals.css`. Không import Tailwind preflight cùng Bootstrap.
+Thứ tự hiện tại là Bootstrap → CSS vendor Hotux → `app/theme/base/globals.css`. Không import Tailwind preflight cùng Bootstrap.
 
 ## Font
 
@@ -113,7 +114,7 @@ Giữ cấu trúc thư mục con (`room-list`, `slider`, `icons`...) để đư�
 | `jquery-3.3.1.min.js` | Không nạp toàn cục. Chỉ giữ tạm trong `public/assets/legacy/js` nếu một plugin cũ bắt buộc jQuery; ưu tiên thay plugin bằng React. |
 | `plugin.js` | File tổng hợp rất lớn; không lấy ngay. Chỉ xác định plugin nào thật sự được dùng, rồi thay bằng component/library tương ứng. |
 | `main.js` | Thường là entry point khởi tạo nhiều plugin. Không import nguyên file; tách từng phần cần thiết vào component Client và `useEffect`. |
-| `custom-nav.js` | Chuyển thành state của header/menu trong `app/templates` hoặc `app/components/navigation`. |
+| `custom-nav.js` | Chuyển thành state của header/menu trong `app/templates` hoặc `app/component/navigation`. |
 | `custom-gallery.js`, `custom-swiper1.js`, `custom-swiper2.js` | Chỉ dùng cho màn hình có gallery/slider; chuyển thành component `Gallery`/`Swiper` riêng, không chạy trên mọi route. |
 | `custom-date.js`, `custom-singledate.js` | Chỉ dùng cho datepicker. Form đặt phòng hiện đã có input `type="date"` và validation riêng; chưa cần hai file này. |
 | `custom-mixtup.js`, `isotope.min.js` | Chỉ dùng nếu có lọc/sắp xếp layout lưới kiểu portfolio. Không cần cho danh sách phòng cơ bản. |
@@ -136,7 +137,7 @@ export function MobileMenu() {
 
 Quy tắc chuyển đổi:
 
-- `js` điều khiển menu/modal/form → component trong `app/components/` hoặc `app/templates/`.
+- `js` điều khiển menu/modal/form → component trong `app/component/` hoặc `app/templates/`.
 - `js` chỉ gọi API → service/thunk trong `app/features/<module>/`.
 - `js` khởi tạo plugin Bootstrap → Client Component, gọi trong `useEffect`, và dispose khi unmount.
 - `js` là thư viện bên thứ ba chưa chuyển đổi → chỉ khi thật cần mới đặt bản tĩnh ở `public/assets/legacy`, rồi nạp bằng `next/script` trong component client cụ thể; không nạp toàn site.
@@ -175,7 +176,7 @@ Page trong `app` chỉ lắp ráp component. Chuyển `class` thành `className`
 
 | File tĩnh cũ | Nơi đặt / cách dùng |
 | --- | --- |
-| `css/*.css` | vendor ở `public/assets/css`; CSS ứng dụng ở `app/css/base` hoặc `app/css/features` |
+| `css/*.css` | vendor ở `public/assets/css`; CSS ứng dụng ở `app/theme/base` hoặc `app/theme/features` |
 | `font/*` | `public/assets/fonts/*`, dùng `/assets/fonts/...` |
 | `images/*` | `public/assets/images/*`, dùng `/assets/images/...` |
 | `js/*` | chuyển thành React component/service/thunk; bản cũ tạm thời vào `public/assets/legacy` |

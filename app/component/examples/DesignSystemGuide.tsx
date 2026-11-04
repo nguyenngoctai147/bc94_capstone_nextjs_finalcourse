@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { Cluster, Stack, Typography } from "@/components/ui";
-import styles from "@/css/examples/design-system-guide.module.css";
+import { Cluster, Stack, Typography } from "@/component/ui";
+import styles from "@/theme/examples/design-system-guide.module.css";
 
 const colors = [
   ["brand", "Nhận diện", "Màu cam Hotux, điểm nhấn trang trí"],
@@ -90,7 +90,7 @@ export function DesignSystemGuide() {
         </div>)}
         <Typography variant="caption" tone="muted">Sơ đồ tỷ lệ minh họa. Các giới hạn thực tế co lại theo viewport, không cố định chiều rộng trên mobile.</Typography>
       </div>
-      <div className={styles.note}><Typography variant="label">Điều chỉnh tại một nơi</Typography><Typography tone="muted">Sửa app/css/base/design-tokens.css để đổi màu, font, width và spacing. Component dùng Typography / Container / Stack / Cluster; Tailwind dùng các lớp tw-text-primary, tw-gap-layout, tw-max-w-content.</Typography></div>
+      <div className={styles.note}><Typography variant="label">Điều chỉnh tại một nơi</Typography><Typography tone="muted">Sửa app/theme/base/design-tokens.css để đổi màu, font, width và spacing. Component dùng Typography / Container / Stack / Cluster; Tailwind dùng các lớp tw-text-primary, tw-gap-layout, tw-max-w-content.</Typography></div>
     </section>
   </div>;
 }

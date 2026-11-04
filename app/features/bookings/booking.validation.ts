@@ -1,4 +1,4 @@
-import { localToday, positiveInteger, required, validDate, type ValidationSchema } from "@/lib/validation/rules";
+import { localToday, positiveInteger, required, validDate, type ValidationSchema } from "@/commons/validation/rules";
 export type BookingFormValues = { ngayDen: string; ngayDi: string; soLuongKhach: string };
 export const bookingSchema = (capacity: number): ValidationSchema<BookingFormValues> => ({
   ngayDen: [required(), validDate, (value) => value >= localToday() ? undefined : "Ngày nhận phòng không được ở quá khứ."],

@@ -1,19 +1,20 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
-import { http, api } from "../app/services/api";
-import { toPage, unwrapResponse } from "../app/lib/api/response";
+import { http, api } from "../app/services/http";
+import { toPage, unwrapResponse } from "../app/services/api-utils";
 import { usersService } from "../app/features/users/users.service";
 import { roomsService } from "../app/features/rooms/rooms.service";
 import { makeStore } from "../app/store";
-import { createRoom, fetchRooms, fetchRoomDetail, patchRoom, fetchRoomsByLocation, updateRoom } from "../app/features/rooms/rooms.slice";
-import { createLocation, fetchLocations, updateLocation } from "../app/features/locations/locations.slice";
-import { hydrateSession, login } from "../app/features/auth/auth.slice";
-import { fetchBookings, createBooking, deleteBooking, updateBooking } from "../app/features/bookings/bookings.slice";
-import { logout } from "../app/features/auth/auth.slice";
-import type { Room } from "../app/features/rooms/rooms.types";
-import type { Location } from "../app/features/locations/locations.types";
-import type { Booking } from "../app/features/bookings/bookings.types";
+import { createRoom, fetchRooms, fetchRoomDetail, patchRoom, fetchRoomsByLocation, updateRoom } from "../app/store/thunk/room";
+import { createLocation, fetchLocations, updateLocation } from "../app/store/thunk/location";
+import { hydrateSession } from "../app/store/slice/auth";
+import { login } from "../app/store/thunk/auth";
+import { fetchBookings, createBooking, deleteBooking, updateBooking } from "../app/store/thunk/bookings";
+import { logout } from "../app/store/slice/auth";
+import type { Room } from "../app/store/type/room";
+import type { Location } from "../app/store/type/location";
+import type { Booking } from "../app/store/type/bookings";
 
 const original = http.defaults.adapter;
 afterEach(() => { http.defaults.adapter = original; });
@@ -39,7 +40,7 @@ test("explicit booking thunks invalidate cached lists and handle partial write r
   await store.dispatch(deleteBooking(19)).unwrap();
   assert.equal(store.getState().bookings.requests.remove.status, "succeeded");
   assert.deepEqual(store.getState().bookings.items, []);
-  assert.deepEqual(calls.map((request) => [request.method, request.url]), [["post", "/dat-phong"], ["delete", "/dat-phong/19"]]);
+  assert.deepEqual(calls.map((request) => [request.method, request.url]), [["post", "/api/booking"], ["delete", "/api/booking/19"]]);
 });
 test("only an admin can update a booking with the complete Swagger PUT payload", async () => {
   const payload: Booking = {
@@ -84,7 +85,7 @@ test("only an admin can update a booking with the complete Swagger PUT payload",
   ).unwrap();
   const request = calls[0];
   assert.equal(request?.method, "put");
-  assert.equal(request?.url, "/dat-phong/91");
+  assert.equal(request?.url, "/api/booking/91");
   assert.equal(request?.headers.get("token"), "admin-token");
   assert.deepEqual(JSON.parse(String(request?.data)), payload);
   assert.deepEqual(booking, payload);
@@ -120,7 +121,7 @@ test("create room thunk posts the Swagger payload and invalidates the catalogue"
 
   const room = await store.dispatch(createRoom(payload)).unwrap();
   assert.equal(request?.method, "post");
-  assert.equal(request?.url, "/phong-thue");
+  assert.equal(request?.url, "/api/room");
   assert.deepEqual(JSON.parse(String(request?.data)), payload);
   assert.equal(room.id, 101);
   assert.equal(store.getState().rooms.requests.create.status, "succeeded");
@@ -142,7 +143,7 @@ test("create location thunk posts the Swagger payload and invalidates the locati
 
   const location = await store.dispatch(createLocation(payload)).unwrap();
   assert.equal(request?.method, "post");
-  assert.equal(request?.url, "/vi-tri");
+  assert.equal(request?.url, "/api/location");
   assert.deepEqual(JSON.parse(String(request?.data)), payload);
   assert.equal(location.id, 202);
   assert.equal(store.getState().locations.requests.create.status, "succeeded");
@@ -167,7 +168,7 @@ test("update location thunk sends the complete Swagger PUT payload to its id", a
     updateLocation({ id: payload.id, data: payload }),
   ).unwrap();
   assert.equal(request?.method, "put");
-  assert.equal(request?.url, "/vi-tri/202");
+  assert.equal(request?.url, "/api/location/202");
   assert.deepEqual(JSON.parse(String(request?.data)), payload);
   assert.deepEqual(location, payload);
   assert.equal(store.getState().locations.requests.update.status, "succeeded");
@@ -189,7 +190,7 @@ test("update room thunk sends the complete Swagger PUT payload to its id", async
 
   const room = await store.dispatch(updateRoom({ id: payload.id, data: payload })).unwrap();
   assert.equal(request?.method, "put");
-  assert.equal(request?.url, "/phong-thue/101");
+  assert.equal(request?.url, "/api/room/101");
   assert.deepEqual(JSON.parse(String(request?.data)), payload);
   assert.deepEqual(room, payload);
   assert.equal(store.getState().rooms.requests.update.status, "succeeded");
@@ -205,16 +206,16 @@ test("unwrap envelopes, plain data, paginated lists and application errors", () 
 test("REST methods, user deletion query, paginated search and multipart upload", async () => {
   const calls: InternalAxiosRequestConfig[] = [];
   http.defaults.adapter = (async (config) => { calls.push(config); return response(config, []); }) satisfies AxiosAdapter;
-  await api.get("/phong-thue");
-  await api.post("/phong-thue", { tenPhong: "Demo" });
-  await api.put("/phong-thue/1", { tenPhong: "Updated" });
-  await api.patch("/phong-thue/1", { wifi: true });
+  await api.get("/api/room");
+  await api.post("/api/room", { tenPhong: "Demo" });
+  await api.put("/api/room/1", { tenPhong: "Updated" });
+  await api.patch("/api/room/1", { wifi: true });
   await usersService.remove(12, { token: "user-token" });
   assert.deepEqual(calls.map((call) => call.method), ["get", "post", "put", "patch", "delete"]);
-  assert.equal(calls[4].url, "/users"); assert.equal(calls[4].params.id, 12);
+  assert.equal(calls[4].url, "/api/user"); assert.equal(calls[4].params.id, 12);
   assert.equal(calls[4].headers.get("token"), "user-token");
   await roomsService.list({ params: { pageIndex: 2, pageSize: 9, keyword: "sea" } });
-  assert.equal(calls[5].url, "/phong-thue/phan-trang-tim-kiem");
+  assert.equal(calls[5].url, "/api/room/phan-trang-tim-kiem");
   assert.equal(calls[5].params.keyword, "sea");
   await roomsService.uploadImage(5, new File(["image"], "room.png", { type: "image/png" }));
   assert.ok(calls[6].data instanceof FormData);
@@ -258,7 +259,7 @@ test("location selection fetches only its rooms and ignores stale results", asyn
 
   const store = makeStore();
   await store.dispatch(fetchRoomsByLocation(7));
-  assert.equal(calls[0].url, "/phong-thue/lay-phong-theo-vi-tri");
+  assert.equal(calls[0].url, "/api/room/lay-phong-theo-vi-tri");
   assert.equal(calls[0].params.maViTri, 7);
   assert.deepEqual(store.getState().locationRooms.items.map((item) => item.id), [12]);
   assert.equal(store.getState().rooms.items.length, 0);

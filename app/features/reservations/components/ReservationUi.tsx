@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ApiImage } from "@/components/ui/ApiImage";
-import { routes } from "@/config/routes";
+import { ApiImage } from "@/component/ui/ApiImage";
+import { routes } from "@/route";
 import { roomAmenities } from "@/features/rooms/room-amenities";
 import { RoomAmenityIcon } from "@/features/rooms/components/RoomAmenityIcon";
-import type { Room } from "@/features/rooms/rooms.types";
+import type { Room } from "@/store/type/room";
 import { checkoutAfter, nights, today, type Search } from "../flow";
-import styles from "@/css/features/reservations/reservation.module.css";
+import styles from "@/theme/features/reservations/reservation.module.css";
+
+export type CalendarDateStatus = {
+  type: "available" | "limited" | "unavailable";
+  label: string;
+};
 
 export function ReservationProgress({ active }: { active: 1 | 2 | 3 | 4 }) {
   const steps = [
@@ -83,25 +88,79 @@ function buildMonth(date: Date): CalendarCell[] {
   ];
 }
 
-function CalendarMonth({ month, value, onSelect }: { month: Date; value: Pick<Search, "checkIn" | "checkOut">; onSelect: (date: string) => void }) {
+function CalendarMonth({
+  month,
+  value,
+  onSelect,
+  isDateDisabled,
+  isBookedDate,
+  getDateStatus,
+}: {
+  month: Date;
+  value: Pick<Search, "checkIn" | "checkOut">;
+  onSelect: (date: string) => void;
+  isDateDisabled: (date: string) => boolean;
+  isBookedDate: (date: string) => boolean;
+  getDateStatus: (date: string) => CalendarDateStatus | null;
+}) {
   const cells = useMemo(() => buildMonth(month), [month]);
   const label = new Intl.DateTimeFormat("vi-VN", { month: "long", year: "numeric" }).format(month);
-  return <div className={styles.calendarMonth}><h3>{label}</h3><div className={styles.weekdays}>{["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => <span key={day}>{day}</span>)}</div><div className={styles.days}>{cells.map((cell) => cell.value ? <button type="button" key={cell.key} disabled={cell.value < today()} className={`${cell.value === value.checkIn || cell.value === value.checkOut ? styles.selectedDay : ""} ${value.checkIn && value.checkOut && cell.value > value.checkIn && cell.value < value.checkOut ? styles.inRange : ""}`} onClick={() => onSelect(cell.value!)}>{cell.day}</button> : <span key={cell.key} />)}</div></div>;
+  return <div className={styles.calendarMonth}><h3>{label}</h3><div className={styles.weekdays}>{["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => <span key={day}>{day}</span>)}</div><div className={styles.days}>{cells.map((cell) => {
+    if (!cell.value) return <span key={cell.key} />;
+    const disabled = isDateDisabled(cell.value);
+    const booked = isBookedDate(cell.value) && disabled;
+    const status = getDateStatus(cell.value);
+    const selected = cell.value === value.checkIn || cell.value === value.checkOut;
+    const inRange = value.checkIn && value.checkOut && cell.value > value.checkIn && cell.value < value.checkOut;
+    return <button type="button" key={cell.key} disabled={disabled} className={`${selected ? styles.selectedDay : ""} ${inRange ? styles.inRange : ""} ${booked ? styles.bookedDay : ""} ${status?.type === "available" ? styles.availableDay : ""} ${status?.type === "limited" ? styles.limitedDay : ""}`} onClick={() => onSelect(cell.value!)} aria-label={status?.label ?? (booked ? `${cell.value}: đã được đặt` : cell.value)} title={status?.label ?? (booked ? "Đã được đặt" : undefined)}>{cell.day}</button>;
+  })}</div></div>;
 }
 
-export function DateRangeCalendar({ value, onChange }: { value: Pick<Search, "checkIn" | "checkOut">; onChange: (value: Pick<Search, "checkIn" | "checkOut">) => void }) {
+export function DateRangeCalendar({
+  value,
+  onChange,
+  months = 2,
+  className = "",
+  isDateUnavailable = () => false,
+  isStayUnavailable = () => false,
+  getDateStatus = () => null,
+}: {
+  value: Pick<Search, "checkIn" | "checkOut">;
+  onChange: (value: Pick<Search, "checkIn" | "checkOut">) => void;
+  months?: 1 | 2;
+  className?: string;
+  isDateUnavailable?: (date: string) => boolean;
+  isStayUnavailable?: (stay: Pick<Search, "checkIn" | "checkOut">) => boolean;
+  getDateStatus?: (date: string) => CalendarDateStatus | null;
+}) {
   const initial = value.checkIn ? new Date(`${value.checkIn}T00:00:00`) : new Date();
   const [month, setMonth] = useState(() => new Date(initial.getFullYear(), initial.getMonth(), 1));
   const [selectingEnd, setSelectingEnd] = useState(false);
   const second = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+
+  const isStartDateDisabled = (date: string) => date < today() || isDateUnavailable(date);
+  const isEndDateDisabled = (date: string) => {
+    if (!value.checkIn) return isStartDateDisabled(date);
+    return date <= value.checkIn || isStayUnavailable({ checkIn: value.checkIn, checkOut: date });
+  };
+
   const handleSelect = (date: string) => {
     if (!selectingEnd || !value.checkIn || date <= value.checkIn) {
-      onChange({ checkIn: date, checkOut: checkoutAfter(date, 1) });
+      if (isStartDateDisabled(date)) return;
+      const defaultCheckOut = checkoutAfter(date, 1);
+      onChange({
+        checkIn: date,
+        checkOut: isStayUnavailable({ checkIn: date, checkOut: defaultCheckOut })
+          ? ""
+          : defaultCheckOut,
+      });
       setSelectingEnd(true);
       return;
     }
+
+    if (isEndDateDisabled(date)) return;
     onChange({ checkIn: value.checkIn, checkOut: date });
     setSelectingEnd(false);
   };
-  return <div className={`calendar-range ${styles.calendar}`}><div className={styles.calendarControls}><button type="button" aria-label="Hai tháng trước" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 2, 1))}><i className="fa fa-angle-left" /></button><p>Chọn ngày nhận và ngày trả phòng</p><button type="button" aria-label="Hai tháng sau" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 2, 1))}><i className="fa fa-angle-right" /></button></div><div className={styles.calendarGrid}><CalendarMonth month={month} value={value} onSelect={handleSelect} /><CalendarMonth month={second} value={value} onSelect={handleSelect} /></div></div>;
+  return <div className={`calendar-range ${styles.calendar} ${months === 1 ? styles.calendarCompact : ""} ${className}`}><div className={styles.calendarControls}><button type="button" aria-label="Hai tháng trước" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - months, 1))}><i className="fa fa-angle-left" /></button><p>{selectingEnd ? "Chọn ngày trả phòng" : "Chọn ngày nhận phòng"}</p><button type="button" aria-label="Hai tháng sau" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + months, 1))}><i className="fa fa-angle-right" /></button></div><div className={styles.calendarGrid}><CalendarMonth month={month} value={value} onSelect={handleSelect} isDateDisabled={selectingEnd ? isEndDateDisabled : isStartDateDisabled} isBookedDate={isDateUnavailable} getDateStatus={getDateStatus} />{months === 2 && <CalendarMonth month={second} value={value} onSelect={handleSelect} isDateDisabled={selectingEnd ? isEndDateDisabled : isStartDateDisabled} isBookedDate={isDateUnavailable} getDateStatus={getDateStatus} />}</div></div>;
 }

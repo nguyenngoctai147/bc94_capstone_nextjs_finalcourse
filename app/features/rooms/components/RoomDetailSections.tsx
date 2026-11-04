@@ -3,18 +3,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { FormEventHandler } from "react";
-import { ApiImage } from "@/components/ui/ApiImage";
-import CardRoom from "@/components/ui/CardRoom";
-import { Pagination } from "@/components/ui/Pagination";
-import { routes } from "@/config/routes";
-import type { Location } from "@/features/locations/locations.types";
-import type { RoomReview } from "@/features/reviews/reviews.types";
+import { ApiImage } from "@/component/ui/ApiImage";
+import CardRoom from "@/component/ui/CardRoom";
+import { Pagination } from "@/component/ui/Pagination";
+import { routes } from "@/route";
+import type { Booking } from "@/store/type/bookings";
+import type { Location } from "@/store/type/location";
+import type { RoomReview } from "@/store/type/reviews";
+import {
+  DateRangeCalendar,
+} from "@/features/reservations/components/ReservationUi";
 import { StayDateFields } from "@/features/reservations/components/StayDateFields";
 import { roomAmenities } from "../room-amenities";
 import { RoomAmenityIcon } from "./RoomAmenityIcon";
-import type { Room } from "../rooms.types";
-import { withStaySearch, type Search } from "@/features/reservations/flow";
-import styles from "@/css/features/rooms/room-detail.module.css";
+import type { Room } from "@/store/type/room";
+import {
+  available,
+  isBookedDate,
+  validSearch,
+  withStaySearch,
+  type Search,
+} from "@/features/reservations/flow";
+import styles from "@/theme/features/rooms/room-detail.module.css";
 
 export type RoomDetailTab =
   | "overview"
@@ -23,6 +33,7 @@ export type RoomDetailTab =
   | "location"
   | "reviews";
 export type ReviewFormValue = { stars: string; content: string };
+type AvailabilityStatus = "loading" | "succeeded" | "failed";
 
 const tabs: readonly { key: RoomDetailTab; label: string }[] = [
   { key: "overview", label: "Tổng quan" },
@@ -566,19 +577,44 @@ export function RoomBookingSidebar({
   stay,
   guests,
   error,
+  busy,
+  availabilityStatus,
+  bookings,
   onStayChange,
   onGuestsChange,
   onSubmit,
+  onRetryAvailability,
 }: {
   room: Room;
   featuredRoom: Room | null;
   stay: Pick<Search, "checkIn" | "checkOut">;
   guests: number;
   error: string;
+  busy: boolean;
+  availabilityStatus: AvailabilityStatus;
+  bookings: Booking[];
   onStayChange: (stay: Pick<Search, "checkIn" | "checkOut">) => void;
   onGuestsChange: (guests: number) => void;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  onRetryAvailability: () => void;
 }) {
+  const selection: Search = {
+    ...stay,
+    guests,
+    roomId: room.id,
+    locationId: room.maViTri,
+  };
+  const hasValidStay = validSearch(selection) && guests <= room.khach;
+  const isStayAvailable =
+    availabilityStatus === "succeeded" &&
+    hasValidStay &&
+    available(room, selection, bookings);
+  const availabilityMessage = !hasValidStay
+    ? "Chọn ngày nhận, ngày trả hợp lệ và số khách phù hợp."
+    : isStayAvailable
+      ? `Phòng còn trống trong khoảng ngày đã chọn cho ${guests} khách.`
+      : "Phòng không còn trống trong khoảng ngày đã chọn. Vui lòng chọn ngày khác.";
+
   return (
     <div className={`detail-sidebar ${styles.sidebar}`}>
       <div
@@ -629,6 +665,64 @@ export function RoomBookingSidebar({
                   </select>
                 </div>
               </div>
+              <div className={styles.availabilityPanel}>
+                <div className={styles.availabilityHeading}>
+                  <div>
+                    <h3>Lịch phòng trống</h3>
+                    <p>Các ngày màu đỏ đã có khách đặt.</p>
+                  </div>
+                  <i className="fa fa-calendar-check-o" aria-hidden="true" />
+                </div>
+                {availabilityStatus === "loading" && (
+                  <p className={styles.availabilityLoading} role="status">
+                    Đang tải lịch phòng...
+                  </p>
+                )}
+                {availabilityStatus === "failed" && (
+                  <div className={styles.availabilityFailure} role="alert">
+                    <p>Chưa tải được lịch phòng. Vui lòng thử lại.</p>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm"
+                      onClick={onRetryAvailability}
+                    >
+                      Tải lại lịch
+                    </button>
+                  </div>
+                )}
+                {availabilityStatus === "succeeded" && (
+                  <>
+                    <div className={styles.availabilityLegend}>
+                      <span><i className={styles.legendAvailable} />Có thể chọn</span>
+                      <span><i className={styles.legendBooked} />Đã được đặt</span>
+                    </div>
+                    <DateRangeCalendar
+                      value={stay}
+                      onChange={onStayChange}
+                      months={1}
+                      className={styles.availabilityCalendar}
+                      isDateUnavailable={(date) => isBookedDate(date, bookings)}
+                      isStayUnavailable={(nextStay) =>
+                        !available(
+                          room,
+                          { ...selection, ...nextStay },
+                          bookings,
+                        )
+                      }
+                    />
+                    <p
+                      className={`${styles.availabilityMessage} ${isStayAvailable ? styles.availabilityAvailable : styles.availabilityUnavailable}`}
+                      role="status"
+                    >
+                      <i
+                        className={`fa ${isStayAvailable ? "fa-check-circle" : "fa-info-circle"}`}
+                        aria-hidden="true"
+                      />
+                      {availabilityMessage}
+                    </p>
+                  </>
+                )}
+              </div>
               {error && (
                 <div className="table-item">
                   <p className="text-danger" role="alert">
@@ -638,8 +732,16 @@ export function RoomBookingSidebar({
               )}
               <div className="table-item">
                 <div className="form-btn">
-                  <button type="submit" className="btn btn-orange w-100">
-                    Đặt phòng ngay
+                  <button
+                    type="submit"
+                    className="btn btn-orange w-100"
+                    disabled={busy || !isStayAvailable}
+                  >
+                    {busy
+                      ? "Đang kiểm tra..."
+                      : isStayAvailable
+                        ? "Đặt phòng ngay"
+                        : "Chọn ngày còn trống"}
                   </button>
                 </div>
               </div>

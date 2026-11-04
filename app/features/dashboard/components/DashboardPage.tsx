@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { shallowEqual } from "react-redux";
-import { AdminPageHeader, Icon } from "@/components/admin";
-import { Alert } from "@/components/ui";
-import styles from "@/css/features/dashboard/dashboard.module.css";
-import { routes } from "@/config/routes";
-import { fetchBookings } from "@/features/bookings/bookings.slice";
-import type { Booking } from "@/features/bookings/bookings.types";
-import { fetchLocations } from "@/features/locations/locations.slice";
-import { fetchReviews } from "@/features/reviews/reviews.slice";
-import { fetchRooms } from "@/features/rooms/rooms.slice";
-import type { Room } from "@/features/rooms/rooms.types";
-import { fetchUsers } from "@/features/users/users.slice";
+import { AdminPageHeader, Icon } from "@/component/admin";
+import { Alert } from "@/component/ui";
+import styles from "@/theme/features/dashboard/dashboard.module.css";
+import { routes } from "@/route";
+import { fetchBookings } from "@/store/thunk/bookings";
+import type { Booking } from "@/store/type/bookings";
+import { fetchLocations } from "@/store/thunk/location";
+import { fetchReviews } from "@/store/thunk/reviews";
+import { fetchRooms } from "@/store/thunk/room";
+import type { Room } from "@/store/type/room";
+import { fetchUsers } from "@/store/thunk/user";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { BarChart, DonutChart, LineChart, Sparkline } from "./DashboardCharts";
 

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ApiImage } from "../app/components/ui/ApiImage";
-import { resolveApiImageSrc } from "../app/lib/api/images";
+import { ApiImage } from "../app/component/ui/ApiImage";
+import { resolveApiImageSrc } from "../app/commons/images";
 
 test("API image sources only use paths supported by next/image", () => {
   const backendImage = "https://airbnbnew.cybersoft.edu.vn/images/vt1.jpg";

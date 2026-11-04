@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { menuItems, routeIsActive } from "../app/components/admin/admin-navigation";
-import { adminNavigation, adminRoutes } from "../app/config/routes";
+import { menuItems, routeIsActive } from "../app/component/admin/admin-navigation";
+import { adminNavigation, adminRoutes } from "../app/route";
 
 const expectedNavigation = [
   ["Tổng quan", adminRoutes.dashboard],

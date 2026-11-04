@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { routes } from "@/config/routes";
-import { siteInfo } from "@/config/site";
-import styles from "@/css/features/pages/hotux-pages.module.css";
+import { routes } from "@/route";
+import { siteInfo } from "@/constants/site";
+import styles from "@/theme/features/pages/hotux-pages.module.css";
 
 const highlights = [
   ["fa-tree", "Không gian gần thiên nhiên"],

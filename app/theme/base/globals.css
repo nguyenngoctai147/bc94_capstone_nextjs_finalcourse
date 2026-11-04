@@ -225,3 +225,21 @@ a { text-underline-offset: 3px; }
     right: 20px;
   }
 }
+.app-pagination { display: flex; width: 100%; justify-content: center; margin-top: 30px; }
+.app-pagination .app-pagination__list { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; padding: 0; }
+.app-pagination .app-pagination__list li { float: none; margin: 0; padding: 0; }
+.app-pagination .app-pagination__button { display: inline-flex; min-width: 52px; height: 50px; align-items: center; justify-content: center; margin: 0 !important; padding: 0 14px; border: 1px solid #d9dee6 !important; border-radius: 7px !important; background: #fff !important; box-shadow: none !important; color: #f04f3b !important; font-size: 17px; font-weight: 500; line-height: 1; transition: border-color .18s ease, background-color .18s ease, color .18s ease, transform .18s ease; }
+.app-pagination .app-pagination__button--edge { min-width: 78px; padding-inline: 20px; }
+.app-pagination .app-pagination__button:hover { border-color: #fe4e37 !important; background: #fff6f4 !important; color: #e4422e !important; transform: translateY(-1px); }
+.app-pagination .app-pagination__button:focus-visible { position: relative; z-index: 2; outline: 3px solid rgba(254, 78, 55, .2); outline-offset: 2px; }
+.app-pagination .is-active .app-pagination__button { border-color: #fe4e37 !important; background: #fe4e37 !important; color: #fff !important; }
+.app-pagination .is-active .app-pagination__button:hover { background: #e84430 !important; transform: none; }
+.app-pagination .is-disabled .app-pagination__button,
+.app-pagination .app-pagination__button:disabled { border-color: #e5e8ed !important; background: #f7f8fa !important; color: #a5aeba !important; cursor: not-allowed; opacity: .72; transform: none; }
+
+@media (max-width: 480px) {
+  .app-pagination { margin-top: 24px; }
+  .app-pagination .app-pagination__list { gap: 5px; }
+  .app-pagination .app-pagination__button { min-width: 42px; height: 42px; padding-inline: 10px; font-size: 15px; }
+  .app-pagination .app-pagination__button--edge { min-width: 62px; padding-inline: 12px; }
+}

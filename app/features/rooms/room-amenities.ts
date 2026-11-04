@@ -1,4 +1,4 @@
-import type { Room } from "./rooms.types";
+import type { Room } from "@/store/type/room";
 
 export type AmenityKey = {
   [Key in keyof Room]: Room[Key] extends boolean ? Key : never;
