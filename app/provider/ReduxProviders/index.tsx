@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Provider } from "react-redux";
-import { useAppStore, useSessionStorageSync } from "./hooks";
+import { useAppStore, useSessionCookieSync } from "./hooks";
 
 type ReduxProvidersProps = Readonly<{
   children: ReactNode;
@@ -11,7 +11,7 @@ type ReduxProvidersProps = Readonly<{
 export default function ReduxProviders({ children }: ReduxProvidersProps) {
   const store = useAppStore();
 
-  useSessionStorageSync(store);
+  useSessionCookieSync(store);
 
   return <Provider store={store}>{children}</Provider>;
 }

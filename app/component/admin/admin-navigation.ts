@@ -19,10 +19,16 @@ const icons: Record<string, IconName> = {
 };
 
 export const menuItems: MenuItem[] = adminNavigation.map(({ label, href }) => ({
-  label, href, icon: icons[href] ?? "box",
+  label,
+  href,
+  icon: icons[href] ?? "box",
 }));
 
 export function routeIsActive(pathname: string, href?: string) {
   if (!href) return false;
-  return isRouteActive(pathname, { href, label: "", exact: href === routes.admin.dashboard });
+  return isRouteActive(pathname, {
+    href,
+    label: "",
+    exact: href === routes.admin.dashboard,
+  });
 }

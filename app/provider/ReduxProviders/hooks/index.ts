@@ -1,2 +1,2 @@
 export { useAppStore } from "./useAppStore";
-export { useSessionStorageSync } from "./useSessionStorageSync";
+export { useSessionCookieSync } from "./useSessionCookieSync";

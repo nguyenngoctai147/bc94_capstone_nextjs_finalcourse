@@ -1,9 +1,9 @@
 # Phiên đăng nhập phía trình duyệt
 
-Sau khi đăng nhập thành công, `ReduxProviders` lưu phiên vào localStorage key `hotux.auth.session.v1`. Giá trị chỉ gồm `version`, `token` và hồ sơ người dùng đã whitelist. Mật khẩu và trạng thái request Redux không được lưu.
+Sau khi đăng nhập thành công, `ReduxProviders` lưu phiên vào session cookie `hotux.auth.session.v3`. Giá trị chỉ gồm `version`, `token`, hồ sơ người dùng đã whitelist, `createdAt` và `expiresAt`. Mật khẩu và trạng thái request Redux không được lưu.
 
-Khi ứng dụng tải lại, provider xác thực JSON rồi dispatch `hydrateSession`. Những dữ liệu thiếu, sai version hoặc lỗi JSON bị xóa khỏi trạng thái trong bộ nhớ. `useClientReady` giữ lần render đầu của các vùng phụ thuộc phiên giống hệt HTML từ server; `HotuxHeader` và `RequireAuth` chỉ dùng phiên đã lưu sau khi hydration hoàn tất. Cách này tránh lỗi hydration ngay cả khi Fast Refresh giữ Redux store cũ trong development.
+Session cookie dùng chung giữa các tab và không khai báo `Expires` hoặc `Max-Age`. Vì vậy, đóng một tab rồi mở tab khác trong cùng phiên trình duyệt vẫn giữ đăng nhập; đóng hẳn phiên trình duyệt sẽ kết thúc đăng nhập. Mốc `expiresAt` bên trong giới hạn phiên tối đa 30 ngày ngay cả khi trình duyệt chưa được đóng.
 
-`logout` xóa token/profile khỏi Redux và localStorage. Sự kiện `storage` đồng bộ đăng xuất hoặc đăng nhập giữa các tab mà không tạo vòng lặp ghi.
+Khi ứng dụng tải, provider xác thực JSON và thời hạn rồi dispatch `hydrateSession`. Dữ liệu thiếu, sai version, quá hạn hoặc lỗi JSON bị xóa. `logout` xóa token/profile khỏi Redux và làm cookie hết hạn ngay. Provider cũng dọn các phiên auth cũ trong `localStorage` và `sessionStorage` để tránh xung đột.
 
-Access token trong localStorage phù hợp với API hiện tại cần token phía client. Khi backend hỗ trợ cookie `HttpOnly`, hãy chuyển token sang cookie đó để tăng khả năng chống XSS; module `auth.session.ts` là điểm tập trung để thay đổi cơ chế lưu.
+Access token hiện vẫn cần ở phía client vì API Swagger chưa hỗ trợ cookie phiên `HttpOnly`. Module `auth.session.ts` là điểm tập trung để thay đổi cơ chế lưu khi backend hỗ trợ phương án an toàn hơn.

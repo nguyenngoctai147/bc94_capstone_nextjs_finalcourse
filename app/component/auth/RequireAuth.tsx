@@ -20,7 +20,8 @@ export function RequireAuth({
   const searchParams = useSearchParams();
   const isReady = clientReady && hydrated;
   const hasSession = Boolean(user && token);
-  const hasRequiredRole = !role || (role === "ADMIN" && isAdminRole(user?.role));
+  const hasRequiredRole =
+    !role || (role === "ADMIN" && isAdminRole(user?.role));
 
   useEffect(() => {
     if (!isReady) return;
@@ -33,6 +34,10 @@ export function RequireAuth({
   }, [hasRequiredRole, hasSession, isReady, pathname, router, searchParams]);
 
   if (!isReady || !hasSession || !hasRequiredRole)
-    return <div className="auth-pending" role="status">Đang chuyển đến trang phù hợp…</div>;
+    return (
+      <div className="auth-pending" role="status">
+        Đang chuyển đến trang phù hợp…
+      </div>
+    );
   return children;
 }

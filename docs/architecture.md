@@ -133,7 +133,7 @@ Thunk truyền token người dùng và AbortSignal vào service, chuẩn hóa l
 
 ReduxProviders giữ một store ổn định bằng lazy useState. Không export store singleton trên server. Đây là cách áp dụng nguyên tắc store theo instance/request trong [hướng dẫn Redux Toolkit cho Next.js](https://redux-toolkit.js.org/usage/nextjs).
 
-Login nhận `{ user, token }`. Redux và localStorage chỉ lưu profile đã whitelist cùng token. Logout xóa phiên và reset state riêng tư; danh mục phòng/vị trí công khai được giữ lại. `ReduxProviders` khôi phục phiên trình duyệt sau hydration; xem `docs/auth-session.md`. Chưa có endpoint refresh/me trong Swagger để tự kiểm chứng lại phiên phía server.
+Login nhận `{ user, token }`. Redux và session cookie chỉ lưu profile đã whitelist cùng token trong tối đa 30 ngày hoặc đến khi đóng hẳn phiên trình duyệt. Cookie dùng chung giữa các tab trong cùng phiên. Logout xóa phiên và reset state riêng tư; danh mục phòng/vị trí công khai được giữ lại. `ReduxProviders` khôi phục phiên sau hydration; xem `docs/auth-session.md`. Chưa có endpoint refresh/me trong Swagger để tự kiểm chứng lại phiên phía server.
 
 Guard `RequireAuth role="ADMIN"` đặt một lần tại layout admin. Các page bên dưới chỉ render nội dung. `ResourcePanel` là bảng đọc dùng chung cho năm tài nguyên; không tự tạo chức năng ghi khi chưa có form và validation tương ứng.
 

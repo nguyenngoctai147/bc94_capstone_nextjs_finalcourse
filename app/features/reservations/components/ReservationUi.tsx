@@ -22,9 +22,15 @@ export function ReservationProgress({ active }: { active: 1 | 2 | 3 | 4 }) {
     ["Đặt phòng", routes.reservation.booking],
     ["Xác nhận", routes.reservation.confirmation],
   ] as const;
-  return <div className="reservation-links text-center">
+  const progressClass = [
+    styles.progressStep1,
+    styles.progressStep2,
+    styles.progressStep3,
+    styles.progressStep4,
+  ][active - 1];
+  return <div className={`reservation-links text-center ${styles.reservationProgress}`}>
     <h2 className="mar-bottom-60 text-capitalize">Đặt chỗ nghỉ của bạn</h2>
-    <div className="reservation-links-content">{steps.map(([label, href], index) => {
+    <div className={`reservation-links-content ${styles.progressTrack} ${progressClass}`}>{steps.map(([label, href], index) => {
       const step = (index + 1) as 1 | 2 | 3 | 4;
       return <div className="res-item" key={label}><Link href={href} className={step <= active ? "active" : undefined} aria-current={step === active ? "step" : undefined}>{step < active ? <i className="fa fa-check" aria-hidden="true" /> : step}</Link><p>{label}</p></div>;
     })}</div>
@@ -38,9 +44,9 @@ export function RoomAmenityList({ room, title = "Tiện nghi đi kèm" }: { room
 }
 
 export function ReservationRoomHero({ room }: { room: Room }) {
-  return <div className="booking-image">
+  return <div className={`booking-image ${styles.bookingHero}`}>
     <ApiImage src={room.hinhAnh} alt={`Phòng ${room.tenPhong}`} width={1200} height={720} sizes="(max-width: 991px) 100vw, 66vw" className={styles.heroImage} fallback={<div className={styles.imageFallback}>Chưa có ảnh phòng</div>} />
-    <div className="booking-title"><div className="title-left"><h2 className="h3">{room.tenPhong}</h2><p className="mar-0">{room.khach} khách · {room.phongNgu} phòng ngủ · {room.giuong} giường · {room.phongTam} phòng tắm</p></div><div className="title-right pull-right"><div className="title-price"><h3><span>${room.giaTien.toLocaleString("vi-VN")}</span><small>/đêm</small></h3></div></div></div>
+    <div className={`booking-title ${styles.bookingHeroTitle}`}><div className={`title-left ${styles.bookingHeroInfo}`}><p className={styles.bookingHeroEyebrow}>Phòng bạn đã chọn</p><h2 className="h3">{room.tenPhong}</h2><div className={styles.bookingHeroAmenities}><span><i className="fa fa-users" aria-hidden="true" /> {room.khach} khách</span><span><i className="fa fa-bed" aria-hidden="true" /> {room.phongNgu} phòng ngủ</span><span><i className="fa fa-bed" aria-hidden="true" /> {room.giuong} giường</span><span><i className="fa fa-tint" aria-hidden="true" /> {room.phongTam} phòng tắm</span></div></div><div className={styles.bookingHeroPrice}><p>Giá mỗi đêm</p><strong>${room.giaTien.toLocaleString("vi-VN")}<span>/đêm</span></strong></div></div>
   </div>;
 }
 
@@ -58,14 +64,14 @@ export function ReservationSummary({ stay, price }: { stay: Pick<Search, "checkI
   const checkOut = formatDay(stay.checkOut);
   const count = Math.max(0, nights(stay));
   const total = price * count;
-  return <div className="detail-sidebar"><div className="sidebar-reservation">
-    <h3>Thông tin đặt phòng</h3>
+  return <div className={`detail-sidebar ${styles.summarySidebar}`}><div className={`sidebar-reservation ${styles.summaryCard}`}>
+    <div className={styles.summaryHeading}><i className="fa fa-file-text-o" aria-hidden="true" /><div><p>Tổng quan</p><h3>Thông tin đặt phòng</h3></div></div>
     <div className="reservation-detail">
       <div className="rd-top"><div className="rd-box"><label>Nhận phòng</label><p className="bold">{checkIn.day}</p><p>{checkIn.month}<br />{checkIn.weekday}</p></div><div className="rd-box"><label>Trả phòng</label><p className="bold">{checkOut.day}</p><p>{checkOut.month}<br />{checkOut.weekday}</p></div></div>
       <div className="rd-top"><div className="rd-box"><p className="bold">{String(stay.guests).padStart(2, "0")}</p><p>Khách</p></div><div className="rd-box"><p className="bold">{String(count).padStart(2, "0")}</p><p>Đêm</p></div></div>
     </div>
-    <table className="reservation-table table"><tbody><tr><td>1 phòng × {count} đêm</td><td>${total.toLocaleString("vi-VN")}</td></tr><tr><td>Thanh toán</td><td>Tại nơi ở</td></tr></tbody><tfoot><tr><td>Tổng tạm tính</td><td>${total.toLocaleString("vi-VN")}</td></tr></tfoot></table>
-  </div><div className="sidebar-support"><h3>Hỗ trợ đặt phòng</h3><p>Cần thay đổi ngày hoặc số khách? Quay lại bước đầu trước khi xác nhận.</p><p><i className="fa fa-phone" /> 1900 1234</p></div></div>;
+    <table className={`reservation-table table ${styles.summaryTable}`}><tbody><tr><td>1 phòng × {count} đêm</td><td>${total.toLocaleString("vi-VN")}</td></tr><tr><td><i className="fa fa-building-o" aria-hidden="true" /> Thanh toán</td><td>Tại nơi ở</td></tr></tbody><tfoot><tr><td>Tổng tạm tính</td><td>${total.toLocaleString("vi-VN")}</td></tr></tfoot></table>
+  </div><div className={`sidebar-support ${styles.summarySupport}`}><i className="fa fa-headphones" aria-hidden="true" /><div><h3>Hỗ trợ đặt phòng</h3><p>Cần thay đổi ngày hoặc số khách? Quay lại bước đầu trước khi xác nhận.</p><a href="tel:19001234"><i className="fa fa-phone" aria-hidden="true" /> 1900 1234</a></div></div></div>;
 }
 
 type CalendarCell = { key: string; value?: string; day?: number };

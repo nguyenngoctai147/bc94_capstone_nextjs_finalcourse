@@ -33,7 +33,7 @@ Số file `.ts`/`.tsx` trong `app/` giảm từ **179 xuống 171**; số entry 
 | Guard ADMIN lặp lại ở từng page | Kiểm tra một lần tại layout admin; các route bên dưới tiếp tục được bảo vệ |
 | State danh sách đặt phòng dùng chung dễ hiển thị bản ghi ngoài tài khoản ở MyBookings | Lọc theo userId ngay khi render; kết quả xác nhận cũng ẩn khi đăng xuất/đổi tài khoản |
 | CSS cho `.admin-shell`, metric/chart/card của một dashboard cũ không có markup sử dụng | Loại CSS cũ; giữ bridge navigation/sidebar cần thiết và design tokens |
-| README/tài liệu ghi phiên chỉ ở bộ nhớ, không khớp implementation localStorage | Cập nhật theo ReduxProviders và auth.session hiện tại |
+| README/tài liệu ghi phiên không khớp implementation session cookie | Cập nhật theo ReduxProviders và auth.session hiện tại |
 
 ## Cấu trúc tiếp tục sử dụng
 
@@ -67,7 +67,7 @@ Không cần thêm tầng repository/use-case cho các màn hình này. Type, th
 3. CSS vendor public và dashboard vẫn có selector toàn cục. Khi tiếp tục thay theme, nên cô lập dần theo phạm vi; Next.js có thể giữ stylesheet khi điều hướng giữa route. Homepage vẫn cần Swiper/Slick/date picker legacy.
 4. Danh sách phòng hiện tải danh mục để lọc/sắp xếp/phân trang nhất quán ở trình duyệt. Với danh mục lớn, cần backend hỗ trợ các bộ lọc tương ứng trước khi chuyển sang phân trang server.
 5. Font có cả `public/assets/font/` và `fonts/`, nhưng `icons.css` tham chiếu trực tiếp `../font/`. Chưa xóa asset vendor vì cần kiểm tra toàn bộ URL CSS và plugin trước; video/font SVG cũng chiếm phần lớn dung lượng asset.
-6. Guard UI và token localStorage chưa thay thế việc kiểm chứng phiên/phân quyền ở backend; giữ ghi chú kỹ thuật hiện có trong tài liệu session/API.
+6. Guard UI và token session cookie chưa thay thế việc kiểm chứng phiên/phân quyền ở backend; giữ ghi chú kỹ thuật hiện có trong tài liệu session/API.
 
 ## Kiểm chứng
 

@@ -60,31 +60,31 @@ export function BookingPage() {
     }
   };
 
-  return <section className="content"><div className="container">
+  return <section className={`content ${styles.bookingPage}`}><div className="container">
     <ReservationProgress active={3} />
-    <div className="booking"><div className="row">
-      <div className="col-lg-8"><div className="booking-content">
+    <div className={`booking ${styles.bookingLayout}`}><div className="row">
+      <div className="col-lg-8"><div className={`booking-content ${styles.bookingContent}`}>
         <ReservationRoomHero room={draft.room} />
         <RoomAmenityList room={draft.room} />
-        <div className="personal-info mar-top-50">
-          <div className="form-title"><span>1</span><h3>Thông tin người đặt</h3></div>
-          {user ? <div className="row">
-            <div className="col-md-6"><div className="form-group"><label>Họ tên</label><input className="form-control" value={user.name} readOnly /></div></div>
-            <div className="col-md-6"><div className="form-group"><label>Email</label><input className="form-control" value={user.email} readOnly /></div></div>
-            <div className="col-md-6"><div className="form-group"><label>Điện thoại</label><input className="form-control" value={user.phone ?? "Chưa cập nhật"} readOnly /></div></div>
-            <div className="col-md-6"><div className="form-group"><label>Ngày sinh</label><input className="form-control" value={user.birthday || "Chưa cập nhật"} readOnly /></div></div>
+        <section className={`personal-info mar-top-50 ${styles.bookingSection}`}>
+          <div className={`form-title ${styles.bookingSectionTitle}`}><span>1</span><div><p>Thông tin xác thực</p><h3>Thông tin người đặt</h3></div></div>
+          {user ? <div className={`row ${styles.bookingFields}`}>
+            <div className="col-md-6"><div className="form-group"><label htmlFor="booking-name"><i className="fa fa-user" aria-hidden="true" /> Họ tên</label><input id="booking-name" className="form-control" value={user.name} readOnly /></div></div>
+            <div className="col-md-6"><div className="form-group"><label htmlFor="booking-email"><i className="fa fa-envelope-o" aria-hidden="true" /> Email</label><input id="booking-email" className="form-control" value={user.email} readOnly /></div></div>
+            <div className="col-md-6"><div className="form-group"><label htmlFor="booking-phone"><i className="fa fa-phone" aria-hidden="true" /> Điện thoại</label><input id="booking-phone" className="form-control" value={user.phone ?? "Chưa cập nhật"} readOnly /></div></div>
+            <div className="col-md-6"><div className="form-group"><label htmlFor="booking-birthday"><i className="fa fa-calendar-o" aria-hidden="true" /> Ngày sinh</label><input id="booking-birthday" className="form-control" value={user.birthday || "Chưa cập nhật"} readOnly /></div></div>
           </div> : <div className={`alert alert-warning ${styles.loginNotice}`}>Bạn cần <Link href={routes.auth.login}>đăng nhập</Link> để gửi yêu cầu đặt phòng.</div>}
-          <p className="text-muted">Thông tin tài khoản được dùng để đối chiếu đặt phòng. Bạn có thể cập nhật tại trang tài khoản.</p>
-        </div>
-        <div className="card-info mar-top-50">
-          <div className="form-title"><span>2</span><h3>Hình thức thanh toán</h3></div>
-          <div className="payment-desc"><p><i className="fa fa-building-o me-2" aria-hidden="true" /> Thanh toán trực tiếp tại nơi lưu trú.</p><p className="text-muted">Hotux chưa thu thập thông tin thẻ và chưa xử lý thanh toán trực tuyến.</p></div>
-          <div className="form-group mar-bottom-30"><input id="booking-agreement" type="checkbox" checked={agree} onChange={(event) => { setAgree(event.target.checked); setError(""); }} /> <label htmlFor="booking-agreement">Tôi xác nhận ngày, phòng, số khách và tổng tạm tính ở bên cạnh.</label></div>
+          <p className={styles.bookingSectionHint}><i className="fa fa-shield" aria-hidden="true" /> Thông tin tài khoản chỉ dùng để đối chiếu đặt phòng. Bạn có thể cập nhật tại trang tài khoản.</p>
+        </section>
+        <section className={`card-info mar-top-50 ${styles.bookingSection}`}>
+          <div className={`form-title ${styles.bookingSectionTitle}`}><span>2</span><div><p>Thanh toán an toàn</p><h3>Hình thức thanh toán</h3></div></div>
+          <div className={`payment-desc ${styles.paymentPanel}`}><i className="fa fa-building-o" aria-hidden="true" /><div><p>Thanh toán trực tiếp tại nơi lưu trú</p><p>Hotux chưa thu thập thông tin thẻ và chưa xử lý thanh toán trực tuyến.</p></div></div>
+          <div className={`form-group mar-bottom-30 ${styles.bookingAgreement}`}><input id="booking-agreement" type="checkbox" checked={agree} onChange={(event) => { setAgree(event.target.checked); setError(""); }} /> <label htmlFor="booking-agreement">Tôi xác nhận ngày ở, phòng, số khách và tổng tạm tính.</label></div>
           {error && <div className="alert alert-danger" role="alert">{error}</div>}
-          <div className="card-btn"><button className="btn btn-orange" type="button" disabled={busy || !user} onClick={() => void handleSubmit()}>{busy ? "Đang gửi..." : "Xác nhận đặt phòng"}</button></div>
-        </div>
+          <div className={`card-btn ${styles.bookingSubmit}`}><button className="btn btn-orange" type="button" disabled={busy || !user} onClick={() => void handleSubmit()}><i className="fa fa-check" aria-hidden="true" /> {busy ? "Đang gửi..." : "Xác nhận đặt phòng"}</button></div>
+        </section>
       </div></div>
-      <aside className="col-lg-4"><ReservationSummary stay={draft} price={draft.room.giaTien} /></aside>
+      <aside className={`col-lg-4 ${styles.bookingAside}`}><ReservationSummary stay={draft} price={draft.room.giaTien} /></aside>
     </div></div>
   </div></section>;
 }
