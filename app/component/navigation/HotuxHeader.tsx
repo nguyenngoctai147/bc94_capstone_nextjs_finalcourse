@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "../../../public/assets/images/logo.png";
 import darkLogo from "../../../public/assets/images/logo-black.png";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   adminRoutes,
@@ -28,8 +28,15 @@ const Icon = ({ name }: { name: string }) => (
 
 function AuthenticatedAccountMenu({ user }: { user: User }) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLLIElement>(null);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setOpen(false);
+    router.replace(authRoutes.login);
+  };
 
   useEffect(() => {
     const closeOnOutsideInteraction = (event: MouseEvent) => {
@@ -74,7 +81,7 @@ function AuthenticatedAccountMenu({ user }: { user: User }) {
           )}
           <li className="account-context-separator" role="separator" />
           <li role="none">
-            <button type="button" role="menuitem" onClick={() => dispatch(logout())}>
+            <button type="button" role="menuitem" onClick={handleLogout}>
               <Icon name="fa-sign-out" /> Đăng xuất
             </button>
           </li>
